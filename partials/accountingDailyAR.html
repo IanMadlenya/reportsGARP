@@ -77,7 +77,7 @@
           </td>          
         </tr>
 
-        <tr ng-repeat="opp in opps">
+        <tr ng-repeat="opp in opps | filter:filterMatch()">
           <td>
             {{displayId(opp)}}
           </td>
@@ -129,7 +129,7 @@
              <b>Totals</b>
           </td>
           <td>
-              <b>${{formatAmountDisplay(getOppTotals('Amount'))}}</b>
+              <b>${{formatAmountDisplay(getOppTotals())}}</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <b>${{formatAmountDisplay(getProdTotals(prod.Id))}}</b>    
