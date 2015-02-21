@@ -77,27 +77,27 @@
           </td>          
         </tr>
 
-        <tr ng-repeat="opp in opps | filter:filterMatch()">
+        <tr ng-repeat="opp in opps">
           <td>
-            {{opp.Display_Invoice_Number__c}}
+            {{displayId(opp)}}
           </td>
           <td>
-            {{opp.GARP_Member_ID__c}}
+            {{displayOpp(opp,'GARP_Member_ID__c')}}
           </td>
           <td>
-            {{getTransaction(opp.Id,'ChargentSFA__Tokenization__c')}}
+            {{getTransaction(opp,'ChargentSFA__Tokenization__c')}}
           </td>
           <td>
-            {{getTransaction(opp.Id,'ChargentSFA__Type__c')}}
+            {{getTransaction(opp,'ChargentSFA__Type__c')}}
           </td>
           <td>
-            {{opp.Company__c}}
+            {{displayOpp(opp,'Company__c')}}
           </td>
           <td>
-            {{formatDate(opp.CloseDate, "MM-DD-YYYY")}}
+            {{formatDate(opp.closeDate, "MM-DD-YYYY")}}
           </td>
           <td>
-            <b>${{formatAmountDisplay(opp.Amount)}}</b>
+            <b>${{formatAmountDisplay(opp.amount)}}</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <div ng-if="getProductAmount(opp, prod.Id)">
@@ -129,7 +129,7 @@
              <b>Totals</b>
           </td>
           <td>
-              <b>${{getOppTotals('Amount')}}</b>
+              <b>${{formatAmountDisplay(getOppTotals('Amount'))}}</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <b>${{formatAmountDisplay(getProdTotals(prod.Id))}}</b>    

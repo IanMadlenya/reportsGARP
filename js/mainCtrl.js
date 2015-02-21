@@ -52,53 +52,89 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
 
           $scope.transactions = data.result;
 
-          reportsGARPServices.getOpplines(sdt, edt, function(err, data) {
-              $rootScope.$apply(function(){
-                  $scope.opps = data.result;
+          reportsGARPServices.getRefunds(sdt, edt, function(err, data) {
 
-                  if(defined($scope,"opps.length")) {
-                    var oppLines = [];
-                    for(var i=0; i<$scope.opps.length; i++) {
-                      var opp = $scope.opps[i];
+            $scope.refundData = data.result;
 
-                      if(defined(opp,"OpportunityLineItems.length")) {
+            reportsGARPServices.getOpplines(sdt, edt, function(err, data) {
+                $rootScope.$apply(function(){
+                    $scope.opps = data.result;
 
-                        for(var j=0; j<opp.OpportunityLineItems.length; j++) {
-                          var oppLine = opp.OpportunityLineItems[j];
+                    if(defined($scope,"opps.length")) {
+                      var oppLines = [];
+                      for(var i=0; i<$scope.opps.length; i++) {
+                        var opp = $scope.opps[i];
 
-                          if(defined(opp,"Display_Invoice_Number__c"))
-                            oppLine.invoiceNumber = opp.Display_Invoice_Number__c;
+                        if(defined(opp,"Display_Invoice_Number__c"))
+                          opp.invoiceNumber = opp.Display_Invoice_Number__c;
 
-                          if(defined(opp,"CloseDate"))
-                            oppLine.closeDate = opp.CloseDate;
+                        if(defined(opp,"CloseDate"))
+                          opp.closeDate = opp.CloseDate;
 
-                          oppLines.push(oppLine);
+                        if(defined(opp,"Amount"))
+                          opp.amount = opp.Amount;
 
-                          var fnd=_.findWhere($scope.prods, {Id: oppLine.PricebookEntryId})
-                          if(defined(fnd)) {
+                        // if(defined(opp,"OpportunityLineItems.length")) {
 
-                            var match = _.findWhere($scope.totals, {id: oppLine.PricebookEntryId});
-                            if(defined(match)) { 
-                              match.total += oppLine.TotalPrice;
-                            } else {
-                              var obj = {
-                                id: oppLine.PricebookEntryId,
-                                total: oppLine.TotalPrice
-                              }
-                              $scope.totals.push(obj);
-                              $scope.total += oppLine.TotalPrice;
-                            }
-                          }                        
-                        }
+                        //   for(var j=0; j<opp.OpportunityLineItems.length; j++) {
+                        //     var oppLine = opp.OpportunityLineItems[j];
+
+                        //     if(defined(opp,"Display_Invoice_Number__c"))
+                        //       oppLine.invoiceNumber = opp.Display_Invoice_Number__c;
+
+                        //     if(defined(opp,"CloseDate"))
+                        //       oppLine.closeDate = opp.CloseDate;
+
+                        //     if(defined(opp,"Amount"))
+                        //       oppLine.amount = opp.Amount;
+
+                        //     oppLines.push(oppLine);
+
+                        //     var fnd=_.findWhere($scope.prods, {Id: oppLine.PricebookEntryId})
+                        //     if(defined(fnd)) {
+
+                        //       var match = _.findWhere($scope.totals, {id: oppLine.PricebookEntryId});
+                        //       if(defined(match)) { 
+                        //         match.total += oppLine.TotalPrice;
+                        //       } else {
+                        //         var obj = {
+                        //           id: oppLine.PricebookEntryId,
+                        //           total: oppLine.TotalPrice
+                        //         }
+                        //         $scope.totals.push(obj);
+                        //         $scope.total += oppLine.TotalPrice;
+                        //       }
+                        //     }                        
+                        //   }
+                        //}
                       }
-                    }
-                    $scope.oppLines = _.sortBy(oppLines, function(obj){ return obj.closeDate; });
-                  }
-                    
-                  if(defined($scope,"prods.length"))
-                    $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
 
-              });
+                      for(var i=0; i<$scope.refundData.refunds.length; i++) {
+                        var refund = $scope.refundData.refunds[i];
+                        var opp = _.findWhere($scope.refundData.opps, {Id: refund.Opportunity__c});
+                        var prod = _.findWhere($scope.prods, {Product2Id: refund.Product__c});
+                        var trans = _.findWhere($scope.refundData.trans, {Id: refund.Payment_Transaction__c});
+                        var obj = {
+                          isRefund: true,
+                          refund: refund,
+                          opp: opp,
+                          prod: prod,
+                          trans: trans,
+                          closeDate: refund.CreatedDate,
+                          amount: refund.Refund_amount__c
+                        }
+                        $scope.opps.push(obj);
+                      }
+
+
+                      $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
+                    }
+                      
+                    if(defined($scope,"prods.length"))
+                      $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
+
+                });
+            });
           });
         });
     });
@@ -109,14 +145,35 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
     init();
   }
 
+  $scope.displayId = function(opp) {
+    if(defined(opp,"isRefund") && opp.isRefund) {
+      return opp.refund.Unique_Id__c;
+    } else {
+      return opp.Display_Invoice_Number__c;
+    }
+  }
 
-  $scope.getTransaction = function(oppId,prop) {
+  $scope.displayOpp = function(opp, prop) {
+    if(defined(opp,"isRefund") && opp.isRefund) {
+      if(defined(opp,'opp.'+prop))
+      return opp.opp[prop];
+    } else {
+      return opp[prop];
+    }
+  }
+
+  $scope.getTransaction = function(opp,prop) {
     
-    var fnd=_.findWhere($scope.transactions, {ChargentSFA__Opportunity__c: oppId})    
-    if(defined(fnd,prop))
-        return fnd[prop];
-    else return null;
-
+    if(defined(opp,"isRefund") && opp.isRefund) {
+      if(defined(opp,'trans.'+prop))
+        return opp.trans[prop];
+      else return null;
+    } else {
+      var fnd=_.findWhere($scope.transactions, {ChargentSFA__Opportunity__c: opp.Id})    
+      if(defined(fnd,prop))
+          return fnd[prop];
+      else return null;
+    }
   }
 
   $scope.export = function() {
@@ -166,6 +223,9 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
 
   $scope.getOppTotals = function(prop) {
 
+    if(!defined(prop) || !defined($scope.opps))
+      return;
+
     var total=0;
     for(var j=0; j<$scope.opps.length; j++) {  
       var opp = $scope.opps[j];    
@@ -199,6 +259,10 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
 
     if(!defined(opp,"OpportunityLineItems.length"))
       return 0;
+
+    if(defined(opp,"isRefund") && opp.opp) {
+       return 0;
+    }
 
     var match = _.findWhere(opp.OpportunityLineItems, {PricebookEntryId: prodId});
 
@@ -236,6 +300,13 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
   }
 
   $scope.getProductAmount = function(opp, prodId) {
+
+    if(defined(opp,"isRefund") && opp.isRefund) {
+      if(defined(opp,"prod.Product2Id") && prodId == opp.prod.Id)
+        return -1 * opp.amount;
+      else return 0;
+    }
+
     var match = _.findWhere(opp.OpportunityLineItems, {PricebookEntryId: prodId});
     if(defined(match))
       return match.TotalPrice;
