@@ -1,0 +1,142 @@
+<div class="container page-container" style="margin-left: 0px">
+
+  <div id="spin"></div>
+
+  <div class="row">
+    <div class="col-md-12">
+        Date Range: <input type=text name="startDate" ng-model="formVars.startDate"> <input type=text name="endDate" ng-model="formVars.endDate"> <button ng-click="refresh()" class="btn garp-btn-portal">Refresh</button> <button ng-click="export()" id="fileExport" class="btn garp-btn-portal">Download</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <button ng-click="show=!show" class="btn garp-btn-portal">Filters</button>
+    </div>
+  </div>  
+  <div class="row" ng-if="show">
+    <div class="col-md-12">
+        <input type=checkbox name='garp' ng-model="formVars.garp"> GARP &nbsp;
+        <input type=checkbox name='gra' ng-model="formVars.gra"> GRA &nbsp;
+        <input type=checkbox name='charge' ng-model="formVars.charge"> Charge &nbsp;
+        <input type=checkbox name='credit' ng-model="formVars.credit"> Credit &nbsp;
+    </div>
+  </div>
+  <div class="row" ng-if="show">
+    <div class="col-md-12">
+        <hr>
+    </div>
+  </div>
+  <div class="row" ng-if="show">
+    <div class="col-md-12">
+      <div ng-repeat="prod in formVars.prods" style="float:left;margin-right:10px;">
+        <input type=checkbox name='{{prod.id}}' ng-model="prod.checked"> {{prod.name}}
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+      &nbsp;
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+
+      <table border=1 class="table table-condensed examday-reminder-area">
+
+        <tr>
+          <td>
+            <b>Invoice #</b>
+          </td>
+          <td style="min-width:100px;">
+            <b>GARP ID</b>
+          </td>
+          <td style="min-width:100px;">
+            <b>PayPal Trans ID</b>
+          </td>
+          <td style="min-width:100px;">
+            <b>Type</b>
+          </td>
+          <td style="min-width:100px;">
+            <b>Company</b>
+          </td>
+          <td style="min-width:100px;">
+            <b>Close Date</b>
+          </td>
+          <td>
+            <b>Amount</b>
+          </td>
+          <td ng-repeat="prod in prods | filter:criteriaMatch()">
+            {{prod.Name}}<br>{{prod.Product2.ProductCode}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
+          </td>
+
+          <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
+            {{prod.Name}} Shipping
+          </td>          
+        </tr>
+
+        <tr ng-repeat="opp in opps | filter:filterMatch()">
+          <td>
+            {{opp.Display_Invoice_Number__c}}
+          </td>
+          <td>
+            {{opp.GARP_Member_ID__c}}
+          </td>
+          <td>
+            {{getTransaction(opp.Id,'ChargentSFA__Tokenization__c')}}
+          </td>
+          <td>
+            {{getTransaction(opp.Id,'ChargentSFA__Type__c')}}
+          </td>
+          <td>
+            {{opp.Company__c}}
+          </td>
+          <td>
+            {{formatDate(opp.CloseDate, "MM-DD-YYYY")}}
+          </td>
+          <td>
+            <b>${{formatAmountDisplay(opp.Amount)}}</b>
+          </td>
+          <td ng-repeat="prod in prods | filter:criteriaMatch()">
+            <div ng-if="getProductAmount(opp, prod.Id)">
+              ${{formatAmountDisplay(getProductAmount(opp, prod.Id))}}
+            </div>
+          </td>
+          <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
+            <div ng-if="getProductAmountShipping(opp, prod.Id)">
+              ${{formatAmountDisplay(getProductAmountShipping(opp, prod.Id))}}
+            </div>
+          </td>
+        </tr>
+        <tr>
+         
+
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+
+
+          <td>
+             <b>Totals</b>
+          </td>
+          <td>
+              <b>${{getOppTotals('Amount')}}</b>
+          </td>
+          <td ng-repeat="prod in prods | filter:criteriaMatch()">
+            <b>${{formatAmountDisplay(getProdTotals(prod.Id))}}</b>    
+          </td>
+        </tr>
+
+      </table>
+
+    </div>
+  </row
