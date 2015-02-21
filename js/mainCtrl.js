@@ -195,57 +195,13 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
     }
   }
 
-  $scope.export = function() {
-
-    var json = [{"invoiceNumber":"Invoice #","closeDate":"Close Date","amount":"Amount"}];
-    for(var i=0; i<$scope.prods.length; i++) {  
-      var prod = $scope.prods[i];
-      var func = $scope.criteriaMatch();
-      if(func(prod)) {
-        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name;        
-      }
-    }
-    for(var i=0; i<$scope.prods.length; i++) {  
-      var func = $scope.criteriaMatchShip();
-      var prod = $scope.prods[i];
-      if(func(prod)) {
-        var prod = $scope.prods[i];
-        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = prod.Name + "Shipping";        
-      }
-    }
-
-    for(var j=0; j<$scope.opps.length; j++) {  
-      var opp = $scope.opps[j];
-
-      var obj = {"invoiceNumber":opp.Display_Invoice_Number__c,"closeDate":formatDate(opp.CloseDate, "MM-DD-YYYY"),"amount":formatAmountDisplay(opp.Amount)};
-      for(var i=0; i<$scope.prods.length; i++) {  
-        var prod = $scope.prods[i];
-        var func = $scope.criteriaMatch();
-        if(func(prod)) {
-         obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = $scope.getProductAmount(opp, prod.Id);
-        }
-      }
-      for(var i=0; i<$scope.prods.length; i++) {  
-        var func = $scope.criteriaMatchShip();
-        var prod = $scope.prods[i];
-        if(func(prod)) {
-          var prod = $scope.prods[i];
-          obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = $scope.getProductAmountShipping(opp, prod.Id);        
-        }
-      }
-      json.push(obj);
-    }
-
-    var csv = JSON2CSV(json);
-    window.open("data:text/csv;charset=utf-8," + escape(csv))
-  }
 
   $scope.getOppTotals = function() {
 
     if(!defined($scope,"opps.length"))
       return 0;
 
-var total=0;
+    var total=0;
     for(var j=0; j<$scope.opps.length; j++) {  
       var opp = $scope.opps[j];    
       var func = $scope.filterMatch();
@@ -356,6 +312,54 @@ var total=0;
     if(defined(match))
       return match.total;
     else return 0;
+  }
+
+  $scope.export = function() {
+
+    var json = [{"invoiceNumber":"Invoice #","closeDate":"Close Date","amount":"Amount"}];
+    for(var i=0; i<$scope.prods.length; i++) {  
+      var prod = $scope.prods[i];
+      var func = $scope.criteriaMatch();
+      if(func(prod)) {
+        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name;        
+      }
+    }
+    for(var i=0; i<$scope.prods.length; i++) {  
+      var func = $scope.criteriaMatchShip();
+      var prod = $scope.prods[i];
+      if(func(prod)) {
+        var prod = $scope.prods[i];
+        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = prod.Name + "Shipping";        
+      }
+    }
+
+    for(var j=0; j<$scope.opps.length; j++) {  
+      var opp = $scope.opps[j];
+
+      var func = $scope.filterMatch();
+      if(func(opp)) {
+        var obj = {"invoiceNumber":$scope.displayId(opp),"closeDate":formatDate(opp.closeDate, "MM-DD-YYYY"),"amount":formatAmountDisplay(opp.amount)};
+        for(var i=0; i<$scope.prods.length; i++) {  
+          var prod = $scope.prods[i];
+          var func = $scope.criteriaMatch();
+          if(func(prod)) {
+           obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = $scope.getProductAmount(opp, prod.Id);
+          }
+        }
+        for(var i=0; i<$scope.prods.length; i++) {  
+          var func = $scope.criteriaMatchShip();
+          var prod = $scope.prods[i];
+          if(func(prod)) {
+            var prod = $scope.prods[i];
+            obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = $scope.getProductAmountShipping(opp, prod.Id);        
+          }
+        }
+        json.push(obj);
+      }
+    }
+
+    var csv = JSON2CSV(json);
+    window.open("data:text/csv;charset=utf-8," + escape(csv))
   }
 
 
