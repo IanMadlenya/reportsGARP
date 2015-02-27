@@ -1,0 +1,60 @@
+<div class="container page-container" style="margin-left: 0px">
+  <div>
+    <div class="row">
+      <div class="col-md-12">
+          Date Range: <input type=text name="startDate" ng-model="userFormVars.startDate"> <input type=text name="endDate" ng-model="userFormVars.endDate"> <button ng-click="refresh()" class="btn garp-btn-portal">Refresh</button> <button ng-click="download()" id="fileExport" class="btn garp-btn-portal">Download</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <button ng-click="show=!show" class="btn garp-btn-portal">Filters</button>
+      </div>
+    </div>  
+    <div class="row" ng-if="show">
+      <div class="col-md-12">
+          <input type=checkbox name='garp' ng-model="userFormVars.garp"> GARP &nbsp;
+          <input type=checkbox name='gra' ng-model="userFormVars.gra"> GRA &nbsp;
+          <input type=checkbox name='charge' ng-model="userFormVars.charge"> Charge &nbsp;
+          <input type=checkbox name='credit' ng-model="userFormVars.credit"> Credit &nbsp;
+      </div>
+
+      <div>
+        <button ng-click="showMore()" class="btn garp-btn-portal">More Filters</button>
+      </div>
+    </div>
+
+    <div class="row" ng-if="filterMore">
+      <div class="col-md-12">
+          <hr>
+      </div>
+    </div>
+
+
+    <div class="row" ng-if="filterMore">
+      <div class="col-md-12">
+        <div ng-repeat="prod in userFormVars.prods" style="float:left;margin-right:10px;">
+          <input type=checkbox name='{{prod.id}}' ng-model="prod.checked"> {{prod.name}}
+        </div>
+      </div>
+    </div>
+
+    <div class="row" ng-if="show">
+      <div class="col-md-12">
+        <button ng-click="filter()" class="btn garp-btn-portal">Filter</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+          <hr>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-md-12">
+        &nbsp;
+      </div>
+    </div>
+  </div>
+</div>

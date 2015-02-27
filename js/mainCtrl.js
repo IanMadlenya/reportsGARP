@@ -4,16 +4,63 @@
 var reportsGARPControllers = angular.module('reportsGARPControllers', []);
 
 reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+}]);
 
+
+reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+
+  //$scope.showMore = false;
+  $scope.show = true;
+  $scope.filterMore = false;
+
+  var td = moment().format("M/D/YYYY")
+  var yd = moment().add(-1, 'days').format("M/D/YYYY");
+
+  $scope.userFormVars = {
+    startDate: yd,
+    endDate: td,
+    garp: false,
+    gra: false,
+    credit: false,
+    charge: false,
+    prods: []
+  }
+
+  $scope.$on('fetchProds', function(event, prods) {
+    $scope.userFormVars.prods = jQuery.extend(true, {}, prods);
+  });
+
+  $scope.filter = function() {
+    $rootScope.$broadcast('filter', $scope.userFormVars);
+  }
+  $scope.refresh = function() {
+    $rootScope.$broadcast('refresh', $scope.userFormVars);
+  }
+  $scope.showMore = function() {
+    $scope.filterMore = !$scope.filterMore;
+  }
+  $scope.download = function() {
+    $rootScope.$broadcast('download', $scope.userFormVars);
+  }
+
+}]);
+
+reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
 
   var SHIP = 'SHIP';        
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
-  $scope.show = false;
+
+  var td = moment().format("M/D/YYYY")
+  var yd = moment().add(-1, 'days').format("M/D/YYYY");
 
   $scope.formVars = {
-    startDate: '2/1/2015',
-    endDate: '3/1/2015',
+    startDate: yd,
+    endDate: td,
+    garp: false,
+    gra: false,
+    credit: false,
+    charge: false,    
     prods: []
   }
   //$scope.spinner=null;
@@ -22,145 +69,146 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
   //  $scope.spinner = new Spinner(spinnerOptions).spin(obj[0]);
   //}, 300);
 
+  function doneAddingToDom() {
+    if(defined($scope,"spinner"))
+      $scope.spinner.stop();    
+  }
+  function startSpinner() {
+    var selector = '#spin';
+    var obj = $(selector)
+    if(defined(obj,"length") && obj.length > 0) {
+      $scope.spinner = new Spinner(spinnerOptions).spin(obj[0]);
+    }   
+  }
+  $scope.$on('allRendered', doneAddingToDom);
+
+
+  $scope.$on('filter', function(event, params) {
+    $scope.formVars = jQuery.extend(true, {}, params);
+  });
+  $scope.$on('refresh', function(event, params) {
+    $scope.formVars = jQuery.extend(true, {}, params);
+    init();
+  });
+  $scope.$on('download', function(event, params) {
+    $scope.formVars = jQuery.extend(true, {}, params);
+    $scope.export();
+  });
+
   function init() {
+
+    $timeout(function () {
+      startSpinner();
+    },300);
+
+    console.log('Init');
 
     reportsGARPServices.getProducts(function(err, data) {
 
-        $scope.prods = data.result;
-        if($scope.formVars.prods.length == 0) {
-          for(var i=0; i<$scope.prods.length; i++) {
-            var obj = {
-              id: $scope.prods[i].Id,
-              name: $scope.prods[i].Name,
-              checked: false
-            }
-            $scope.formVars.prods.push(obj);
+      $scope.prods = data.result;
+      if($scope.formVars.prods.length == 0) {
+        for(var i=0; i<$scope.prods.length; i++) {
+          var obj = {
+            id: $scope.prods[i].Id,
+            name: $scope.prods[i].Name,
+            checked: false
+          }
+          $scope.formVars.prods.push(obj);
 
-            if($scope.prods[i].Product2.ProductCode == SHIP)
-              $scope.shippingProductId = $scope.prods[i].Id
-          }          
+          if($scope.prods[i].Product2.ProductCode == SHIP)
+            $scope.shippingProductId = $scope.prods[i].Id
         }
-  
-        $scope.totals = [];
-        $scope.total = 0;
+      }
 
-        var sdt = moment.tz($scope.formVars.startDate,'America/New_York').unix();
-        var edt = moment.tz($scope.formVars.endDate,'America/New_York').unix();
+      $scope.totals = [];
+      $scope.total = 0;
 
-
-        reportsGARPServices.getTransactions(sdt, edt, function(err, data) {
-
-          $scope.transactions = data.result;
-
-          reportsGARPServices.getRefunds(sdt, edt, function(err, data) {
-
-            $scope.refundData = data.result;
-
-            reportsGARPServices.getOpplines(sdt, edt, function(err, data) {
-                $rootScope.$apply(function(){
-                    $scope.opps = data.result;
-
-                    if(defined($scope,"opps.length")) {
-                      var oppLines = [];
-                      for(var i=0; i<$scope.opps.length; i++) {
-                        var opp = $scope.opps[i];
-
-                        if(defined(opp,"Display_Invoice_Number__c"))
-                          opp.invoiceNumber = opp.Display_Invoice_Number__c;
-
-                        if(defined(opp,"CloseDate"))
-                          opp.closeDate = opp.CloseDate;
-
-                        if(defined(opp,"Amount"))
-                          opp.amount = opp.Amount;
-
-                        // if(defined(opp,"OpportunityLineItems.length")) {
-
-                        //   for(var j=0; j<opp.OpportunityLineItems.length; j++) {
-                        //     var oppLine = opp.OpportunityLineItems[j];
-
-                        //     if(defined(opp,"Display_Invoice_Number__c"))
-                        //       oppLine.invoiceNumber = opp.Display_Invoice_Number__c;
-
-                        //     if(defined(opp,"CloseDate"))
-                        //       oppLine.closeDate = opp.CloseDate;
-
-                        //     if(defined(opp,"Amount"))
-                        //       oppLine.amount = opp.Amount;
-
-                        //     oppLines.push(oppLine);
-
-                        //     var fnd=_.findWhere($scope.prods, {Id: oppLine.PricebookEntryId})
-                        //     if(defined(fnd)) {
-
-                        //       var match = _.findWhere($scope.totals, {id: oppLine.PricebookEntryId});
-                        //       if(defined(match)) { 
-                        //         match.total += oppLine.TotalPrice;
-                        //       } else {
-                        //         var obj = {
-                        //           id: oppLine.PricebookEntryId,
-                        //           total: oppLine.TotalPrice
-                        //         }
-                        //         $scope.totals.push(obj);
-                        //         $scope.total += oppLine.TotalPrice;
-                        //       }
-                        //     }                        
-                        //   }
-                        //}
-                      }
-
-                      for(var i=0; i<$scope.refundData.refunds.length; i++) {
-                        var refund = $scope.refundData.refunds[i];
-                        var opp = _.findWhere($scope.refundData.opps, {Id: refund.Opportunity__c});
-                        var prod = _.findWhere($scope.prods, {Product2Id: refund.Product__c});
-                        var trans = _.findWhere($scope.refundData.trans, {Id: refund.Payment_Transaction__c});
-                        var fnd = null;
-
-                        if(!defined(opp) || !defined(prod) || !defined(trans))
-                          continue;
-
-                        if(defined(trans,"ChargentSFA__Tokenization__c")) {
-                          fnd = _.findWhere($scope.opps, {isRefund: true, transId: trans.ChargentSFA__Tokenization__c})
-                        } else {
-                          var trans = {};
-                          trans.ChargentSFA__Tokenization__c = null;
-                        }
-                          
-                        if(defined(fnd)) {
-                          fnd.amount += refund.Refund_amount__c;
-                          fnd.refunds.push(refund);
-                        } else {
-                          var obj = {
-                            isRefund: true,
-                            refunds: [refund],
-                            opp: opp,
-                            trans: trans,
-                            transId: trans.ChargentSFA__Tokenization__c,
-                            closeDate: refund.CreatedDate,
-                            amount: refund.Refund_amount__c
-                          }
-                          $scope.opps.push(obj);
-                        }
-                      }
+      var sdt = moment.tz($scope.formVars.startDate,'America/New_York').unix();
+      var edt = moment.tz($scope.formVars.endDate,'America/New_York').unix();
 
 
-                      $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
+      //reportsGARPServices.getTransactions(sdt, edt, function(err, data) {
+
+        //$scope.transactions = data.result;
+
+        reportsGARPServices.getRefunds(sdt, edt, function(err, data) {
+
+          $scope.refundData = data.result;
+
+          reportsGARPServices.getOpplines(sdt, edt, function(err, data) {
+              
+
+              console.log('Init - doneGet');
+
+              if(defined(data,"result.opps"))
+                $scope.opps = data.result.opps;
+              if(defined(data,"result.trans"))
+                $scope.transactions = data.result.trans;
+
+              if(defined($scope,"opps.length")) {
+                var oppLines = [];
+                for(var i=0; i<$scope.opps.length; i++) {
+                  var opp = $scope.opps[i];
+
+                  if(defined(opp,"Display_Invoice_Number__c"))
+                    opp.invoiceNumber = opp.Display_Invoice_Number__c;
+
+                  if(defined(opp,"CloseDate"))
+                    opp.closeDate = opp.CloseDate;
+
+                  if(defined(opp,"Amount"))
+                    opp.amount = opp.Amount;
+
+                }
+
+                for(var i=0; i<$scope.refundData.refunds.length; i++) {
+                  var refund = $scope.refundData.refunds[i];
+                  var opp = _.findWhere($scope.refundData.opps, {Id: refund.Opportunity__c});
+                  var prod = _.findWhere($scope.prods, {Product2Id: refund.Product__c});
+                  var trans = _.findWhere($scope.refundData.trans, {Id: refund.Payment_Transaction__c});
+                  var fnd = null;
+
+                  if(!defined(opp) || !defined(prod) || !defined(trans))
+                    continue;
+
+                  if(defined(trans,"ChargentSFA__Tokenization__c")) {
+                    fnd = _.findWhere($scope.opps, {isRefund: true, transId: trans.ChargentSFA__Tokenization__c})
+                  } else {
+                    var trans = {};
+                    trans.ChargentSFA__Tokenization__c = null;
+                  }
+                    
+                  if(defined(fnd)) {
+                    fnd.amount += refund.Refund_amount__c;
+                    fnd.refunds.push(refund);
+                  } else {
+                    var obj = {
+                      isRefund: true,
+                      refunds: [refund],
+                      opp: opp,
+                      trans: trans,
+                      transId: trans.ChargentSFA__Tokenization__c,
+                      closeDate: refund.CreatedDate,
+                      amount: refund.Refund_amount__c
                     }
-                      
-                    if(defined($scope,"prods.length"))
-                      $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
+                    $scope.opps.push(obj);
+                  }
+                }
+              }
 
-                });
-            });
+              $rootScope.$apply(function(){
+                $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
+                if(defined($scope,"prods.length")) {
+                  $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
+                  $rootScope.$broadcast('fetchProds', $scope.formVars.prods);
+                }                  
+              });
           });
         });
+      //});
     });
   }
   init();
-
-  $scope.refresh = function() {
-    init();
-  }
 
   $scope.displayId = function(opp) {
     if(defined(opp,"isRefund") && opp.isRefund) {
@@ -207,7 +255,9 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
       var func = $scope.filterMatch();
       if(func(opp)) {
         if(defined(opp,"amount") && typeof opp.amount == "number")
-          total+=opp.amount
+          if(defined(opp,"isRefund") && opp.isRefund)
+            total-=opp.amount;
+          else total+=opp.amount;
       }
     }
     return total;
@@ -314,6 +364,16 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
     else return 0;
   }
 
+  $scope.getRowTotal = function(opp) {
+    if(defined(opp,"isRefund") && opp.isRefund) {
+      return opp.amount * -1;
+    } else if(defined(opp)) {
+      return opp.amount;
+    } else {
+      return 0;
+    }
+  }
+
   $scope.export = function() {
 
     var json = [{"invoiceNumber":"Invoice #","closeDate":"Close Date","amount":"Amount"}];
@@ -359,7 +419,17 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
     }
 
     var csv = JSON2CSV(json);
-    window.open("data:text/csv;charset=utf-8," + escape(csv))
+    var fileName = 'data'
+    var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
+    var link = document.createElement("a");    
+    link.href = uri
+    link.style = "visibility:hidden";
+    link.download = fileName + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    //window.open("data:text/csv;charset=utf-8," + escape(csv))
   }
 
 
@@ -367,6 +437,7 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
     return function( item ) {   
 
       var fnd=_.findWhere($scope.prods, {Id: item.Id})
+
       if(defined(fnd,"Product2.Weight__c") && fnd.Product2.Weight__c > 0) {
         return 1;
       } else {
@@ -381,22 +452,23 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
 
       if(defined(item.isRefund)) {
 
-        if(item.opp.Company__c != 'GARP' && $scope.formVars.garp==true)
+        if(item.opp.Company__c == 'GRA' && $scope.formVars.garp==true && $scope.formVars.gra==false)
           return 0;
-        if(item.opp.Company__c != 'GRA' && $scope.formVars.gra==true)
-
-        if($scope.formVars.charge==true)
+        if(item.opp.Company__c == 'GARP' && $scope.formVars.gra==true && $scope.formVars.garp==false)
+          return 0;
+        if($scope.formVars.charge==true && $scope.formVars.credit==false)
           return 0;
 
 
       } else {
-        if(item.Company__c != 'GARP' && $scope.formVars.garp==true)
+
+        if(item.Company__c == 'GRA' && $scope.formVars.garp==true && $scope.formVars.gra==false)
           return 0;
-        if(item.Company__c != 'GRA' && $scope.formVars.gra==true)
+        if(item.Company__c == 'GARP' && $scope.formVars.gra==true && $scope.formVars.garp==false)
           return 0;
-        if(item.ChargentSFA__Type__c == 'Credit' && $scope.formVars.charge==true)
+        if(item.ChargentSFA__Type__c == 'Credit' && $scope.formVars.charge==true && $scope.formVars.credit==false)
           return 0;
-        if(item.ChargentSFA__Type__c != 'Credit' && $scope.formVars.credit==true)
+        if(item.ChargentSFA__Type__c != 'Credit' && $scope.formVars.credit==true && $scope.formVars.charge==false)
           return 0;
 
       }
@@ -410,8 +482,20 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
   $scope.criteriaMatch = function(value) {
     return function( item ) {   
 
+      var fnd=_.findWhere($scope.prods, {Id: item.Id})
+      if(defined(fnd,"Product2.ProductCode") && fnd.Product2.ProductCode==SHIP)
+        return 0;
+
+
       //if($scope.getTotal(item.Id) > 0) {
         var checked = _.where($scope.formVars.prods, {checked:true});
+
+        if(item.Product2.Company__c == 'GRA' && $scope.formVars.garp==true && $scope.formVars.gra==false)
+          return 0;
+
+        if(item.Product2.Company__c == 'GARP' && $scope.formVars.gra==true && $scope.formVars.garp==false)
+          return 0;
+
         if(defined(checked) && checked.length > 0) {
           var fnd = _.findWhere(checked, {id: item.Id});
           if(defined(fnd))
