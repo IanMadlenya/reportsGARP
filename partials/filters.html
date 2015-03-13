@@ -15,7 +15,13 @@
           <input type=checkbox name='garp' ng-model="userFormVars.garp"> GARP &nbsp;
           <input type=checkbox name='gra' ng-model="userFormVars.gra"> GRA &nbsp;
           <input type=checkbox name='charge' ng-model="userFormVars.charge"> Charge &nbsp;
-          <input type=checkbox name='credit' ng-model="userFormVars.credit"> Credit &nbsp;
+          <input type=checkbox name='refund' ng-model="userFormVars.refund"> Refund &nbsp;
+      </div>
+      <div class="col-md-12" ng-if="show">
+          <input type=checkbox name='pm_creditcard' ng-model="userFormVars.pm_creditcard"> Credit Card &nbsp;
+          <input type=checkbox name='pm_creditcardbyfax' ng-model="userFormVars.pm_creditcardbyfax"> Credit Card by Fax &nbsp;
+          <input type=checkbox name='pm_wire' ng-model="userFormVars.pm_wire"> Wire &nbsp;
+          <input type=checkbox name='pm_check' ng-model="userFormVars.pm_check"> Check &nbsp;
       </div>
 
       <div>
@@ -40,7 +46,7 @@
 
     <div class="row" ng-if="show">
       <div class="col-md-12">
-        <button ng-click="filter()" class="btn garp-btn-portal">Search</button>
+        <button ng-click="filter()" class="btn garp-btn-portal">Apply Filters</button>
       </div>
     </div>
 
