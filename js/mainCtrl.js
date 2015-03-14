@@ -22,7 +22,7 @@ reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeo
     garp: false,
     gra: false,
     refund: false,
-    charge: true,
+    charge: false,
     pm_creditcard: true,
     pm_creditcardbyfax: true,
     pm_wire: false,
@@ -59,12 +59,12 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   var yd = moment().add(-1, 'days').format("M/D/YYYY");
 
   $scope.formVars = {
-    startDate: yd,
+  startDate: yd,
     endDate: td,
     garp: false,
     gra: false,
     refund: false,
-    charge: true,
+    charge: false,
     pm_creditcard: true,
     pm_creditcardbyfax: true,
     pm_wire: false,
@@ -112,7 +112,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
     console.log('Init');
 
-    var priceBookId = '01sf00000008rTn';
+    var priceBookId = '01s40000000VV15';
     reportsGARPServices.getProducts(priceBookId, function(err, data) {
 
       $scope.prods = data.result;
@@ -158,18 +158,18 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
               if(defined(opps,"length")) {
                 var oppLines = [];
+
                 for(var i=0; i<opps.length; i++) {
                   var opp = opps[i];
 
-                if(defined(opp,"Display_Invoice_Number__c"))
-                  opp.invoiceNumber = opp.Display_Invoice_Number__c;
+                  if(defined(opp,"Display_Invoice_Number__c"))
+                    opp.invoiceNumber = opp.Display_Invoice_Number__c;
 
-                if(defined(opp,"CloseDate"))
-                  opp.closeDate = opp.CloseDate;
+                  if(defined(opp,"CloseDate"))
+                    opp.closeDate = opp.CloseDate;
 
-                if(defined(opp,"Amount"))
-                  opp.amount = opp.Amount;
-
+                  if(defined(opp,"Amount"))
+                    opp.amount = opp.Amount;
 
                   var found=false;
                   var total=0;
@@ -481,15 +481,23 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   $scope.filterMatch = function(value) {
     return function( item ) {   
 
-    
+      if(!defined(item,"amount") || item.amount == 0)
+        return false;
+
       var match = false;
-      if($scope.formVars.garp==false && $scope.formVars.gra==false &&
-          $scope.formVars.refund==false && $scope.formVars.charge==false)
+      if($scope.formVars.garp==false && $scope.formVars.gra==false)
         match=true;
-      else if($scope.formVars.garp==true && defined(item,"opp.Company__c") && item.opp.Company__c == 'GRA')
+      else if($scope.formVars.garp==true && defined(item,"Company__c") && item.Company__c == 'GARP')
          match=true;
-      else if($scope.formVars.gra==true && defined(item,"opp.Company__c") && item.opp.Company__c == 'GARP')
+      else if($scope.formVars.gra==true && defined(item,"Company__c") && item.Company__c == 'GRA')
          match=true;
+
+      if(match == false)
+        return match;
+
+      match = false
+      if($scope.formVars.refund==false && $scope.formVars.charge==false)
+        match=true;
       else if($scope.formVars.refund==true && defined(item,"trans.ChargentSFA__Type__c") && item.trans.ChargentSFA__Type__c == 'Refund')
          match=true;
       else if($scope.formVars.charge==true && defined(item,"trans.ChargentSFA__Type__c") && item.trans.ChargentSFA__Type__c == 'Charge')
@@ -499,7 +507,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
         return match;
 
 
-      var match = false;
+      match = false;
       if($scope.formVars.pm_creditcard==false && $scope.formVars.pm_creditcardbyfax==false &&
           $scope.formVars.pm_wire==false && $scope.formVars.pm_check==false)
         match=true;
