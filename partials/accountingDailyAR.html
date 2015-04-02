@@ -37,18 +37,18 @@
             <b>Total</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
-            {{prod.Name}}<br>{{prod.Product2.ProductCode}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
+            {{prod.Name}}<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
           </td>
 
           <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
-            {{prod.Name}} Shipping
+            {{prod.Name}} Shipping<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.
           </td>          
           <td>
             <b>Total</b>
           </td>
         </tr>
 
-        <tr ng-repeat="opp in opps | filter:filterMatch()" emit-when="{event: 'allRendered', condition: $last}">
+        <tr ng-repeat="opp in opps | filter:filterMatch() track by $index" emit-when="{event: 'allRendered', condition: $last}">
           <td>
             {{opp.Display_Invoice_Number__c}}
           </td>
@@ -80,13 +80,13 @@
             <b>${{formatAmountDisplay(getRowTotal(opp))}}</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
-            <div ng-if="getProductAmount(opp, prod.Id)">
-              ${{formatAmountDisplay(getProductAmount(opp, prod.Id))}}
+            <div ng-if="getProductAmount(opp, prod)">
+              ${{formatAmountDisplay(getProductAmount(opp, prod))}}
             </div>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
-            <div ng-if="getProductAmountShipping(opp, prod.Id)">
-              ${{formatAmountDisplay(getProductAmountShipping(opp, prod.Id))}}
+            <div ng-if="getProductAmountShipping(opp, prod)">
+              ${{formatAmountDisplay(getProductAmountShipping(opp, prod))}}
             </div>
           </td>
           <td>
@@ -121,7 +121,7 @@
           </td>
 
           <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
-            <div ng-if="getProductAmountShipping(opp, prod.Id)">
+            <div ng-if="getProductAmountShipping(opp, prod)">
             </div>
           </td>          
           <td>
