@@ -517,6 +517,22 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   }
 
 
+  $scope.criteriaMatch = function(value) {
+    return function( item ) {   
+
+
+      var fnd=_.findWhere($scope.prods, {Id: item.Id})
+
+      if(defined(fnd,"Product2")) {
+        return 1;
+      } else {
+        return 0;
+      }
+
+    }
+  }
+        
+
   $scope.filterMatch = function(value) {
     return function( item ) {   
 
@@ -575,39 +591,4 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   }
 
 
-  $scope.criteriaMatch = function(value) {
-    return function( item ) {   
-
-      var fnd=_.findWhere($scope.prods, {Id: item.Id})
-      if(defined(fnd,"Product2.ProductCode") && fnd.Product2.ProductCode==SHIP)
-        return 0;
-
-
-      //if($scope.getTotal(item.Id) > 0) {
-        var checked = _.where($scope.formVars.prods, {checked:true});
-
-        if(item.Product2.Company__c == 'GRA' && $scope.formVars.garp==true && $scope.formVars.gra==false)
-          return 0;
-
-        if(item.Product2.Company__c == 'GARP' && $scope.formVars.gra==true && $scope.formVars.garp==false)
-          return 0;
-
-        if(item.Product2.Company__c == 'GARP' && $scope.formVars.gra==true && $scope.formVars.garp==false)
-          return 0;
-
-
-        if(defined(checked) && checked.length > 0) {
-          var fnd = _.findWhere(checked, {id: item.Id});
-          if(defined(fnd))
-            return 1;
-          else return 0;
-        } else {
-          return 1;  
-        }
-        
-      //}
-      //else return 0;
-    }
-  }
-        
 }]);
