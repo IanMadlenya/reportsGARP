@@ -524,7 +524,9 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var fnd=_.findWhere($scope.prods, {Id: item.Id})
 
       if(defined(fnd,"Product2")) {
-        return 1;
+        if(fnd.Product2.ProductCode==SHIP)
+          return 0;
+        else return 1;
       } else {
         return 0;
       }
