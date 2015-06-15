@@ -493,7 +493,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
     var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
     var link = document.createElement("a");    
     link.href = uri
-    link.style = "visibility:hidden";
+    //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
     link.download = fileName + ".csv";
     document.body.appendChild(link);
     link.click();
