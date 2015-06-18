@@ -201,6 +201,9 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
             }
           }
 
+          if(opp.Display_Invoice_Number__c == 'W969866')
+            console.log('hi');
+
           obj = opp;
           obj.isRefund=false;
           obj.refunds=null;
@@ -225,8 +228,12 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
               obj.isRefund=true;
               obj.refunds = refunds;
 
-              if(defined(trans,"ChargentSFA__Amount__c"))
-                obj.amount = trans.ChargentSFA__Amount__c * -1;
+              if(defined(trans,"ChargentSFA__Amount__c")) {
+                if(trans.ChargentSFA__Amount__c >= 0)
+                  obj.amount = trans.ChargentSFA__Amount__c * -1;
+                else obj.amount = trans.ChargentSFA__Amount__c;
+              }
+                
 
               if(defined(trans,"ChargentSFA__Gateway_Response__c")) {
                 var patt = /PNREF=([^&]*)/i
@@ -241,7 +248,8 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
           }
         }
-        $scope.spinner.stop();
+        if(defined($scope,"spinner"))
+          $scope.spinner.stop();
         $rootScope.$apply(function(){
           $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
           if(defined($scope,"prods.length")) {
@@ -270,9 +278,14 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var func = $scope.filterMatch();
       if(func(opp)) {
         if(defined(opp,"amount") && typeof opp.amount == "number")
-          if(defined(opp,"isRefund") && opp.isRefund)
-            total-=opp.amount;
-          else total+=opp.amount;
+          if(defined(opp,"isRefund") && opp.isRefund) {
+            if(opp.amount >= 0)
+              total+=(opp.amount * -1);
+            else total+=opp.amount;
+
+          } else {
+            total+=opp.amount;
+          }
       }
     }
     return total;
@@ -309,14 +322,17 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       console.log('hu');
     }
 
+    var found = false;
+    var foundRefundShipping = false;
     if(opp.isRefund) {
-
       var refunds = opp.refunds;
       for(var j=0; j<refunds.length; j++) {
         var refund = refunds[j];
         if(refund.Product__c == prod.Product2.Id) {
           found=true;
-          break;
+        }        
+        if(refund.Product_Code__c == SHIP) {
+          foundRefundShipping=true;
         }
       }      
        
@@ -359,9 +375,17 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
     if(defined(fndProd,"Product2.Weight__c") && fndProd.Product2.Weight__c > 0 && shippingCost && totalWeight && bought) {
       var percent = fndProd.Product2.Weight__c / totalWeight;
 
-      if(opp.isRefund)
-        return shippingCost * percent * -1;
-      else return shippingCost * percent;
+      if(opp.isRefund) {
+        if(foundRefundShipping) {
+          return shippingCost * percent * -1;
+        } else {
+          return 0;
+        }
+      } else {
+        return shippingCost * percent;
+      }
+        
+      
     }
     return 0;
 
@@ -375,8 +399,11 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var prod = _.findWhere($scope.prods, {Id: prodId});
       if(defined(prod)) {
         var match = _.findWhere(opp.refunds, {Product__c: prod.Product2Id});
-        if(defined(match,"Refund_amount__c"))
-          return -1 * match.Refund_amount__c;        
+        if(defined(match,"Refund_amount__c")) {
+          if(match.Refund_amount__c >= 0)
+            return -1 * match.Refund_amount__c;        
+          else return match.Refund_amount__c; 
+        }
       }
       return 0;
     }
@@ -419,7 +446,9 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
   $scope.getRowTotal = function(opp) {
     if(defined(opp,"isRefund") && opp.isRefund) {
-      return opp.amount * -1;
+      if(opp.amount >= 0)
+        return opp.amount * -1;
+      else return opp.amount;
     } else if(defined(opp)) {
       return opp.amount;
     } else {
@@ -429,7 +458,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
   $scope.export = function() {
 
-    var json = [{"invoiceNumber":"Invoice #","garpId":"GARP ID","county":"Country","state":"State","payPalId":"PayPal Trans ID",
+    var json = [{"invoiceNumber":"Invoice #","garpId":"GARP ID","firstName":"First Name","lastName":"Last Name","county":"Country","state":"State","payPalId":"PayPal Trans ID",
                   "type":"Type","method":"Payment Method","company":"Company","paidDate":"Paid Date","total":"Total"}];
     for(var i=0; i<$scope.prods.length; i++) {  
       var prod = $scope.prods[i];
@@ -456,6 +485,8 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
         var obj = {
           "invoiceNumber":formatDefined(opp.Display_Invoice_Number__c),
           "garpId":formatDefined(opp.GARP_Member_ID__c),
+          "firstName":formatDefined(opp.Member_First_Name__c),
+          "lastName":formatDefined(opp.Member_Last_Name__c),
           "county":formatDefined(opp.Shipping_Country__c),
           "state":formatDefined(opp.Shipping_State__c),
           "payPalId":formatDefined(opp.trans.ChargentSFA__Gateway_ID__c),
@@ -556,7 +587,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       if($scope.formVars.nj==false)
         match=true;
       if($scope.formVars.nj==true && defined(item,"Shipping_State__c") && defined(item,"Shipping_Country__c") &&
-              (item.Shipping_Country__c == 'US' || item.Shipping_Country__c == 'United States') &&
+              (item.Shipping_Country__c == 'US' || item.Shipping_Country__c == 'United States' || item.Shipping_Country__c == 'United States of America') &&
               (item.Shipping_State__c == 'NJ' || item.Shipping_State__c == 'New Jersey') )
          match=true;     
 
