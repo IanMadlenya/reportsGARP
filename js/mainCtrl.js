@@ -113,6 +113,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
     },300);
 
     console.log('Init');
+    $scope.err = '';
 
     var hostName = window.location.hostname;
     if(hostName.indexOf("c.cs16.visual.force.com") > -1) {
@@ -157,6 +158,15 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var edt = moment.tz($scope.formVars.endDate + ' 23:59:59','America/Los_Angeles').unix();
 
       reportsGARPServices.getReportData(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
+
+        if(data.event.status == false) {
+          if(defined($scope,"spinner"))
+            $scope.spinner.stop();          
+          $rootScope.$apply(function(){
+            $scope.err = data.event.message;
+          });
+          return;
+        }
 
         if(defined(data,"result.opps"))
           $scope.oppsData = data.result.opps;
