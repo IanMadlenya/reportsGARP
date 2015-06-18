@@ -173,7 +173,8 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
           if(trans.ChargentSFA__Response_Status__c != 'Approved')
             continue;
 
-          var opp = _.findWhere($scope.oppsData, {Id: trans.ChargentSFA__Opportunity__c});
+          var findopp = _.findWhere($scope.oppsData, {Id: trans.ChargentSFA__Opportunity__c});
+          var opp = jQuery.extend(true, {}, findopp);
 
           if(!defined(opp))
             continue;
@@ -221,7 +222,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
             $scope.opps.push(obj);
 
-          } if(trans.ChargentSFA__Type__c == 'Refund' || trans.ChargentSFA__Type__c == 'Credit') {
+          } else if(trans.ChargentSFA__Type__c == 'Refund' || trans.ChargentSFA__Type__c == 'Credit') {
 
             var refunds = _.where($scope.refunds, {Opportunity__c: opp.Id});
             if(defined(refunds)) {
