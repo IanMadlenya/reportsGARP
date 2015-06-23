@@ -362,14 +362,14 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
     }
 
-    if(!found)
+    if(!found && !foundRefundShipping)
       return 0;
 
     var fndProd=prod;
 
     var totalWeight = 0;
     var shippingCost = 0;
-    var bought=false;
+    var boughtShipping=false;
     for(var j=0; j<opp.OpportunityLineItems.length; j++) {
       var oppLine = opp.OpportunityLineItems[j];
       var fnd=_.findWhere($scope.prods, {Id: oppLine.PricebookEntryId})
@@ -381,9 +381,9 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       }
 
       if(oppLine.PricebookEntry.Product2.Id == prod.Product2.Id)
-        bought=true
+        boughtShipping=true
     }        
-    if(defined(fndProd,"Product2.Weight__c") && fndProd.Product2.Weight__c > 0 && shippingCost && totalWeight && bought) {
+    if(defined(fndProd,"Product2.Weight__c") && fndProd.Product2.Weight__c > 0 && shippingCost > 0 && totalWeight > 0 && boughtShipping == true) {
       var percent = fndProd.Product2.Weight__c / totalWeight;
 
       if(opp.isRefund) {
