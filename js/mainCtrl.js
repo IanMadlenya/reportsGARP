@@ -157,7 +157,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var sdt = moment.tz($scope.formVars.startDate + ' 00:00:01','America/Los_Angeles').unix();
       var edt = moment.tz($scope.formVars.endDate + ' 23:59:59','America/Los_Angeles').unix();
 
-      reportsGARPServices.getReportData(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
+      reportsGARPServices.getReportDataTrans(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
 
         if(data.event.status == false) {
           if(defined($scope,"spinner"))
@@ -168,107 +168,130 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
           return;
         }
 
-        if(defined(data,"result.opps"))
-          $scope.oppsData = data.result.opps;
-
         if(defined(data,"result.trans"))
           $scope.transactions = data.result.trans;
 
-        if(defined(data,"result.refunds"))
-          $scope.refunds = data.result.refunds;
+        reportsGARPServices.getReportDataOpp(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
 
-        for(var i=0; i<$scope.transactions.length; i++) {
-          var trans = $scope.transactions[i];
+          if(data.event.status == false) {
+            if(defined($scope,"spinner"))
+              $scope.spinner.stop();          
+            $rootScope.$apply(function(){
+              $scope.err = data.event.message;
+            });
+            return;
+          }
 
-          if(trans.ChargentSFA__Response_Status__c != 'Approved')
-            continue;
+          if(defined(data,"result.opps"))
+            $scope.oppsData = data.result.opps;
 
-          var findopp = _.findWhere($scope.oppsData, {Id: trans.ChargentSFA__Opportunity__c});
-          var opp = jQuery.extend(true, {}, findopp);
+          reportsGARPServices.getReportDataRefunds(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
 
-          if(!defined(opp))
-            continue;
+            if(data.event.status == false) {
+              if(defined($scope,"spinner"))
+                $scope.spinner.stop();          
+              $rootScope.$apply(function(){
+                $scope.err = data.event.message;
+              });
+              return;
+            }
 
-          var found=false;
-          var total=0;
-          if(defined(opp,"OpportunityLineItems.length")) {                  
-            for(var j=0; j<opp.OpportunityLineItems.length; j++) {
-              var oppLine = opp.OpportunityLineItems[j];
-              var fnd=_.findWhere($scope.prods, {Id: oppLine.PricebookEntryId})
-              if(defined(fnd)) {
-                found=true;
-                var match = _.findWhere($scope.totals, {id: oppLine.PricebookEntryId});
-                total+=oppLine.TotalPrice;
-                if(defined(match)) {
-                  match.total += oppLine.TotalPrice;
-                } else {
-                  var obj = {
-                    id: oppLine.PricebookEntryId,
-                    total: oppLine.TotalPrice
+            if(defined(data,"result.refunds"))
+              $scope.refunds = data.result.refunds;
+
+            for(var i=0; i<$scope.transactions.length; i++) {
+              var trans = $scope.transactions[i];
+
+              if(trans.ChargentSFA__Response_Status__c != 'Approved')
+                continue;
+
+              var findopp = _.findWhere($scope.oppsData, {Id: trans.ChargentSFA__Opportunity__c});
+              var opp = jQuery.extend(true, {}, findopp);
+
+              if(!defined(opp))
+                continue;
+
+              var found=false;
+              var total=0;
+              if(defined(opp,"OpportunityLineItems.length")) {                  
+                for(var j=0; j<opp.OpportunityLineItems.length; j++) {
+                  var oppLine = opp.OpportunityLineItems[j];
+                  var fnd=_.findWhere($scope.prods, {Id: oppLine.PricebookEntryId})
+                  if(defined(fnd)) {
+                    found=true;
+                    var match = _.findWhere($scope.totals, {id: oppLine.PricebookEntryId});
+                    total+=oppLine.TotalPrice;
+                    if(defined(match)) {
+                      match.total += oppLine.TotalPrice;
+                    } else {
+                      var obj = {
+                        id: oppLine.PricebookEntryId,
+                        total: oppLine.TotalPrice
+                      }
+                      $scope.totals.push(obj);
+                    }
                   }
-                  $scope.totals.push(obj);
-                }
-              }
-            }
-          }
-
-          if(opp.Display_Invoice_Number__c == 'W969866')
-            console.log('hi');
-
-          obj = opp;
-          obj.isRefund=false;
-          obj.refunds=null;
-          obj.trans=trans;
-          obj.transId=trans.Id;
-          obj.amount = opp.Amount;
-          obj.closeDate = opp.CloseDate;
-          if(defined(trans,"ChargentSFA__Gateway_Date__c"))
-            obj.closeDate = trans.ChargentSFA__Gateway_Date__c;
-
-          if(trans.ChargentSFA__Type__c == 'Charge') {
-
-            if(defined(trans,"ChargentSFA__Amount__c"))
-              obj.amount = trans.ChargentSFA__Amount__c;
-
-            $scope.opps.push(obj);
-
-          } else if(trans.ChargentSFA__Type__c == 'Refund' || trans.ChargentSFA__Type__c == 'Credit') {
-
-            var refunds = _.where($scope.refunds, {Opportunity__c: opp.Id});
-            if(defined(refunds)) {
-              obj.isRefund=true;
-              obj.refunds = refunds;
-
-              if(defined(trans,"ChargentSFA__Amount__c")) {
-                if(trans.ChargentSFA__Amount__c >= 0)
-                  obj.amount = trans.ChargentSFA__Amount__c * -1;
-                else obj.amount = trans.ChargentSFA__Amount__c;
-              }
-                
-
-              if(defined(trans,"ChargentSFA__Gateway_Response__c")) {
-                var patt = /PNREF=([^&]*)/i
-                var x = patt.exec(trans.ChargentSFA__Gateway_Response__c);
-                if(defined(x,"length") && x.length > 1) {
-                  obj.trans.ChargentSFA__Gateway_ID__c = x[1];
                 }
               }
 
-              $scope.opps.push(obj);
-            }
+              if(opp.Display_Invoice_Number__c == 'W969866')
+                console.log('hi');
 
-          }
-        }
-        if(defined($scope,"spinner"))
-          $scope.spinner.stop();
-        $rootScope.$apply(function(){
-          $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
-          if(defined($scope,"prods.length")) {
-            $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
-            $rootScope.$broadcast('fetchProds', $scope.formVars.prods);
-          }                  
+              obj = opp;
+              obj.isRefund=false;
+              obj.refunds=null;
+              obj.trans=trans;
+              obj.transId=trans.Id;
+              obj.amount = opp.Amount;
+              obj.closeDate = opp.CloseDate;
+              if(defined(trans,"ChargentSFA__Gateway_Date__c"))
+                obj.closeDate = trans.ChargentSFA__Gateway_Date__c;
+
+              if(trans.ChargentSFA__Type__c == 'Charge') {
+
+                if(defined(trans,"ChargentSFA__Amount__c"))
+                  obj.amount = trans.ChargentSFA__Amount__c;
+
+                $scope.opps.push(obj);
+
+              } else if(trans.ChargentSFA__Type__c == 'Refund' || trans.ChargentSFA__Type__c == 'Credit') {
+
+                var refunds = _.where($scope.refunds, {Opportunity__c: opp.Id});
+                if(defined(refunds)) {
+                  obj.isRefund=true;
+                  obj.refunds = refunds;
+
+                  if(defined(trans,"ChargentSFA__Amount__c")) {
+                    if(trans.ChargentSFA__Amount__c >= 0)
+                      obj.amount = trans.ChargentSFA__Amount__c * -1;
+                    else obj.amount = trans.ChargentSFA__Amount__c;
+                  }
+                    
+
+                  if(defined(trans,"ChargentSFA__Gateway_Response__c")) {
+                    var patt = /PNREF=([^&]*)/i
+                    var x = patt.exec(trans.ChargentSFA__Gateway_Response__c);
+                    if(defined(x,"length") && x.length > 1) {
+                      obj.trans.ChargentSFA__Gateway_ID__c = x[1];
+                    }
+                  }
+
+                  $scope.opps.push(obj);
+                }
+
+              }
+            }
+            if(defined($scope,"spinner"))
+              $scope.spinner.stop();
+            $rootScope.$apply(function(){
+              $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
+              if(defined($scope,"prods.length")) {
+                $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
+                $rootScope.$broadcast('fetchProds', $scope.formVars.prods);
+              }                  
+            });
+          });
         });
-
       });
     });
   }
