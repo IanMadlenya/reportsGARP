@@ -64,6 +64,21 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   var FRM1_NAME_MERGED = 'FRM Exam Part I - Merged';
 
 
+  var mergeProds = [
+    {
+      glCode: FRM1_GLCODE,
+      company: 'GARP',
+      prodCodes : [
+        FRM1EARLY,
+        FRM1STANDARD,
+        FRM1LATE
+      ],
+      mergedCode : FRM1_CODE_MERGED,
+      mergedGL : FRM1_GLCODE_MERGED,
+      mergedName : FRM1_NAME_MERGED
+    }
+  ];
+
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
 
@@ -144,46 +159,79 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       $scope.formVars.prods = [];
       if($scope.formVars.prods.length == 0) {
         for(var i=0; i<$scope.prods.length; i++) {
+          var prod = $scope.prods[i];
 
-          if(defined($scope.prods[i],"Product2.IsActive") && defined($scope.prods[i],"Pricebook2.IsActive") &&
-             defined($scope.prods[i],"Pricebook2.IsActive") && $scope.prods[i].Pricebook2.IsActive == true && 
-             defined($scope.prods[i],"Product2.IsActive") && $scope.prods[i].Product2.IsActive == true) {
+          if(defined(prod,"Product2.IsActive") && defined(prod,"Pricebook2.IsActive") &&
+             defined(prod,"Pricebook2.IsActive") && prod.Pricebook2.IsActive == true && 
+             defined(prod,"Product2.IsActive") && prod.Product2.IsActive == true) {
 
-            if($scope.prods[i].Product2.GL_Code__c == FRM1_GLCODE && 
-               ($scope.prods[i].Product2.ProductCode == FRM1EARLY || $scope.prods[i].Product2.ProductCode == FRM1STANDARD ||
-               $scope.prods[i].Product2.ProductCode == FRM1LATE)) {
-              continue;
+            var found=false;
+            var fnd = _.where(mergeProds, {glCode: prod.Product2.GL_Code__c});
+            if(defined(fnd,"length") && fnd.length > 0) {
+              for(var j=0; j<fnd.length; j++) {
+                var idx = _.indexOf(fnd[j].prodCodes, prod.Product2.ProductCode);  
+                if(idx > -1)  {
+                  found=true;
+                  break;
+                }
+              }
             }
 
+            // if(prod.Product2.GL_Code__c == FRM1_GLCODE && 
+            //    (prod.Product2.ProductCode == FRM1EARLY || prod.Product2.ProductCode == FRM1STANDARD ||
+            //    prod.Product2.ProductCode == FRM1LATE)) {
+            //   continue;
+            // }
+
+            if(found)
+              continue;
+
             var obj = {
-              id: $scope.prods[i].Id,
-              name: $scope.prods[i].Name,
+              id: prod.Id,
+              name: prod.Name,
               checked: false
             }
             $scope.formVars.prods.push(obj);
 
-            if($scope.prods[i].Product2.ProductCode == SHIP)
-              $scope.shippingProductId = $scope.prods[i].Product2.Id
+            if(prod.Product2.ProductCode == SHIP)
+              $scope.shippingProductId = prod.Product2.Id
 
-            $scope.prodsFinal.push($scope.prods[i]);
+            $scope.prodsFinal.push(prod);
           }
         }
       }
 
-      var prodObj = {
-        Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
-        Name: FRM1_NAME_MERGED,
-        Product2Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
-        Product2: {
-          Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
-          Company__c: "GARP",
-          GL_Code__c: FRM1_GLCODE_MERGED,
-          ProductCode: FRM1_CODE_MERGED,
-          Weight__c: 1
-        }
-      }
+      // var prodObj = {
+      //   Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
+      //   Name: FRM1_NAME_MERGED,
+      //   Product2Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
+      //   Product2: {
+      //     Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
+      //     Company__c: "GARP",
+      //     GL_Code__c: FRM1_GLCODE_MERGED,
+      //     ProductCode: FRM1_CODE_MERGED,
+      //     Weight__c: 1
+      //   }
+      // }
 
-      $scope.prodsFinal.push(prodObj);
+      for(var i=0; i<mergeProds.length; i++) {
+        var mp = mergeProds[i];
+
+        var prodObj = {
+          Id: mp.mergedCode+':'+mp.mergedGL,
+          Name: mp.mergedName,
+          Product2Id: mp.mergedCode+':'+mp.mergedGL,
+          Product2: {
+            Id: mp.mergedCode+':'+mp.mergedGL,
+            Company__c: mp.company,
+            GL_Code__c: mp.mergedGL,
+            ProductCode: mp.mergedCode,
+            Weight__c: 1
+          }
+        }
+
+        $scope.prodsFinal.push(prodObj);
+      }
 
       $scope.prods = $scope.prodsFinal;
 
@@ -227,13 +275,33 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
               var opp = $scope.oppsData[t];
               for(var z=0; z<opp.OpportunityLineItems.length; z++) {
                 var li = opp.OpportunityLineItems[z];
-                if(li.PricebookEntry.Product2.GL_Code__c == FRM1_GLCODE && 
-                  (li.PricebookEntry.ProductCode == FRM1EARLY || li.PricebookEntry.ProductCode == FRM1STANDARD || li.PricebookEntry.ProductCode == FRM1LATE)) {
-                  
-                    li.PricebookEntry.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
-                    li.PricebookEntry.Product2.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
-                    li.PricebookEntryId = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+
+                var found=false;
+                var fnd = _.where(mergeProds, {glCode: li.PricebookEntry.Product2.GL_Code__c});
+                if(defined(fnd)) {
+                  for(var i=0; i<fnd.length; i++) {
+                    var idx = _.indexOf(fnd[i].prodCodes, li.PricebookEntry.ProductCode);  
+                    if(idx > -1)  {
+                      found=true;
+                      break;
+                    }
+                  }
                 }
+
+                if(found) {
+                  li.PricebookEntry.Id = fnd[i].mergedCode+':'+fnd[i].mergedGL;
+                  li.PricebookEntry.Product2.Id = fnd[i].mergedCode+':'+fnd[i].mergedGL;
+                  li.PricebookEntryId = fnd[i].mergedCode+':'+fnd[i].mergedGL;                  
+                }
+
+
+                // if(li.PricebookEntry.Product2.GL_Code__c == FRM1_GLCODE && 
+                //   (li.PricebookEntry.ProductCode == FRM1EARLY || li.PricebookEntry.ProductCode == FRM1STANDARD || li.PricebookEntry.ProductCode == FRM1LATE)) {
+                  
+                //     li.PricebookEntry.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                //     li.PricebookEntry.Product2.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                //     li.PricebookEntryId = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                // }
               }
             }
           }
@@ -254,11 +322,32 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
               $scope.refunds = data.result.refunds;
               for(var t=0; t<$scope.refunds.length; t++) {
                 var rfnd = $scope.refunds[t];
-                var fnd = _.findWhere($scope.origProds, {Product2Id: rfnd.Product__c});
-                if(defined(fnd) && fnd.Product2.GL_Code__c == FRM1_GLCODE && 
-                  (fnd.Product2.ProductCode == FRM1EARLY || fnd.Product2.ProductCode == FRM1STANDARD || fnd.Product2.ProductCode == FRM1LATE)) {
-                  rfnd.Product__c = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                var fndRfnd = _.findWhere($scope.origProds, {Product2Id: rfnd.Product__c});
+
+                if(defined(fndRfnd)) {
+
+                  var found=false;
+                  var fnd = _.where(mergeProds, {glCode: fndRfnd.Product2.GL_Code__c});
+                  if(defined(fnd)) {
+                    for(var i=0; i<fnd.length; i++) {
+                      var idx = _.indexOf(fnd[i].prodCodes, fndRfnd.Product2.ProductCode);  
+                      if(idx > -1)  {
+                        found=true;
+                        break;
+                      }
+                    }
+                  }
+
+                  if(found) {                    
+                    rfnd.Product__c = fnd[i].mergedCode+':'+fnd[i].mergedGL;
+                  }
                 }
+
+                // if(defined(fnd) && fnd.Product2.GL_Code__c == FRM1_GLCODE && 
+                //   (fnd.Product2.ProductCode == FRM1EARLY || fnd.Product2.ProductCode == FRM1STANDARD || fnd.Product2.ProductCode == FRM1LATE)) {
+                //   rfnd.Product__c = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                // }
+
               }
             }
               
