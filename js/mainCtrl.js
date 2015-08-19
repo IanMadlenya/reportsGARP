@@ -54,29 +54,56 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
   var SHIP = 'SHIP';        
 
-  var FRM1EARLY = 'FRM1E';
-  var FRM1STANDARD = 'FRM1S';
-  var FRM1LATE = 'FRM1L';
-  var FRM1_GLCODE = '4002';
-
-  var FRM1_CODE_MERGED = 'FRM1MERGE';
-  var FRM1_GLCODE_MERGED = '4001MERGE';
-  var FRM1_NAME_MERGED = 'FRM Exam Part I - Merged';
-
-
   var mergeProds = [
     {
-      glCode: FRM1_GLCODE,
+      glCode: '4002',
       company: 'GARP',
       prodCodes : [
-        FRM1EARLY,
-        FRM1STANDARD,
-        FRM1LATE
+        'FRM1E',
+        'FRM1S',
+        'FRM1L'
       ],
-      mergedCode : FRM1_CODE_MERGED,
-      mergedGL : FRM1_GLCODE_MERGED,
-      mergedName : FRM1_NAME_MERGED
+      mergedCode : 'FRM1MERGE',
+      mergedGL : '400XMERGE',
+      mergedName : 'FRM Exam Part I - Merged'
+    },
+    {
+      glCode: '4001',
+      company: 'GARP',
+      prodCodes : [
+        'FRM1E',
+        'FRM1S',
+        'FRM1L'
+      ],
+      mergedCode : 'FRM1MERGE',
+      mergedGL : '400XMERGE',
+      mergedName : 'FRM Exam Part I - Merged'
+    },
+    {
+      glCode: '4002',
+      company: 'GRA',
+      prodCodes : [
+        'ENCE',
+        'ENCS',
+        'ENCL',
+      ],
+      mergedCode : 'ENCMERGE',
+      mergedGL : '400XMERGE',
+      mergedName : 'ERP Exam - Merged'
+    },
+    {
+      glCode: '4001',
+      company: 'GRA',
+      prodCodes : [
+        'ENCE',
+        'ENCS',
+        'ENCL',
+      ],
+      mergedCode : 'ENCMERGE',
+      mergedGL : '400XMERGE',
+      mergedName : 'ERP Exam - Merged'
     }
+
   ];
 
   $scope.shippingProductId = null;
