@@ -53,6 +53,17 @@ reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeo
 reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
 
   var SHIP = 'SHIP';        
+
+  var FRM1EARLY = 'FRM1E';
+  var FRM1STANDARD = 'FRM1S';
+  var FRM1LATE = 'FRM1L';
+  var FRM1_GLCODE = '4002';
+
+  var FRM1_CODE_MERGED = 'FRM1MERGE';
+  var FRM1_GLCODE_MERGED = '4001MERGE';
+  var FRM1_NAME_MERGED = 'FRM Exam Part I - Merged';
+
+
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
 
@@ -128,12 +139,21 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
     reportsGARPServices.getProducts(priceBookId, function(err, data) {
 
       $scope.prods = data.result;
+      $scope.origProds = data.result;
+      $scope.prodsFinal = [];
+      $scope.formVars.prods = [];
       if($scope.formVars.prods.length == 0) {
         for(var i=0; i<$scope.prods.length; i++) {
 
-          //if(defined($scope.prods[i],"Product2.IsActive") && defined($scope.prods[i],"pricebook2.IsActive")) {
-          //if(defined($scope.prods[i],"pricebook2.IsActive") && $scope.prods[i].pricebook2.IsActive == true && 
-          //  defined($scope.prods[i],"Product2.IsActive") && $scope.prods[i].Product2.IsActive == true) {
+          if(defined($scope.prods[i],"Product2.IsActive") && defined($scope.prods[i],"Pricebook2.IsActive") &&
+             defined($scope.prods[i],"Pricebook2.IsActive") && $scope.prods[i].Pricebook2.IsActive == true && 
+             defined($scope.prods[i],"Product2.IsActive") && $scope.prods[i].Product2.IsActive == true) {
+
+            if($scope.prods[i].Product2.GL_Code__c == FRM1_GLCODE && 
+               ($scope.prods[i].Product2.ProductCode == FRM1EARLY || $scope.prods[i].Product2.ProductCode == FRM1STANDARD ||
+               $scope.prods[i].Product2.ProductCode == FRM1LATE)) {
+              continue;
+            }
 
             var obj = {
               id: $scope.prods[i].Id,
@@ -144,9 +164,28 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
             if($scope.prods[i].Product2.ProductCode == SHIP)
               $scope.shippingProductId = $scope.prods[i].Product2.Id
-         // }
+
+            $scope.prodsFinal.push($scope.prods[i]);
+          }
         }
       }
+
+      var prodObj = {
+        Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
+        Name: FRM1_NAME_MERGED,
+        Product2Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
+        Product2: {
+          Id: FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED,
+          Company__c: "GARP",
+          GL_Code__c: FRM1_GLCODE_MERGED,
+          ProductCode: FRM1_CODE_MERGED,
+          Weight__c: 1
+        }
+      }
+
+      $scope.prodsFinal.push(prodObj);
+
+      $scope.prods = $scope.prodsFinal;
 
       $scope.totals = [];
       $scope.opps = [];
@@ -182,8 +221,23 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
             return;
           }
 
-          if(defined(data,"result.opps"))
+          if(defined(data,"result.opps")) {
             $scope.oppsData = data.result.opps;
+            for(var t=0; t<$scope.oppsData.length; t++) {
+              var opp = $scope.oppsData[t];
+              for(var z=0; z<opp.OpportunityLineItems.length; z++) {
+                var li = opp.OpportunityLineItems[z];
+                if(li.PricebookEntry.Product2.GL_Code__c == FRM1_GLCODE && 
+                  (li.PricebookEntry.ProductCode == FRM1EARLY || li.PricebookEntry.ProductCode == FRM1STANDARD || li.PricebookEntry.ProductCode == FRM1LATE)) {
+                  
+                    li.PricebookEntry.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                    li.PricebookEntry.Product2.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                    li.PricebookEntryId = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                }
+              }
+            }
+          }
+            
 
           reportsGARPServices.getReportDataRefunds(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
 
@@ -196,8 +250,18 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
               return;
             }
 
-            if(defined(data,"result.refunds"))
+            if(defined(data,"result.refunds")) {
               $scope.refunds = data.result.refunds;
+              for(var t=0; t<$scope.refunds.length; t++) {
+                var rfnd = $scope.refunds[t];
+                var fnd = _.findWhere($scope.origProds, {Product2Id: rfnd.Product__c});
+                if(defined(fnd) && fnd.Product2.GL_Code__c == FRM1_GLCODE && 
+                  (fnd.Product2.ProductCode == FRM1EARLY || fnd.Product2.ProductCode == FRM1STANDARD || fnd.Product2.ProductCode == FRM1LATE)) {
+                  rfnd.Product__c = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                }
+              }
+            }
+              
 
             for(var i=0; i<$scope.transactions.length; i++) {
               var trans = $scope.transactions[i];
@@ -286,7 +350,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
             $rootScope.$apply(function(){
               $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
               if(defined($scope,"prods.length")) {
-                $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
+                //$scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
                 $rootScope.$broadcast('fetchProds', $scope.formVars.prods);
               }                  
             });
@@ -295,7 +359,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       });
     });
   }
-  init();
+  //init();
 
   $scope.sortItems = function(fieldName) {
     $scope.opps = _.sortBy($scope.opps, function(obj){ return obj[fieldName]; });
@@ -498,7 +562,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var prod = $scope.prods[i];
       var func = $scope.criteriaMatch();
       if(func(prod)) {
-        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name;        
+        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c;        
       }
     }
     for(var i=0; i<$scope.prods.length; i++) {  
@@ -506,7 +570,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var prod = $scope.prods[i];
       if(func(prod)) {
         var prod = $scope.prods[i];
-        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = prod.Name + "Shipping";        
+        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c + "Shipping";        
       }
     }
     json[0].endTotal="Total";
