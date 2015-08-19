@@ -56,7 +56,10 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
   var mergeProds = [
     {
-      glCode: '4002',
+      glCodes: [
+        '4002',
+        '4001'
+      ],
       company: 'GARP',
       prodCodes : [
         'FRM1E',
@@ -68,31 +71,10 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedName : 'FRM Exam Part I - Merged'
     },
     {
-      glCode: '4001',
-      company: 'GARP',
-      prodCodes : [
-        'FRM1E',
-        'FRM1S',
-        'FRM1L'
+      glCodes: [
+        '4002',
+        '4001'
       ],
-      mergedCode : 'FRM1MERGE',
-      mergedGL : '400XMERGE',
-      mergedName : 'FRM Exam Part I - Merged'
-    },
-    {
-      glCode: '4002',
-      company: 'GRA',
-      prodCodes : [
-        'ENCE',
-        'ENCS',
-        'ENCL',
-      ],
-      mergedCode : 'ENCMERGE',
-      mergedGL : '400XMERGE',
-      mergedName : 'ERP Exam - Merged'
-    },
-    {
-      glCode: '4001',
       company: 'GRA',
       prodCodes : [
         'ENCE',
@@ -103,7 +85,6 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedGL : '400XMERGE',
       mergedName : 'ERP Exam - Merged'
     }
-
   ];
 
   $scope.shippingProductId = null;
@@ -193,14 +174,13 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
              defined(prod,"Product2.IsActive") && prod.Product2.IsActive == true) {
 
             var found=false;
-            var fnd = _.where(mergeProds, {glCode: prod.Product2.GL_Code__c});
-            if(defined(fnd,"length") && fnd.length > 0) {
-              for(var j=0; j<fnd.length; j++) {
-                var idx = _.indexOf(fnd[j].prodCodes, prod.Product2.ProductCode);  
-                if(idx > -1)  {
-                  found=true;
-                  break;
-                }
+
+            for(var k=0; k<mergeProds.length; k++) {
+              var idxgl = _.indexOf(mergeProds[k].glCodes, prod.Product2.GL_Code__c);  
+              var idxpc = _.indexOf(mergeProds[k].prodCodes, prod.Product2.ProductCode);  
+              if(idxgl > -1 && idxpc > -1) {              
+                found=true;
+                break;
               }
             }
 
@@ -304,21 +284,19 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
                 var li = opp.OpportunityLineItems[z];
 
                 var found=false;
-                var fnd = _.where(mergeProds, {glCode: li.PricebookEntry.Product2.GL_Code__c});
-                if(defined(fnd)) {
-                  for(var i=0; i<fnd.length; i++) {
-                    var idx = _.indexOf(fnd[i].prodCodes, li.PricebookEntry.ProductCode);  
-                    if(idx > -1)  {
-                      found=true;
-                      break;
-                    }
+                for(var k=0; k<mergeProds.length; k++) {
+                  var idxgl = _.indexOf(mergeProds[k].glCodes, li.PricebookEntry.Product2.GL_Code__c);  
+                  var idxpc = _.indexOf(mergeProds[k].prodCodes, li.PricebookEntry.ProductCode);  
+                  if(idxgl > -1 && idxpc > -1) {              
+                    found=true;
+                    break;
                   }
                 }
 
                 if(found) {
-                  li.PricebookEntry.Id = fnd[i].mergedCode+':'+fnd[i].mergedGL;
-                  li.PricebookEntry.Product2.Id = fnd[i].mergedCode+':'+fnd[i].mergedGL;
-                  li.PricebookEntryId = fnd[i].mergedCode+':'+fnd[i].mergedGL;                  
+                  li.PricebookEntry.Id = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
+                  li.PricebookEntry.Product2.Id = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
+                  li.PricebookEntryId = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;                  
                 }
 
 
@@ -354,19 +332,17 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
                 if(defined(fndRfnd)) {
 
                   var found=false;
-                  var fnd = _.where(mergeProds, {glCode: fndRfnd.Product2.GL_Code__c});
-                  if(defined(fnd)) {
-                    for(var i=0; i<fnd.length; i++) {
-                      var idx = _.indexOf(fnd[i].prodCodes, fndRfnd.Product2.ProductCode);  
-                      if(idx > -1)  {
-                        found=true;
-                        break;
-                      }
+                  for(var k=0; k<mergeProds.length; k++) {
+                    var idxgl = _.indexOf(mergeProds[k].glCodes, fndRfnd.Product2.GL_Code__c);  
+                    var idxpc = _.indexOf(mergeProds[k].prodCodes, fndRfnd.Product2.ProductCode);  
+                    if(idxgl > -1 && idxpc > -1) {              
+                      found=true;
+                      break;
                     }
                   }
 
                   if(found) {                    
-                    rfnd.Product__c = fnd[i].mergedCode+':'+fnd[i].mergedGL;
+                    rfnd.Product__c = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
                   }
                 }
 
