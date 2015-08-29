@@ -25,18 +25,18 @@ module.exports = function (grunt) {
                 },
                 files: [
                     {
-                        src: ['lib/**', 'data/**', 'fonts/**', 'css/**', 'img/**', 'data/**', 'js/**', 'less/**', 'partials/**']
+                        src: ['data/**', 'fonts/**', 'css/**', 'img/**', 'data/**', 'js/**', 'less/**', 'partials/**']
                     }
             ]
             },
-            dev: {
+            lib: {
                 options: {
                     mode: 'zip',
-                    archive: 'build/staticresources/reportsGARP.resource.zip'
+                    archive: 'build/staticresources/reportsGARP.resource.lib'
                 },
                 files: [
                     {
-                        src: ['lib/**', 'data/**', 'fonts/**', 'css/**', 'img/**', 'data/**', 'js/**', 'less/**', 'partials/**']
+                        src: ['lib/**']
                     }
             ]
             }
@@ -218,6 +218,6 @@ module.exports = function (grunt) {
     grunt.registerTask('e2e-test', ['protractor:run']);
     grunt.registerTask('unit-test', ['karma:unit']);
     grunt.registerTask('unit-test-multi', ['karma:dev']);
-    grunt.registerTask('sfdc-push', ['compress:main','antdeploy']);
+    grunt.registerTask('sfdc-push', ['compress:main','compress:lib']);
 
 };

@@ -4,7 +4,337 @@
 var reportsGARPControllers = angular.module('reportsGARPControllers', []);
 
 reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+  $scope.envPath = envPath;
 }]);
+
+
+reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout','$stateParams', 
+function ($scope, $rootScope, $timeout, $stateParams) {
+  $scope.envPath = envPath;
+
+  var conn = jsForceConn;
+  var reportId = '00O400000048eLH';
+  var displayType = 'stackedbar';
+  var cumlative = false;
+  if($stateParams.reportId != null && $stateParams.reportId != '') {
+    reportId=$stateParams.reportId;
+  }
+  if($stateParams.displayType != null && $stateParams.displayType != '') {
+    displayType=$stateParams.displayType;
+  }
+
+  if($stateParams.cumlative != null && $stateParams.cumlative != '') {
+    cumlative=$stateParams.cumlative;
+  }
+
+  var report = conn.analytics.report(reportId);
+
+  // execute report synchronously
+  report.execute(function(err, result) {
+    if (err) { return console.error(err); }
+    console.log(result.reportMetadata);
+    console.log(result.factMap);
+    console.log(result.factMap["T!T"]);
+    console.log(result.factMap["T!T"].aggregates);
+
+    var data = result;
+
+    console.log(data);
+    
+    //"groupingsDown"
+    if(data.groupingsDown.groupings.length <= 0) {
+      return;
+    }
+        
+    // Setup X and Y Axis, line does not require stackLabels data...
+    if(displayType == 'stackedLine') {
+
+      var series =[];
+      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+        var s = _.pluck(data.groupingsDown.groupings[i].groupings, "label");
+        var series = _.union(series, s);
+      }
+
+      var sdata = [];      
+      var  labels = [];    
+      for(var i=0; i<series.length; i++) {
+        var obj = {
+          name: series[i],
+          data: [],
+          last: null,
+          lineWidth: 4,
+          marker: {
+              radius: 4
+          }          
+        }
+        sdata.push(obj);
+      }
+        
+      
+      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+        var group = data.groupingsDown.groupings[i];
+        var lastObj = {};
+        var ldate = group.label;
+        labels.push(ldate);
+        for(var j=0; j<group.groupings.length; j++) {
+          var g = group.groupings[j];
+
+          var ldate = g.label;
+          var val = data.factMap[g.key+'!T'].aggregates[0].value;
+          var name = g.label;
+          var sd = _.findWhere(sdata, {name: g.label});
+
+          if(cumlative == "true") {
+            if(sd.last != null)
+              val = sd.last + val;
+            sd.last = val;
+          }
+          sd.data.push(val);
+        }
+      }
+
+
+        $('#container').highcharts({
+
+          // data: {
+          //     csv: csv
+          // },
+
+          title: {
+              text: 'Registrations by Day'
+          },
+
+          subtitle: {
+              text: ''
+          },
+
+          xAxis: {
+              tickInterval: 7, // one week
+              tickWidth: 0,
+              gridLineWidth: 1,
+              labels: {
+                  align: 'left',
+                  x: 3,
+                  y: -3,
+                  enabled: true
+              },
+              categories: labels
+          },
+
+          yAxis: [{ // left y axis
+              title: {
+                  text: null
+              },
+              labels: {
+                  align: 'left',
+                  x: 3,
+                  y: 16,
+                  format: '{value:.,0f}'
+              },
+              showFirstLabel: false
+          }, { // right y axis
+              linkedTo: 0,
+              gridLineWidth: 0,
+              opposite: true,
+              title: {
+                  text: null
+              },
+              labels: {
+                  align: 'right',
+                  x: -3,
+                  y: 16,
+                  format: '{value:.,0f}'
+              },
+              showFirstLabel: false
+          }],
+
+          legend: {
+              align: 'left',
+              verticalAlign: 'top',
+              y: 20,
+              floating: true,
+              borderWidth: 0
+          },
+
+          tooltip: {
+              shared: true,
+              crosshairs: true
+          },
+
+          plotOptions: {
+              series: {
+                  cursor: 'pointer',
+                  point: {
+                      events: {
+                          click: function (e) {
+                              hs.htmlExpand(null, {
+                                  pageOrigin: {
+                                      x: e.pageX || e.clientX,
+                                      y: e.pageY || e.clientY
+                                  },
+                                  headingText: this.series.name,
+                                  maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                                      this.y + ' Registrations',
+                                  width: 200
+                              });
+                          }
+                      }
+                  },
+                  marker: {
+                      lineWidth: 1
+                  }
+              }
+          },
+          series: sdata
+          // series: [{
+          //     name: 'All visits',
+          //     lineWidth: 4,
+          //     marker: {
+          //         radius: 4
+          //     }
+          // }, {
+          //     name: 'New visitors'
+          // }
+          //]
+      });
+
+
+      // $('#container').highcharts({
+      //     chart: {
+      //         type: 'line'
+      //     },
+      //     title: {
+      //         text: 'Exam by Day of the Year'
+      //     },
+      //     subtitle: {
+      //         text: null
+      //     },
+      //     xAxis: {
+      //         categories: labels
+      //     },
+      //     yAxis: {
+      //         title: {
+      //             text: 'Registrations'
+      //         }
+      //     },
+      //     plotOptions: {
+      //         line: {
+      //             dataLabels: {
+      //                 enabled: true
+      //             },
+      //             enableMouseTracking: false
+      //         }
+      //     },
+      //     series: sdata
+      //     // [{
+      //     //     name: 'Tokyo',
+      //     //     data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+      //     // }, {
+      //     //     name: 'London',
+      //     //     data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+      //     // }]
+      // });
+
+    }
+
+
+
+    if(displayType == 'stackedbar') {
+
+      var  labels = _.pluck(data.groupingsDown.groupings, "label");    
+        var first = data.groupingsDown.groupings[0]
+        var  series = _.pluck(first.groupings, "label");
+        var sdata = [];
+        
+        for(var i=0; i<series.length; i++) {
+          var obj = {
+            name: series[i],
+            data: []
+          }
+          sdata.push(obj);
+        }
+          
+        
+        for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+          var group = data.groupingsDown.groupings[i];
+          for(var j=0; j<group.groupings.length; j++) {
+            var g = group.groupings[j];
+            
+            var sd = _.findWhere(sdata, {name: g.label});
+            var da = data.factMap[g.key+'!T'].aggregates[0].value;
+            
+            sd.data.push(da);
+          
+          }
+        }
+
+
+      $('#container').highcharts({
+        chart: {
+          type: 'column'
+        },
+        title: {
+          text: 'Exam Registrations Over Time'
+        },
+        xAxis: {
+          categories: labels,
+          title: {
+            text: 'Exams'
+          }
+        },
+        yAxis: {
+          min: 0,
+          title: {
+            text: 'Exam Registrations'
+          },
+          stackLabels: {
+            enabled: true,
+            style: {
+              fontWeight: 'bold',
+              color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+          }
+        },
+        legend: {
+          align: 'right',
+          x: -30,
+          verticalAlign: 'top',
+          y: 25,
+          floating: true,
+          backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+          borderColor: '#CCC',
+          borderWidth: 1,
+          shadow: false
+        },
+        tooltip: {
+          formatter: function () {
+            return '<b>' + this.x + '</b><br/>' +
+              this.series.name + ': ' + this.y + '<br/>' +
+              'Total: ' + this.point.stackTotal;
+          }
+        },
+        plotOptions: {
+          column: {
+            stacking: 'normal',
+            dataLabels: {
+              enabled: true,
+              color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+              style: {
+                textShadow: '0 0 3px black'
+              }
+            }
+          }
+        },
+        series: sdata
+      });
+
+
+    } // Stacked Bar
+
+
+  });
+}]);
+
 
 
 reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
