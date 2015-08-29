@@ -167,15 +167,20 @@ function ($scope, $rootScope, $timeout, $stateParams) {
                   point: {
                       events: {
                           click: function (e) {
-                              hs.htmlExpand(null, {
-                                  pageOrigin: {
-                                      x: e.pageX || e.clientX,
-                                      y: e.pageY || e.clientY
-                                  },
-                                  headingText: this.series.name,
-                                  maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
-                                      this.y + ' Registrations',
-                                  width: 200
+
+                              $scope.yval = this.y;
+                              $scope.xval = this.x;
+                              $("#myDontHaveModal").modal();
+
+                              // hs.htmlExpand(null, {
+                              //     pageOrigin: {
+                              //         x: e.pageX || e.clientX,
+                              //         y: e.pageY || e.clientY
+                              //     },
+                              //     headingText: this.series.name,
+                              //     maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                              //         this.y + ' Registrations',
+                              //     width: 200
                               });
                           }
                       }
