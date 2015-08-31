@@ -201,28 +201,6 @@ $scope.examDatesNov = [
             }
           }
 
-          // if(firstTime == true) {
-          //   // Lookup
-          //   var myRegexp = /([A-Za-z]*) ([0-9]*) ([A-Za-z]*)/ 
-          //   var match = myRegexp.exec(gname);
-
-          //   var mMonth = match[1];
-          //   var mYear = match[2];
-          //   var mExam = match[3];
-
-          //   if(mMonth=='Nov') {
-          //     mMonth = 'May';
-          //   } else if(mMonth=='May') {
-          //     mMonth = 'Nov';  
-          //     mYear--;
-          //   }
-          //   var gFndName = mMonth + ' ' + mYear + ' ' + mExam;
-          //   var fnd = _.findWhere($scope.deferred, {name: gFndName});
-          //   if(fnd != null && fnd.data != null) {
-          //       val = val + fnd.data;
-          //   }
-          // }
-
           // Push Data to graph
           sd.data.push(val);
 
@@ -232,46 +210,57 @@ $scope.examDatesNov = [
       $scope.sdata = sdata;
       $scope.labels = labels;
 
-      _.each($scope.examDatesMay, function(ed) {
-          $scope.lastEd = ed;
-          _.each(sdata, function(sd) {
-            var fndDef = _.findWhere($scope.deferred, {name: sd.name});
-            if(fndDef != null) {
-              $scope.fndIdx=0;
-              $scope.fndNew=false;
-              _.find(labels, function(lab) {
-                  if(lab != '-') {
-                    var mLDate = moment(lab);
-                    var mFndDat = moment($scope.lastEd.datetext).year('2014');
-                    var mFndDat1 = moment($scope.lastEd.datetext).year('2015');
-                    if(mLDate.diff(mFndDat, 'days') == 0 || mLDate.diff(mFndDat1, 'days') == 0) {
-                      return true;
-                    }
-                    if((mLDate.year() == '2014' && mLDate.diff(mFndDat, 'days') > 0) || 
-                       (mLDate.year() == '2015' && mLDate.diff(mFndDat1, 'days') > 0)){
-                      $scope.fndNew=true;
-                      return true;
-                    }
-                  }
-                  $scope.fndIdx++;
-                  return false;
-              });
-            }
-            if($scope.fndNew) {
-              $scope.labels.splice($scope.fndIdx, 0, fndDef.data);
-              sd.data.splice($scope.fndIdx, 0, fndDef.data);
-            } else {
-              if($scope.cumlative) {
-                for(var z=0; z<=sd.data.length; z++) {
-                  if(z >= $scope.fndIdx)
-                    sd.data[z] = sd.data[z] + fndDef.data;                  
-                }
-              } else {
-                sd.data[$scope.fndIdx] = sd.data[$scope.fndIdx] + fndDef.data;  
-              }
-            }
-          });
-        });
+      _.each(sdata, function(sd) {
+        var fndDef = _.findWhere($scope.deferred, {name: sd.name});
+        var defTot = fndDef.data;
+        var sdData = sd.data;
+
+        for(var i=0; i<sd.data.length; i++) {
+          var val = sdData[i];
+          sdData[i] = val + defTot;                  
+        }
+      });
+
+      // _.each($scope.examDatesMay, function(ed) {
+      //     $scope.lastEd = ed;
+      //     _.each(sdata, function(sd) {
+      //       var fndDef = _.findWhere($scope.deferred, {name: sd.name});
+      //       if(fndDef != null) {
+      //         $scope.fndIdx=0;
+      //         $scope.fndNew=false;
+      //         _.find(labels, function(lab) {
+      //             if(lab != '-') {
+      //               var mLDate = moment(lab);
+      //               var mFndDat = moment($scope.lastEd.datetext).year('2014');
+      //               var mFndDat1 = moment($scope.lastEd.datetext).year('2015');
+      //               if(mLDate.diff(mFndDat, 'days') == 0 || mLDate.diff(mFndDat1, 'days') == 0) {
+      //                 return true;
+      //               }
+      //               if((mLDate.year() == '2014' && mLDate.diff(mFndDat, 'days') > 0) || 
+      //                  (mLDate.year() == '2015' && mLDate.diff(mFndDat1, 'days') > 0)){
+      //                 $scope.fndNew=true;
+      //                 return true;
+      //               }
+      //             }
+      //             $scope.fndIdx++;
+      //             return false;
+      //         });
+      //       }
+      //       if($scope.fndNew) {
+      //         $scope.labels.splice($scope.fndIdx, 0, fndDef.data);
+      //         sd.data.splice($scope.fndIdx, 0, fndDef.data);
+      //       } else {
+      //         if($scope.cumlative) {
+      //           for(var z=0; z<=sd.data.length; z++) {
+      //             if(z >= $scope.fndIdx)
+      //               sd.data[z] = sd.data[z] + fndDef.data;                  
+      //           }
+      //         } else {
+      //           sd.data[$scope.fndIdx] = sd.data[$scope.fndIdx] + fndDef.data;  
+      //         }
+      //       }
+      //     });
+      //   });
 
         $('#container').highcharts({
 
