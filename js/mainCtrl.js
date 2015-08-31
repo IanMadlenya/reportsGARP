@@ -507,7 +507,6 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   var mergeProds = [
     {
       glCodes: [
-        '4002',
         '4001'
       ],
       company: 'GARP',
@@ -516,13 +515,65 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
         'FRM1S',
         'FRM1L'
       ],
-      mergedCode : 'FRM1MERGE',
-      mergedGL : '400XMERGE',
-      mergedName : 'FRM Exam Part I - Merged'
+      mergedCode : 'FRMIMAY',
+      mergedGL : '4001MERGE',
+      mergedName : 'FRM Exam Part I - May',
+      sort: 18,
+      weight: 0
     },
     {
       glCodes: [
-        '4002',
+        '4002'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'FRM1E',
+        'FRM1S',
+        'FRM1L'
+      ],
+      mergedCode : 'FRMINOV',
+      mergedGL : '4002MERGE',
+      mergedName : 'FRM Exam Part I - Nov',
+      sort: 19,
+      weight: 0
+    },
+
+    {
+      glCodes: [
+        '4001'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'FRM2E',
+        'FRM2S',
+        'FRM2L'
+      ],
+      mergedCode : 'FRMIIMAY',
+      mergedGL : '4001MERGE',
+      mergedName : 'FRM Exam Part II - May',
+      sort: 18,
+      weight: 0
+    },
+    {
+      glCodes: [
+        '4002'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'FRM2E',
+        'FRM2S',
+        'FRM2L'
+      ],
+      mergedCode : 'FRMIINOV',
+      mergedGL : '4002MERGE',
+      mergedName : 'FRM Exam Part II - Nov',
+      sort: 19,
+      weight: 0
+    },
+
+
+    {
+      glCodes: [
         '4001'
       ],
       company: 'GRA',
@@ -531,10 +582,29 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
         'ENCS',
         'ENCL',
       ],
-      mergedCode : 'ENCMERGE',
-      mergedGL : '400XMERGE',
-      mergedName : 'ERP Exam - Merged'
+      mergedCode : 'ENCMAY',
+      mergedGL : '4001MERGE',
+      mergedName : 'ERP Exam - May',
+      sort: 9,
+      weight: 0
+    },
+    {
+      glCodes: [
+        '4002'
+      ],
+      company: 'GRA',
+      prodCodes : [
+        'ENCE',
+        'ENCS',
+        'ENCL',
+      ],
+      mergedCode : 'ENCNOV',
+      mergedGL : '4002MERGE',
+      mergedName : 'ERP Exam - Nov',
+      sort: 10,
+      weight: 0
     }
+
   ];
 
   $scope.shippingProductId = null;
@@ -621,7 +691,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
           if(defined(prod,"Product2.IsActive") && defined(prod,"Pricebook2.IsActive") &&
              defined(prod,"Pricebook2.IsActive") && prod.Pricebook2.IsActive == true && 
-             defined(prod,"Product2.IsActive") && prod.Product2.IsActive == true) {
+             defined(prod,"Product2.IsActive") && prod.Product2.IsActive == true && defined(prod,"Product2.RPT_Sort_Order__c")) {
 
             var found=false;
 
@@ -683,7 +753,8 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
             Company__c: mp.company,
             GL_Code__c: mp.mergedGL,
             ProductCode: mp.mergedCode,
-            Weight__c: 1
+            RPT_Sort_Order__c: mp.sort,
+            Weight__c: mp.weight
           }
         }
 
@@ -892,7 +963,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
             $rootScope.$apply(function(){
               $scope.opps = _.sortBy($scope.opps, function(obj){ return obj.closeDate; });
               if(defined($scope,"prods.length")) {
-                //$scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Name; });
+                $scope.prods = _.sortBy($scope.prods, function(obj){ return obj.Product2.RPT_Sort_Order__c; });
                 $rootScope.$broadcast('fetchProds', $scope.formVars.prods);
               }                  
             });
