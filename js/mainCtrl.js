@@ -1,5 +1,24 @@
 'use strict';
 
+function defined (ref, strNames) {
+  var name;
+
+  if(typeof ref === "undefined" || ref === null) {
+    return false;
+  }
+
+  if(strNames !== null && typeof strNames !== "undefined") {
+    var arrNames = strNames.split('.');
+    while (name = arrNames.shift()) {        
+        if (ref[name] === null || typeof ref[name] === "undefined") return false;
+        ref = ref[name];
+    } 
+  }
+  return true;
+}
+
+
+
 /* Controllers */
 var reportsGARPControllers = angular.module('reportsGARPControllers', []);
 
@@ -12,10 +31,66 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 function ($scope, $rootScope, $timeout, $stateParams) {
   $scope.envPath = envPath;
 
+$scope.examDatesMay = [
+  {
+    datetext: '12/1/2009',
+    key:'May 2010',
+    done: false
+  },{
+    datetext: '12/1/2010',
+    key:'May 2011',
+    done: false
+  },{
+    datetext: '12/1/2011',
+    key:'May 2012',
+    done: false
+  },{
+    datetext: '12/1/2012',
+    key:'May 2013',
+    done: false
+  },{
+    datetext: '12/1/2013',
+    key:'May 2014',
+    done: false
+  },{
+    datetext: '12/1/2014',
+    key:'May 2015',
+    done: false
+  }
+]
+
+$scope.examDatesNov = [
+  {
+    datetext: '12/1/2010',
+    key:'Nov 2010',
+    done: false
+  },{
+    datetext: '11/19/2011',
+    key:'Nov 2011',
+    done: false
+  },{
+    datetext: '11/17/2012',
+    key:'Nov 2012',
+    done: false
+  },{
+    datetext: '11/16/2013',
+    key:'Nov 2010',
+    done: false
+  },{
+    datetext: '11/15/2014',
+    key:'Nov 2014',
+    done: false
+  },{
+    datetext: '11/21/2015',
+    key:'Nov 2015',
+    done: false
+  }
+]
+
   var conn = jsForceConn;
   var reportId = '00O400000048eLH';
   var displayType = 'stackedbar';
-  var cumlative = false;
+  $scope.cumlative = false;
   if($stateParams.reportId != null && $stateParams.reportId != '') {
     reportId=$stateParams.reportId;
   }
@@ -24,7 +99,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
   }
 
   if($stateParams.cumlative != null && $stateParams.cumlative != '') {
-    cumlative=$stateParams.cumlative;
+    $scope.cumlative=$stateParams.cumlative;
   }
 
   var report = conn.analytics.report(reportId);
@@ -47,7 +122,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
     }
         
     // Setup X and Y Axis, line does not require stackLabels data...
-    if(displayType == 'stackedLine') {
+    if(displayType == 'stackedline') {
 
       var series =[];
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
@@ -70,6 +145,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
         sdata.push(obj);
       }
         
+      $scope.deferred = [];
       
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
         var group = data.groupingsDown.groupings[i];
@@ -81,18 +157,121 @@ function ($scope, $rootScope, $timeout, $stateParams) {
 
           var ldate = g.label;
           var val = data.factMap[g.key+'!T'].aggregates[0].value;
-          var name = g.label;
+          var gname = g.label;
           var sd = _.findWhere(sdata, {name: g.label});
 
-          if(cumlative == "true") {
+          if($scope.cumlative == "true") {
             if(sd.last != null)
               val = sd.last + val;
             sd.last = val;
           }
+          //sd.data.push(val);
+
+          // Store Derrered
+          var defObj = {
+            name: gname,  // May 2013 ERP
+            data: null
+          }
+
+          // First Registration for a given group
+          var firstTime = false;
+          var fnd = _.findWhere($scope.deferred, {name: gname});
+          if(fnd != null) {
+            defObj = fnd;
+          } else {
+            $scope.deferred.push(defObj);
+            firstTime=true;
+          }
+          
+          $scope.lastGroup = defObj;
+
+          for(var x=0; x<g.groupings.length; x++) {
+          //_.each(g.groupings, function(gg) {
+            var gg = g.groupings[x];
+
+            var ldate = gg.label;
+            var ggval = data.factMap[gg.key+'!T'].aggregates[0].value;
+            var ggname = gg.label;
+            //var sd = _.findWhere(sdata, {name: gg.label});
+            
+            if(ggname != null && ggname == 'Deferred') {
+              if($scope.lastGroup.data == null)
+                $scope.lastGroup.data = 1;
+              else $scope.lastGroup.data++;
+            }
+          }
+
+          // if(firstTime == true) {
+          //   // Lookup
+          //   var myRegexp = /([A-Za-z]*) ([0-9]*) ([A-Za-z]*)/ 
+          //   var match = myRegexp.exec(gname);
+
+          //   var mMonth = match[1];
+          //   var mYear = match[2];
+          //   var mExam = match[3];
+
+          //   if(mMonth=='Nov') {
+          //     mMonth = 'May';
+          //   } else if(mMonth=='May') {
+          //     mMonth = 'Nov';  
+          //     mYear--;
+          //   }
+          //   var gFndName = mMonth + ' ' + mYear + ' ' + mExam;
+          //   var fnd = _.findWhere($scope.deferred, {name: gFndName});
+          //   if(fnd != null && fnd.data != null) {
+          //       val = val + fnd.data;
+          //   }
+          // }
+
+          // Push Data to graph
           sd.data.push(val);
+
         }
       }
 
+      $scope.sdata = sdata;
+      $scope.labels = labels;
+
+      _.each($scope.examDatesMay, function(ed) {
+          $scope.lastEd = ed;
+          _.each(sdata, function(sd) {
+            var fndDef = _.findWhere($scope.deferred, {name: sd.name});
+            if(fndDef != null) {
+              $scope.fndIdx=0;
+              $scope.fndNew=false;
+              _.find(labels, function(lab) {
+                  if(lab != '-') {
+                    var mLDate = moment(lab);
+                    var mFndDat = moment($scope.lastEd.datetext).year('2014');
+                    var mFndDat1 = moment($scope.lastEd.datetext).year('2015');
+                    if(mLDate.diff(mFndDat, 'days') == 0 || mLDate.diff(mFndDat1, 'days') == 0) {
+                      return true;
+                    }
+                    if((mLDate.year() == '2014' && mLDate.diff(mFndDat, 'days') > 0) || 
+                       (mLDate.year() == '2015' && mLDate.diff(mFndDat1, 'days') > 0)){
+                      $scope.fndNew=true;
+                      return true;
+                    }
+                  }
+                  $scope.fndIdx++;
+                  return false;
+              });
+            }
+            if($scope.fndNew) {
+              $scope.labels.splice($scope.fndIdx, 0, fndDef.data);
+              sd.data.splice($scope.fndIdx, 0, fndDef.data);
+            } else {
+              if($scope.cumlative) {
+                for(var z=0; z<=sd.data.length; z++) {
+                  if(z >= $scope.fndIdx)
+                    sd.data[z] = sd.data[z] + fndDef.data;                  
+                }
+              } else {
+                sd.data[$scope.fndIdx] = sd.data[$scope.fndIdx] + fndDef.data;  
+              }
+            }
+          });
+        });
 
         $('#container').highcharts({
 
@@ -186,55 +365,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
               }
           },
           series: sdata
-          // series: [{
-          //     name: 'All visits',
-          //     lineWidth: 4,
-          //     marker: {
-          //         radius: 4
-          //     }
-          // }, {
-          //     name: 'New visitors'
-          // }
-          //]
       });
-
-
-      // $('#container').highcharts({
-      //     chart: {
-      //         type: 'line'
-      //     },
-      //     title: {
-      //         text: 'Exam by Day of the Year'
-      //     },
-      //     subtitle: {
-      //         text: null
-      //     },
-      //     xAxis: {
-      //         categories: labels
-      //     },
-      //     yAxis: {
-      //         title: {
-      //             text: 'Registrations'
-      //         }
-      //     },
-      //     plotOptions: {
-      //         line: {
-      //             dataLabels: {
-      //                 enabled: true
-      //             },
-      //             enableMouseTracking: false
-      //         }
-      //     },
-      //     series: sdata
-      //     // [{
-      //     //     name: 'Tokyo',
-      //     //     data: [7.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
-      //     // }, {
-      //     //     name: 'London',
-      //     //     data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-      //     // }]
-      // });
-
     }
 
 
