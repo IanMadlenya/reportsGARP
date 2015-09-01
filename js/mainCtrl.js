@@ -17,7 +17,24 @@ function defined (ref, strNames) {
   return true;
 }
 
-
+var spinnerOptions = {
+              lines: 13, // The number of lines to draw
+              length: 20, // The length of each line
+              width: 10, // The line thickness
+              radius: 30, // The radius of the inner circle
+              corners: 0.5, // Corner roundness (0..1)
+              rotate: 0, // The rotation offset
+              direction: 1, // 1: clockwise, -1: counterclockwise
+              color: '#8b8989', // #rgb or #rrggbb or array of colors
+              speed: 1, // Rounds per second
+              trail: 60, // Afterglow percentage
+              shadow: false, // Whether to render a shadow
+              hwaccel: false, // Whether to use hardware acceleration
+              className: 'spinner', // The CSS class to assign to the spinner
+              zIndex: 2e9, // The z-index (defaults to 2000000000)
+              top: '10', // Top position relative to parent in px
+              left: 'auto' // Left position relative to parent in px
+            };
 
 /* Controllers */
 var reportsGARPControllers = angular.module('reportsGARPControllers', []);
@@ -31,61 +48,181 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 function ($scope, $rootScope, $timeout, $stateParams) {
   $scope.envPath = envPath;
 
-$scope.examDatesMay = [
-  {
-    datetext: '12/1/2009',
-    key:'May 2010',
-    done: false
-  },{
-    datetext: '12/1/2010',
-    key:'May 2011',
-    done: false
-  },{
-    datetext: '12/1/2011',
-    key:'May 2012',
-    done: false
-  },{
-    datetext: '12/1/2012',
-    key:'May 2013',
-    done: false
-  },{
-    datetext: '12/1/2013',
-    key:'May 2014',
-    done: false
-  },{
-    datetext: '12/1/2014',
-    key:'May 2015',
-    done: false
-  }
-]
+  $scope.examDatesMay = [
+    {
+      datetext: '12/1/2009',
+      key:'May 2010',
+      done: false
+    },{
+      datetext: '12/1/2010',
+      key:'May 2011',
+      done: false
+    },{
+      datetext: '12/1/2011',
+      key:'May 2012',
+      done: false
+    },{
+      datetext: '12/1/2012',
+      key:'May 2013',
+      done: false
+    },{
+      datetext: '12/1/2013',
+      key:'May 2014',
+      done: false
+    },{
+      datetext: '12/1/2014',
+      key:'May 2015',
+      done: false
+    }
+  ]
 
-$scope.examDatesNov = [
-  {
-    datetext: '12/1/2010',
-    key:'Nov 2010',
-    done: false
-  },{
-    datetext: '11/19/2011',
-    key:'Nov 2011',
-    done: false
-  },{
-    datetext: '11/17/2012',
-    key:'Nov 2012',
-    done: false
-  },{
-    datetext: '11/16/2013',
-    key:'Nov 2010',
-    done: false
-  },{
-    datetext: '11/15/2014',
-    key:'Nov 2014',
-    done: false
-  },{
-    datetext: '11/21/2015',
-    key:'Nov 2015',
-    done: false
+  $scope.examDatesNov = [
+    {
+      datetext: '12/1/2010',
+      key:'Nov 2010',
+      done: false
+    },{
+      datetext: '11/19/2011',
+      key:'Nov 2011',
+      done: false
+    },{
+      datetext: '11/17/2012',
+      key:'Nov 2012',
+      done: false
+    },{
+      datetext: '11/16/2013',
+      key:'Nov 2010',
+      done: false
+    },{
+      datetext: '11/15/2014',
+      key:'Nov 2014',
+      done: false
+    },{
+      datetext: '11/21/2015',
+      key:'Nov 2015',
+      done: false
+    }
+  ]
+
+  if(defined(localStorage,"rptData"))
+    $scope.rptData = JSON.parse(localStorage.rptData);
+
+
+  $scope.rptData = {
+    disableExamYear:false,  
+    disableExamMonth:false,
+    disableExamType:false,
+    includeUnPaid:false,  
+    allOrders : 'New Lead,Closed Won,Closed, Closed Lost',
+    paidOrders : 'Closed Won, Closed',
+    currentReportType: null,
+    currentExamType: null,
+    currentExamMonth: null,
+    currentExamYear: null
   }
-]
+
+  $scope.rptData.reportTypeList = [
+      {
+        name: "Exam Registrations By Country",
+        reportId: "00O400000048zEv",
+        reportType: 'table',
+        cumlative: false
+      },
+      {
+        name: "Exam Attendance By Country",
+        reportId: "00O400000048zF0",
+        reportType: 'table',
+        cumlative: false
+      },
+      {
+        name: "Exam Registrations By Day Of Year",
+        reportId: "00O4000000492wq",
+        reportType: 'stackedline',
+        cumlative: true
+      },
+      {
+        name: "Exam Registrations By Type By Year",
+        reportId: "00O400000048zVS",
+        reportType: 'stackedbar',
+        cumlative: false
+      },
+      {
+        name: "ERP Exam Registrations By Year",
+        reportId: "00O400000048zUA",
+        reportType: 'stackedbar',
+        cumlative: false
+      },
+      {
+        name: "FRM Exam Registrations By Year",
+        reportId: "00O400000048zVN",
+        reportType: 'stackedbar',
+        cumlative: false
+      }
+    ];
+
+  $scope.rptData.examTypeList = [
+      {
+        name: "ERP",
+        value: "ERP"
+      },
+      {
+        name: "FRM I",
+        value: "FRM Part 1"
+      },
+      {
+        name: "FRM II",
+        value: "FRM Part 2"
+      },
+      {
+        name: "FRM Both",
+        value: "FRM Part 1,FRM Part 2"
+      },
+      {
+        name: "All",
+        value: "FRM Part 1,FRM Part 2,ERP"
+      }
+    ];
+
+
+
+    $scope.rptData.examMonthList = [
+      {
+        name: "May",
+        value: "May"
+      },
+      {
+        name: "November",
+        value: "Nov"
+      },
+      {
+        name: "Both",
+        value: "May,Nov"
+      }
+    ];
+
+    $scope.rptData.examYearList=[];
+    for(var i=2010; i<=2015; i++) {
+      var obj = {
+        name: i,
+        value: i
+      }
+      $scope.rptData.examYearList.push(obj);
+    }
+
+    $scope.selectType = function() {
+      if($scope.rptData.currentRptId == 'Exam Registrations By Day Of Year' || $scope.rptData.currentRptId == 'Exam Registrations By Type By Year') {
+        $scope.rptData.disableExamYear=true;
+      } else if($scope.rptData.currentRptId == 'ERP Exam Registrations By Year' || $scope.rptData.currentRptId == 'FRM Exam Registrations By Year') {
+        $scope.rptData.disableExamYear=true;
+        $scope.rptData.disableExamMonth=true;
+        $scope.rptData.disableExamType=true;
+      } else  {
+        $scope.rptData.disableExamYear=false;
+        $scope.rptData.disableExamMonth=false;
+        $scope.rptData.disableExamType=false;
+      }
+      localStorage.examsData = JSON.stringify($scope.rptData);
+    }
 
   var conn = jsForceConn;
   var reportId = '00O400000048eLH';
@@ -102,27 +239,124 @@ $scope.examDatesNov = [
     $scope.cumlative=$stateParams.cumlative;
   }
 
-  var report = conn.analytics.report(reportId);
+  $scope.refresh=function() {
+    if(defined($scope,"rptData.currentReportType")) {
+      var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+      if(defined($scope.rptData[key])) {
+        drawGraph();    
+      } else {
+        loadData();
+      }
+    } else {
+      // Error
+      alert('Please select report paramteters.');
+    }
+    
+  }
 
-  // execute report synchronously
-  report.execute(function(err, result) {
-    if (err) { return console.error(err); }
-    console.log(result.reportMetadata);
-    console.log(result.factMap);
-    console.log(result.factMap["T!T"]);
-    console.log(result.factMap["T!T"].aggregates);
 
-    var data = result;
+  function loadData() {
 
+    var report = conn.analytics.report($scope.rptData.currentReportType);
+
+    var oppStages = $scope.rptData.paidOrders;
+    if($scope.rptData.includeUnPaid) {
+      oppStages = $scope.rptData.allOrders;
+    }
+
+    var srtDate = '2014-12-01';
+    if($scope.rptData.currentExamMonth == 'Nov')
+      var srtDate = '2015-05-01'
+
+    var metadata = { 
+      reportMetadata : {
+        reportFilters : [{
+          column: 'Exam_Attempt__c.RPT_Exam_Description__c',
+          operator: 'contains',
+          value: $scope.rptData.currentExamMonth
+        },{
+          column: 'Exam_Attempt__c.Section__c',
+          operator: 'contains',
+          value: $scope.rptData.currentExamType          
+        },{
+          column: 'Exam_Attempt__c.Opportunity_StageName__c',
+          operator: 'equals',
+          value: oppStages         
+        },{
+          column: 'Exam_Attempt__c.RPT_Purchase_Day_Of_Year__c',
+          operator: 'greaterThan',
+          value: srtDate         
+        },{
+          column: 'Exam_Attempt__c.RPT_Exam_Year__c',
+          operator: 'equals',
+          value: '2010,2011,2012,2013,2014,2015'
+        }
+        ]
+      }
+    };
+
+    var selector = '#mainspin';
+    var obj = $(selector)
+    $scope.mainSpinner;  
+    if(obj !== null && typeof obj !== "undefined" && obj.length !== null && typeof obj.length !== "undefined") {
+      $scope.mainSpinner = new Spinner(spinnerOptions ).spin(obj[0]);
+    }   
+
+
+    // execute report synchronously
+    report.execute({ metadata : metadata },function(err, result) {
+      if (err) { 
+        $scope.mainSpinner.stop();
+        return console.error(err); 
+      }
+      console.log(result.reportMetadata);
+      console.log(result.factMap);
+      console.log(result.factMap["T!T"]);
+      console.log(result.factMap["T!T"].aggregates);
+
+      var data = result;
+      debugger;
+
+      var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+      $scope.rptData[key] = data;
+      localStorage.rptData = JSON.stringify($scope.rptData);
+
+       $scope.mainSpinner.stop();
+
+      drawGraph();
+    });
+
+  }
+
+  function drawGraph() {
+
+    if(!defined($scope,"rptData.currentReportType"))
+      return;
+
+    if(!defined($scope,"rptData.currentReportType"))
+      return;
+
+    var rptId = $scope.rptData.currentReportType
+    var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+    if(!defined($scope.rptData[key]))
+      return;
+
+    var data = $scope.rptData[key];
     console.log(data);
     
     //"groupingsDown"
     if(data.groupingsDown.groupings.length <= 0) {
       return;
     }
-        
+
+    var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: rptId});
+    if(!defined(fndRpt)) {
+      alert('Report not found!');
+      return;
+    }  
+
     // Setup X and Y Axis, line does not require stackLabels data...
-    if(displayType == 'stackedline') {
+    if(fndRpt.reportType == 'stackedline') {
 
       var series =[];
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
@@ -152,74 +386,91 @@ $scope.examDatesNov = [
         var lastObj = {};
         var ldate = group.label;
         labels.push(ldate);
-        for(var j=0; j<group.groupings.length; j++) {
-          var g = group.groupings[j];
 
-          var ldate = g.label;
-          var val = data.factMap[g.key+'!T'].aggregates[0].value;
-          var gname = g.label;
-          var sd = _.findWhere(sdata, {name: g.label});
 
-          if($scope.cumlative == "true") {
-            if(sd.last != null)
-              val = sd.last + val;
-            sd.last = val;
-          }
-          //sd.data.push(val);
+        for(var j=0; j<series.length; j++) {
 
-          // Store Derrered
-          var defObj = {
-            name: gname,  // May 2013 ERP
-            data: null
-          }
+          var fnd = _.findWhere(group.groupings, {value: series[j]});
+          if(!defined(fnd)) {
+            var sd = _.findWhere(sdata, {name: series[j]});
+            var val = 0;
 
-          // First Registration for a given group
-          var firstTime = false;
-          var fnd = _.findWhere($scope.deferred, {name: gname});
-          if(fnd != null) {
-            defObj = fnd;
+            if(fndRpt.cumlative == true) {
+              if(sd.last != null)
+                val = sd.last + val;
+              sd.last = val;
+              sd.data.push(val);  
+            } else {
+              sd.data.push(val);  
+            }            
           } else {
-            $scope.deferred.push(defObj);
-            firstTime=true;
-          }
-          
-          $scope.lastGroup = defObj;
+            var g = fnd;
+            var ldate = g.label;
+            var val = data.factMap[g.key+'!T'].aggregates[0].value;
+            var gname = g.label;
+            var sd = _.findWhere(sdata, {name: g.label});
 
-          for(var x=0; x<g.groupings.length; x++) {
-          //_.each(g.groupings, function(gg) {
-            var gg = g.groupings[x];
-
-            var ldate = gg.label;
-            var ggval = data.factMap[gg.key+'!T'].aggregates[0].value;
-            var ggname = gg.label;
-            //var sd = _.findWhere(sdata, {name: gg.label});
-            
-            if(ggname != null && ggname == 'Deferred') {
-              if($scope.lastGroup.data == null)
-                $scope.lastGroup.data = 1;
-              else $scope.lastGroup.data++;
+            if(fndRpt.cumlative == true) {
+              if(sd.last != null)
+                val = sd.last + val;
+              sd.last = val;
             }
+            //sd.data.push(val);
+
+            // Store Derrered
+            var defObj = {
+              name: gname,  // May 2013 ERP
+              data: null
+            }
+
+            // First Registration for a given group
+            var firstTime = false;
+            var fnd = _.findWhere($scope.deferred, {name: gname});
+            if(fnd != null) {
+              defObj = fnd;
+            } else {
+              $scope.deferred.push(defObj);
+              firstTime=true;
+            }
+            
+            $scope.lastGroup = defObj;
+
+            for(var x=0; x<g.groupings.length; x++) {
+            //_.each(g.groupings, function(gg) {
+              var gg = g.groupings[x];
+
+              var ldate = gg.label;
+              var ggval = data.factMap[gg.key+'!T'].aggregates[0].value;
+              var ggname = gg.label;
+              //var sd = _.findWhere(sdata, {name: gg.label});
+              
+              if(ggname != null && ggname == 'Deferred') {
+                if($scope.lastGroup.data == null)
+                  $scope.lastGroup.data = 1;
+                else $scope.lastGroup.data++;
+              }
+            }
+
+            // Push Data to graph
+            sd.data.push(val);
+
           }
-
-          // Push Data to graph
-          sd.data.push(val);
-
         }
       }
 
-      $scope.sdata = sdata;
-      $scope.labels = labels;
+      // $scope.sdata = sdata;
+      // $scope.labels = labels;
 
-      _.each(sdata, function(sd) {
-        var fndDef = _.findWhere($scope.deferred, {name: sd.name});
-        var defTot = fndDef.data;
-        var sdData = sd.data;
+      // _.each(sdata, function(sd) {
+      //   var fndDef = _.findWhere($scope.deferred, {name: sd.name});
+      //   var defTot = fndDef.data;
+      //   var sdData = sd.data;
 
-        for(var i=0; i<sd.data.length; i++) {
-          var val = sdData[i];
-          sdData[i] = val + defTot;                  
-        }
-      });
+      //   for(var i=0; i<sd.data.length; i++) {
+      //     var val = sdData[i];
+      //     sdData[i] = val + defTot;                  
+      //   }
+      // });
 
       // _.each($scope.examDatesMay, function(ed) {
       //     $scope.lastEd = ed;
@@ -267,6 +518,18 @@ $scope.examDatesNov = [
           // data: {
           //     csv: csv
           // },
+
+          // Edit chart spacing
+          chart: {
+            spacingBottom: 15,
+            spacingTop: 10,
+            spacingLeft: 10,
+            spacingRight: 10,
+
+            // Explicitly tell the width and height of a chart
+            width: null,
+            height: 900,
+          },
 
           title: {
               text: 'Registrations by Day'
@@ -359,7 +622,7 @@ $scope.examDatesNov = [
 
 
 
-    if(displayType == 'stackedbar') {
+    if(fndRpt.reportType == 'stackedbar') {
 
       var  labels = _.pluck(data.groupingsDown.groupings, "label");    
         var first = data.groupingsDown.groupings[0]
@@ -451,8 +714,10 @@ $scope.examDatesNov = [
 
     } // Stacked Bar
 
+  }
+  //}); -- Query Data
+  drawGraph();
 
-  });
 }]);
 
 

@@ -3,4 +3,36 @@
 <style type="text/css">
 ${demo.css}
 </style>
-<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<div id="mainspin"></div>
+
+ <div class="row">
+    <div class="col-md-4">
+      Exam:<br> <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
+              <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
+            </select>
+    </div>
+    <div class="col-md-2">
+      Exam Type:<br> <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disable="rptData.disableExamType">
+                    <option ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
+                  </select>
+    </div>
+    <div class="col-md-2">
+
+      Exam Month:<br> <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disable="rptData.disableExamMonth">
+                    <option ng-repeat="examMonth in rptData.examMonthList" value="{{examMonth.value}}">{{examMonth.name}}</option>
+                   </select>
+    </div>
+    <div class="col-md-2">
+
+      Exam Year:<br> <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disable="rptData.disableExamYear" ng-disabled='rptData.disableExamYear'>
+                    <option ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
+                   </select>
+    </div>
+    <div class="col-md-2">
+      <button ng-click="refresh()">Refresh</button>
+    </div>
+
+
+
+<div id="container" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
