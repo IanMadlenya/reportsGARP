@@ -142,7 +142,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
       },
       {
         name: "Exam Registrations By Type By Year",
-        reportId: "00O400000048zVS",
+        reportId: "00O4000000493cI",
         reportType: 'stackedbar',
         cumlative: false
       },
@@ -154,7 +154,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
       },
       {
         name: "FRM Exam Registrations By Year",
-        reportId: "00O400000048zVN",
+        reportId: "00O4000000493eE",
         reportType: 'stackedbar',
         cumlative: false
       }
