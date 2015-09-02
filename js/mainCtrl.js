@@ -108,55 +108,60 @@ function ($scope, $rootScope, $timeout, $stateParams) {
     $scope.rptData = JSON.parse(localStorage.rptData);
 
 
-  $scope.rptData = {
-    disableExamYear:false,  
-    disableExamMonth:false,
-    disableExamType:false,
-    includeUnPaid:false,  
-    allOrders : 'New Lead,Closed Won,Closed, Closed Lost',
-    paidOrders : 'Closed Won, Closed',
-    currentReportType: null,
-    currentExamType: null,
-    currentExamMonth: null,
-    currentExamYear: null
-  }
+  $scope.rptData.disableExamYear=false;  
+  $scope.rptData.disableExamMonth=false;
+  $scope.rptData.disableExamType=false;
+  $scope.rptData.includeUnPaid=false;
+  $scope.rptData.allOrders = "New Lead,Closed Won,Closed, Closed Lost";
+  $scope.rptData.paidOrders = "Closed Won, Closed";
+  $scope.rptData.currentReportType= null;
+  $scope.rptData.currentExamType= null;
+  $scope.rptData.currentExamMonth= null;
+  $scope.rptData.currentExamYear= null;
+
 
   $scope.rptData.reportTypeList = [
       {
         name: "Exam Registrations By Country",
         reportId: "00O400000048zEv",
         reportType: 'table',
-        cumlative: false
+        cumlative: false,
+        applyFilters: true
       },
       {
         name: "Exam Attendance By Country",
         reportId: "00O400000048zF0",
         reportType: 'table',
-        cumlative: false
+        cumlative: false,
+        applyFilters: true
       },
       {
         name: "Exam Registrations By Day Of Year",
         reportId: "00O4000000492wq",
         reportType: 'stackedline',
-        cumlative: true
+        cumlative: true,
+        applyFilters: true
       },
       {
         name: "Exam Registrations By Type By Year",
         reportId: "00O4000000493cI",
         reportType: 'stackedbar',
-        cumlative: false
+        cumlative: false,
+        applyFilters: true
       },
       {
         name: "ERP Exam Registrations By Year",
-        reportId: "00O400000048zUA",
-        reportType: 'stackedbar',
-        cumlative: false
+        reportId: "00O4000000493iL",
+        reportType: 'bar',
+        cumlative: false,
+        applyFilters: false
       },
       {
         name: "FRM Exam Registrations By Year",
         reportId: "00O4000000493eE",
         reportType: 'stackedbar',
-        cumlative: false
+        cumlative: false,
+        applyFilters: false
       }
     ];
 
@@ -209,17 +214,26 @@ function ($scope, $rootScope, $timeout, $stateParams) {
     $scope.rptData.examYearList.push(obj);
   }
 
+
   $scope.selectType = function() {
     var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
 
     if(fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
-      $scope.rptData.disableExamYear=true;
+      $scope.rptData.disableExamYear=true;      
+      $scope.rptData.currentExamYear=null;
+
       $scope.rptData.disableExamMonth=false;
       $scope.rptData.disableExamType=false;
     } else if(fndRpt.name == 'ERP Exam Registrations By Year' || fndRpt.name == 'FRM Exam Registrations By Year') {
       $scope.rptData.disableExamYear=true;
+      $scope.rptData.currentExamYear=null;
+
       $scope.rptData.disableExamMonth=true;
+      $scope.rptData.currentExamMonth=null;
+
       $scope.rptData.disableExamType=true;
+      $scope.rptData.currentExamType=null;
+
     } else  {
       $scope.rptData.disableExamYear=false;
       $scope.rptData.disableExamMonth=false;
@@ -243,9 +257,11 @@ function ($scope, $rootScope, $timeout, $stateParams) {
     $scope.cumlative=$stateParams.cumlative;
   }
 
-  $scope.refresh=function() {
+  $scope.refresh=function(reload) {
     if(defined($scope,"rptData.currentReportType")) {
       var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+      if(reload)
+        $scope.rptData[key]=null;
       if(defined($scope.rptData[key])) {
         drawGraph();    
       } else {
@@ -279,16 +295,20 @@ function ($scope, $rootScope, $timeout, $stateParams) {
       if($scope.rptData.currentExamMonth == 'Nov')
         var srtDate = '2015-05-01'
 
+      var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+
       if(defined(meta,"reportMetadata.reportFilters.length")) {
         for(var i=0; i<meta.reportMetadata.reportFilters.length; i++) {
           var rf = meta.reportMetadata.reportFilters[i];
           switch(rf.column) {
             case 'Exam_Attempt__c.RPT_Exam_Description__c':
-              rf.value = $scope.rptData.currentExamMonth;
+              if(fndRpt.applyFilters)
+                rf.value = $scope.rptData.currentExamMonth;
               break;
 
             case 'Exam_Attempt__c.Section__c':
-              rf.value = $scope.rptData.currentExamType;
+              if(fndRpt.applyFilters)
+                rf.value = $scope.rptData.currentExamType;
               break;
 
             case 'Exam_Attempt__c.Opportunity_StageName__c':
@@ -663,10 +683,94 @@ function ($scope, $rootScope, $timeout, $stateParams) {
     }
 
 
+    if(fndRpt.reportType == 'bar') {
+
+      var  labels = _.pluck(data.groupingsDown.groupings, "label");    
+      var sdata = {
+        name: 'Bar',
+        data: [],
+        dataLabels: {
+            enabled: true,
+            color: '#FFFFFF',
+            align: 'right',
+            format: '{point.y:.1f}', // one decimal
+            y: 10, // 10 pixels down from the top
+            style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+            }
+        }
+      };
+
+      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+          var group = data.groupingsDown.groupings[i];
+          var da = data.factMap[group.key+'!T'].aggregates[0].value;
+
+          var obj = [];
+          obj.push(group.label);
+          obj.push(da);
+
+          sdata.data.push(obj);
+      }
+
+      var stuff = sdata.data;
+
+      $('#container').highcharts({
+              chart: {
+                  type: 'column'
+              },
+              title: {
+                  text: fndRpt.Name
+              },
+              subtitle: {
+                  text: ''
+              },
+              xAxis: {
+                  type: 'category',
+                  labels: {
+                      rotation: -45,
+                      style: {
+                          fontSize: '13px',
+                          fontFamily: 'Verdana, sans-serif'
+                      }
+                  }, title: {
+                      text: 'Year'
+                  }
+              },
+              yAxis: {
+                  min: 0,
+                  title: {
+                      text: 'Registrations'
+                  }
+              },
+              legend: {
+                  enabled: false
+              },
+              tooltip: {
+                  pointFormat: 'Registrations for a give year'
+              },
+              series: [{
+                  name: 'Population',
+                  data: stuff,
+                  dataLabels: {
+                      enabled: true,
+                      color: '#FFFFFF',
+                      align: 'right',
+                      format: '{point.y:.1f}', // one decimal
+                      y: 10, // 10 pixels down from the top
+                      style: {
+                          fontSize: '13px',
+                          fontFamily: 'Verdana, sans-serif'
+                      }
+                  }
+              }]
+          });
+          
+    } // Bar
 
     if(fndRpt.reportType == 'stackedbar') {
 
-      var  labels = _.pluck(data.groupingsDown.groupings, "label");    
+        var  labels = _.pluck(data.groupingsDown.groupings, "label");    
         var first = data.groupingsDown.groupings[0]
         var  series = _.pluck(first.groupings, "label");
         var sdata = [];

@@ -30,7 +30,8 @@ ${demo.css}
                    </select>
     </div>
     <div class="col-md-2">
-      <button ng-click="refresh()">Refresh</button>
+      <input type="checkbox" name="includeUnPaid" ng-model="includeUnPaid"> Include Unpaid<br>
+      <button ng-click="refresh(false)">Graph</button>&nbsp;<button ng-click="refresh(true)">Refresh</button>
     </div>
 
 
