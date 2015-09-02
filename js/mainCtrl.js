@@ -161,68 +161,72 @@ function ($scope, $rootScope, $timeout, $stateParams) {
     ];
 
   $scope.rptData.examTypeList = [
-      {
-        name: "ERP",
-        value: "ERP"
-      },
-      {
-        name: "FRM I",
-        value: "FRM Part 1"
-      },
-      {
-        name: "FRM II",
-        value: "FRM Part 2"
-      },
-      {
-        name: "FRM Both",
-        value: "FRM Part 1,FRM Part 2"
-      },
-      {
-        name: "All",
-        value: "FRM Part 1,FRM Part 2,ERP"
-      }
-    ];
-
-
-
-    $scope.rptData.examMonthList = [
-      {
-        name: "May",
-        value: "May"
-      },
-      {
-        name: "November",
-        value: "Nov"
-      },
-      {
-        name: "Both",
-        value: "May,Nov"
-      }
-    ];
-
-    $scope.rptData.examYearList=[];
-    for(var i=2010; i<=2015; i++) {
-      var obj = {
-        name: i,
-        value: i
-      }
-      $scope.rptData.examYearList.push(obj);
+    {
+      name: "ERP",
+      value: "ERP"
+    },
+    {
+      name: "FRM I",
+      value: "FRM Part 1"
+    },
+    {
+      name: "FRM II",
+      value: "FRM Part 2"
+    },
+    {
+      name: "FRM Both",
+      value: "FRM Part 1,FRM Part 2"
+    },
+    {
+      name: "All",
+      value: "FRM Part 1,FRM Part 2,ERP"
     }
+  ];
 
-    $scope.selectType = function() {
-      if($scope.rptData.currentRptId == 'Exam Registrations By Day Of Year' || $scope.rptData.currentRptId == 'Exam Registrations By Type By Year') {
-        $scope.rptData.disableExamYear=true;
-      } else if($scope.rptData.currentRptId == 'ERP Exam Registrations By Year' || $scope.rptData.currentRptId == 'FRM Exam Registrations By Year') {
-        $scope.rptData.disableExamYear=true;
-        $scope.rptData.disableExamMonth=true;
-        $scope.rptData.disableExamType=true;
-      } else  {
-        $scope.rptData.disableExamYear=false;
-        $scope.rptData.disableExamMonth=false;
-        $scope.rptData.disableExamType=false;
-      }
-      localStorage.examsData = JSON.stringify($scope.rptData);
+
+
+  $scope.rptData.examMonthList = [
+    {
+      name: "May",
+      value: "May"
+    },
+    {
+      name: "November",
+      value: "Nov"
+    },
+    {
+      name: "Both",
+      value: "May,Nov"
     }
+  ];
+
+  $scope.rptData.examYearList=[];
+  for(var i=2010; i<=2015; i++) {
+    var obj = {
+      name: i,
+      value: i
+    }
+    $scope.rptData.examYearList.push(obj);
+  }
+
+  $scope.selectType = function() {
+    var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+
+    if(fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
+      $scope.rptData.disableExamYear=true;
+      $scope.rptData.disableExamMonth=false;
+      $scope.rptData.disableExamType=false;
+    } else if(fndRpt.name == 'ERP Exam Registrations By Year' || fndRpt.name == 'FRM Exam Registrations By Year') {
+      $scope.rptData.disableExamYear=true;
+      $scope.rptData.disableExamMonth=true;
+      $scope.rptData.disableExamType=true;
+    } else  {
+      $scope.rptData.disableExamYear=false;
+      $scope.rptData.disableExamMonth=false;
+      $scope.rptData.disableExamType=false;
+    }
+    localStorage.examsData = JSON.stringify($scope.rptData);
+  }
 
   var conn = jsForceConn;
   var reportId = '00O400000048eLH';
@@ -259,71 +263,109 @@ function ($scope, $rootScope, $timeout, $stateParams) {
 
     var report = conn.analytics.report($scope.rptData.currentReportType);
 
-    var oppStages = $scope.rptData.paidOrders;
-    if($scope.rptData.includeUnPaid) {
-      oppStages = $scope.rptData.allOrders;
-    }
+    conn.analytics.report($scope.rptData.currentReportType).describe(function(err, meta) {
+      if (err) { return console.error(err); }
+      console.log(meta.reportMetadata);
+      console.log(meta.reportTypeMetadata);
+      console.log(meta.reportExtendedMetadata);
 
-    var srtDate = '2014-12-01';
-    if($scope.rptData.currentExamMonth == 'Nov')
-      var srtDate = '2015-05-01'
 
-    var metadata = { 
-      reportMetadata : {
-        reportFilters : [{
-          column: 'Exam_Attempt__c.RPT_Exam_Description__c',
-          operator: 'contains',
-          value: $scope.rptData.currentExamMonth
-        },{
-          column: 'Exam_Attempt__c.Section__c',
-          operator: 'contains',
-          value: $scope.rptData.currentExamType          
-        },{
-          column: 'Exam_Attempt__c.Opportunity_StageName__c',
-          operator: 'equals',
-          value: oppStages         
-        },{
-          column: 'Exam_Attempt__c.RPT_Purchase_Day_Of_Year__c',
-          operator: 'greaterThan',
-          value: srtDate         
-        },{
-          column: 'Exam_Attempt__c.RPT_Exam_Year__c',
-          operator: 'equals',
-          value: '2010,2011,2012,2013,2014,2015'
+      var oppStages = $scope.rptData.paidOrders;
+      if($scope.rptData.includeUnPaid) {
+        oppStages = $scope.rptData.allOrders;
+      }
+
+      var srtDate = '2014-12-01';
+      if($scope.rptData.currentExamMonth == 'Nov')
+        var srtDate = '2015-05-01'
+
+      if(defined(meta,"reportMetadata.reportFilters.length")) {
+        for(var i=0; i<meta.reportMetadata.reportFilters.length; i++) {
+          var rf = meta.reportMetadata.reportFilters[i];
+          switch(rf.column) {
+            case 'Exam_Attempt__c.RPT_Exam_Description__c':
+              rf.value = $scope.rptData.currentExamMonth;
+              break;
+
+            case 'Exam_Attempt__c.Section__c':
+              rf.value = $scope.rptData.currentExamType;
+              break;
+
+            case 'Exam_Attempt__c.Opportunity_StageName__c':
+              rf.value = oppStages;
+              break;
+
+            case 'Exam_Attempt__c.RPT_Exam_Year__c':
+              rf.value = '2010,2011,2012,2013,2014,2015';
+              break;
+          }
+        }        
+      }
+
+
+      var metadata = { 
+        reportMetadata : {
+          reportFilters : meta.reportMetadata.reportFilters
         }
-        ]
-      }
-    };
+      };
 
-    var selector = '#mainspin';
-    var obj = $(selector)
-    $scope.mainSpinner;  
-    if(obj !== null && typeof obj !== "undefined" && obj.length !== null && typeof obj.length !== "undefined") {
-      $scope.mainSpinner = new Spinner(spinnerOptions ).spin(obj[0]);
-    }   
+      // var metadata = { 
+      //   reportMetadata : {
+      //     reportFilters : [{
+      //       column: 'Exam_Attempt__c.RPT_Exam_Description__c',
+      //       operator: 'contains',
+      //       value: $scope.rptData.currentExamMonth
+      //     },{
+      //       column: 'Exam_Attempt__c.Section__c',
+      //       operator: 'contains',
+      //       value: $scope.rptData.currentExamType          
+      //     },{
+      //       column: 'Exam_Attempt__c.Opportunity_StageName__c',
+      //       operator: 'equals',
+      //       value: oppStages         
+      //     },{
+      //       column: 'Exam_Attempt__c.RPT_Purchase_Day_Of_Year__c',
+      //       operator: 'greaterThan',
+      //       value: srtDate         
+      //     },{
+      //       column: 'Exam_Attempt__c.RPT_Exam_Year__c',
+      //       operator: 'equals',
+      //       value: '2010,2011,2012,2013,2014,2015'
+      //     }
+      //     ]
+      //   }
+      // };
+
+      var selector = '#mainspin';
+      var obj = $(selector)
+      $scope.mainSpinner;  
+      if(obj !== null && typeof obj !== "undefined" && obj.length !== null && typeof obj.length !== "undefined") {
+        $scope.mainSpinner = new Spinner(spinnerOptions ).spin(obj[0]);
+      }   
 
 
-    // execute report synchronously
-    report.execute({ metadata : metadata },function(err, result) {
-      if (err) { 
-        $scope.mainSpinner.stop();
-        return console.error(err); 
-      }
-      console.log(result.reportMetadata);
-      console.log(result.factMap);
-      console.log(result.factMap["T!T"]);
-      console.log(result.factMap["T!T"].aggregates);
+      // execute report synchronously
+      report.execute({ metadata : metadata },function(err, result) {
+        if (err) { 
+          $scope.mainSpinner.stop();
+          return console.error(err); 
+        }
+        console.log(result.reportMetadata);
+        console.log(result.factMap);
+        console.log(result.factMap["T!T"]);
+        console.log(result.factMap["T!T"].aggregates);
 
-      var data = result;
-      debugger;
+        var data = result;
+        debugger;
 
-      var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
-      $scope.rptData[key] = data;
-      localStorage.rptData = JSON.stringify($scope.rptData);
+        var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+        $scope.rptData[key] = data;
+        localStorage.rptData = JSON.stringify($scope.rptData);
 
-       $scope.mainSpinner.stop();
+         $scope.mainSpinner.stop();
 
-      drawGraph();
+        drawGraph();
+      });
     });
 
   }
