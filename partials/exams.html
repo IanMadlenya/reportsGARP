@@ -31,12 +31,12 @@ ${demo.css}
     </div>
     <div class="col-md-2">
       <input type="checkbox" name="includeUnPaid" ng-model="includeUnPaid"> Include Unpaid<br>
-      <button ng-click="refresh(false)">Graph</button>&nbsp;<button ng-click="refresh(true)">Refresh</button>
+      <button ng-click="refresh(false)">Graph</button>&nbsp;<button ng-click="refresh(true)">Reload Data</button>
     </div>
   </div>
   <div class="row">
     <div class="col-md-12">
-      <div ng-if="fndRpt.reportType == 'table'" ui-grid="{ data: myData }" class="myGrid"></div>
+      <div ng-if="fndRpt.reportType == 'table'" ui-grid="gridOptions1" class="myGrid"></div>
       <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
     </div>
   </div>

@@ -44,10 +44,58 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
 }]);
 
 
-reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout','$stateParams', 
-function ($scope, $rootScope, $timeout, $stateParams) {
+reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout','$stateParams','uiGridConstants', 
+function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   
   $scope.envPath = envPath;
+
+  $scope.sortingAlgorithm = function(a, b) {
+    if(a>b)
+      return 1;
+    else if(a<b)
+      return -1;
+    else return 0;
+  }
+
+  $scope.gridOptions1 = {
+      enableSorting: true,
+      enableFiltering: true,
+      columnDefs: [
+        { field: 'Country' },
+        { field: 'Total',
+          sort: {
+            direction: uiGridConstants.DESC,
+            priority: 1
+          },
+          sortingAlgorithm: $scope.sortingAlgorithm
+        },
+        { field: 'Attended',          
+          sort: {
+            direction: uiGridConstants.DESC,
+            priority: 2
+          },
+          sortingAlgorithm: $scope.sortingAlgorithm        
+        },
+        { field: 'Deferred',          
+          sort: {
+            direction: uiGridConstants.DESC,
+            priority: 3
+          },
+          sortingAlgorithm: $scope.sortingAlgorithm
+        },
+        { field: 'No-Show',          
+          sort: {
+            direction: uiGridConstants.DESC,
+            priority: 4
+          },
+          sortingAlgorithm: $scope.sortingAlgorithm
+        }
+      ],
+      filterOptions: {
+        filterColumn: "Country",
+      },
+      data: null
+    };
 
   $scope.examDatesMay = [
     {
@@ -265,7 +313,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
       if(reload)
         $scope.rptData[key]=null;
       if(defined($scope.rptData[key])) {
-        drawGraph();    
+        drawGraph(false);
       } else {
         loadData();
       }
@@ -318,7 +366,9 @@ function ($scope, $rootScope, $timeout, $stateParams) {
               break;
 
             case 'Exam_Attempt__c.RPT_Exam_Year__c':
-              rf.value = '2010,2011,2012,2013,2014,2015';
+              if($scope.rptData.currentExamYear != null)
+                  rf.value = $scope.rptData.currentExamYear;
+              else rf.value = '2010,2011,2012,2013,2014,2015';
               break;
           }
         }        
@@ -359,13 +409,13 @@ function ($scope, $rootScope, $timeout, $stateParams) {
 
          $scope.mainSpinner.stop();
 
-        drawGraph();
+        drawGraph(true);
       });
     });
 
   }
 
-  function drawGraph() {
+  function drawGraph(async) {
 
     if(!defined($scope,"rptData.currentReportType"))
       return;
@@ -412,7 +462,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
             var type = types[k];
             var fndGroup = _.findWhere(group.groupings, {label: type});
             if(defined(fndGroup)) {
-              var g = data.groupingsDown.groupings[k];
+              var g = fndGroup;
               var v = data.factMap[g.key+'!T'].aggregates[0].value;
               obj[type] = v;              
             } else {
@@ -422,7 +472,15 @@ function ($scope, $rootScope, $timeout, $stateParams) {
         }
         sdata.push(obj);
       }
-      $scope.myData = sdata;
+      if(async) {
+        $rootScope.$apply(function(){
+          $scope.myData = sdata;
+          $scope.gridOptions1.data = sdata;
+        });
+      } else {
+        $scope.myData = sdata;
+        $scope.gridOptions1.data = sdata;        
+      }
     }
 
     // Setup X and Y Axis, line does not require stackLabels data...
