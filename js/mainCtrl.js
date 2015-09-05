@@ -60,37 +60,6 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   $scope.gridOptions1 = {
       enableSorting: true,
       enableFiltering: true,
-      columnDefs: [
-        { field: 'Country' },
-        { field: 'Total',
-          sort: {
-            direction: uiGridConstants.DESC,
-            priority: 1
-          },
-          sortingAlgorithm: $scope.sortingAlgorithm
-        },
-        { field: 'Attended',          
-          sort: {
-            direction: uiGridConstants.DESC,
-            priority: 2
-          },
-          sortingAlgorithm: $scope.sortingAlgorithm        
-        },
-        { field: 'Deferred',          
-          sort: {
-            direction: uiGridConstants.DESC,
-            priority: 3
-          },
-          sortingAlgorithm: $scope.sortingAlgorithm
-        },
-        { field: 'No-Show',          
-          sort: {
-            direction: uiGridConstants.DESC,
-            priority: 4
-          },
-          sortingAlgorithm: $scope.sortingAlgorithm
-        }
-      ],
       filterOptions: {
         filterColumn: "Country",
       },
@@ -172,17 +141,79 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   $scope.rptData.reportTypeList = [
       {
         name: "Exam Registrations By Country",
-        reportId: "00O4000000494Tb",
+        reportId: "00O4000000494UK",
         reportType: 'table',
         cumlative: false,
-        applyFilters: true
+        applyFilters: true,
+        columnDefs: [
+          { field: 'Country' },
+          { field: 'Total',
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 1
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm
+          },
+          { field: 'Closed',          
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 2
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm        
+          },
+          { field: 'Closed Lost',          
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 3
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm
+          },
+          { field: 'New Lead',          
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 4
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm
+          }
+        ]
       },
       {
         name: "Exam Attendance By Country",
-        reportId: "00O400000048zF0",
+        reportId: "00O4000000494Tb",
         reportType: 'table',
         cumlative: false,
-        applyFilters: true
+        applyFilters: true,
+        columnDefs: [
+          { field: 'Country' },
+          { field: 'Total',
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 1
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm
+          },
+          { field: 'Attended',          
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 2
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm        
+          },
+          { field: 'Deferred',          
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 3
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm
+          },
+          { field: 'No-Show',          
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 4
+            },
+            sortingAlgorithm: $scope.sortingAlgorithm
+          }
+        ]
       },
       {
         name: "Exam Registrations By Day Of Year",
@@ -457,7 +488,11 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           Total: val
         }
         if(defined(group,"groupings.length")) {
-          var types = ['Attended','Deferred','No-Show'];
+
+          var types = _.pluck(fndRpt.columnDefs, "field");
+          types= _.reject(types, function(obj){ return (obj == 'Country' || obj == 'Total'); });
+          //var types = ['Attended','Deferred','No-Show'];
+          
           for(var k=0; k<types.length; k++) {
             var type = types[k];
             var fndGroup = _.findWhere(group.groupings, {label: type});
@@ -475,10 +510,12 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       if(async) {
         $rootScope.$apply(function(){
           $scope.myData = sdata;
+          $scope.gridOptions1.columnDefs = fndRpt.columnDefs;
           $scope.gridOptions1.data = sdata;
         });
       } else {
         $scope.myData = sdata;
+        $scope.gridOptions1.columnDefs = fndRpt.columnDefs;
         $scope.gridOptions1.data = sdata;        
       }
     }
@@ -491,6 +528,8 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
         var s = _.pluck(data.groupingsDown.groupings[i].groupings, "label");
         var series = _.union(series, s);
       }
+
+      var series = _.reject(series, function(obj){ return !defined(obj); });
 
       var sdata = [];      
       var  labels = [];    
