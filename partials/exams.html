@@ -5,7 +5,7 @@ ${demo.css}
 </style>
 
 <div id="mainspin"></div>
-
+<div class="container page-container">
  <div class="row">
     <div class="col-md-4">
       Exam:<br> <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
@@ -33,7 +33,11 @@ ${demo.css}
       <input type="checkbox" name="includeUnPaid" ng-model="includeUnPaid"> Include Unpaid<br>
       <button ng-click="refresh(false)">Graph</button>&nbsp;<button ng-click="refresh(true)">Refresh</button>
     </div>
-
-
-
-<div id="container" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div ng-if="fndRpt.reportType == 'table'" ui-grid="{ data: myData }" class="myGrid"></div>
+      <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
+    </div>
+  </div>
+</div>

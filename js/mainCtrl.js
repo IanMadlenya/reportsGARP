@@ -46,6 +46,7 @@ reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout
 
 reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout','$stateParams', 
 function ($scope, $rootScope, $timeout, $stateParams) {
+  
   $scope.envPath = envPath;
 
   $scope.examDatesMay = [
@@ -123,7 +124,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
   $scope.rptData.reportTypeList = [
       {
         name: "Exam Registrations By Country",
-        reportId: "00O400000048zEv",
+        reportId: "00O4000000494Tb",
         reportType: 'table',
         cumlative: false,
         applyFilters: true
@@ -217,6 +218,7 @@ function ($scope, $rootScope, $timeout, $stateParams) {
 
   $scope.selectType = function() {
     var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+    $scope.fndRpt = fndRpt;
 
     if(fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
       $scope.rptData.disableExamYear=true;      
@@ -329,33 +331,6 @@ function ($scope, $rootScope, $timeout, $stateParams) {
         }
       };
 
-      // var metadata = { 
-      //   reportMetadata : {
-      //     reportFilters : [{
-      //       column: 'Exam_Attempt__c.RPT_Exam_Description__c',
-      //       operator: 'contains',
-      //       value: $scope.rptData.currentExamMonth
-      //     },{
-      //       column: 'Exam_Attempt__c.Section__c',
-      //       operator: 'contains',
-      //       value: $scope.rptData.currentExamType          
-      //     },{
-      //       column: 'Exam_Attempt__c.Opportunity_StageName__c',
-      //       operator: 'equals',
-      //       value: oppStages         
-      //     },{
-      //       column: 'Exam_Attempt__c.RPT_Purchase_Day_Of_Year__c',
-      //       operator: 'greaterThan',
-      //       value: srtDate         
-      //     },{
-      //       column: 'Exam_Attempt__c.RPT_Exam_Year__c',
-      //       operator: 'equals',
-      //       value: '2010,2011,2012,2013,2014,2015'
-      //     }
-      //     ]
-      //   }
-      // };
-
       var selector = '#mainspin';
       var obj = $(selector)
       $scope.mainSpinner;  
@@ -417,10 +392,43 @@ function ($scope, $rootScope, $timeout, $stateParams) {
       return;
     }  
 
+
+    if(fndRpt.reportType == 'table') {
+
+      var sdata = [];
+      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+        var group = data.groupingsDown.groupings[i];
+        var val = data.factMap[group.key+'!T'].aggregates[0].value;
+
+        if(group.label == "-" || group.label == "&nbsp;")
+          continue;
+        var obj = {
+          Country: group.label,
+          Total: val
+        }
+        if(defined(group,"groupings.length")) {
+          var types = ['Attended','Deferred','No-Show'];
+          for(var k=0; k<types.length; k++) {
+            var type = types[k];
+            var fndGroup = _.findWhere(group.groupings, {label: type});
+            if(defined(fndGroup)) {
+              var g = data.groupingsDown.groupings[k];
+              var v = data.factMap[g.key+'!T'].aggregates[0].value;
+              obj[type] = v;              
+            } else {
+              obj[type] = 0;
+            }
+          }
+        }
+        sdata.push(obj);
+      }
+      $scope.myData = sdata;
+    }
+
     // Setup X and Y Axis, line does not require stackLabels data...
     if(fndRpt.reportType == 'stackedline') {
 
-      var series =[];
+      var sdata =[];
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
         var s = _.pluck(data.groupingsDown.groupings[i].groupings, "label");
         var series = _.union(series, s);
