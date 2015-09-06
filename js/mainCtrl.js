@@ -52,80 +52,88 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
 
     $rootScope.$on('drawMap', function(event, sdata) {
 
-        var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+      var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
 
-        var data = [];
+      var data = [];
 
-        for(var i=0; i<sdata.length; i++) {
+      for(var i=0; i<sdata.length; i++) {
 
-          var fnd = _.findWhere(mapData, {name: sdata[i].Country})
+        var fnd = _.findWhere(mapData, {name: sdata[i].Country})
 
-          if(defined(fnd)) {
-            var obj = {
-              code: fnd.properties['iso-a2'],
-              z: sdata[i].Total,
-              name: sdata[i].Country
-            }
-            data.push(obj);
-          } else {
-            console.log('Not Found: ' + sdata.Country);
+        if(defined(fnd)) {
+          var obj = {
+            code: fnd.properties['iso-a2'],
+            z: sdata[i].Total,
+            name: sdata[i].Country,
+            value: sdata[i].Total
           }
+          data.push(obj);
+        } else {
+          console.log('Not Found: ' + sdata.Country);
         }
+      }
 
-        // Correct UK to GB in data
-        $.each(data, function () {
-            if (this.code === 'UK') {
-                this.code = 'GB';
-            }
-        });
+      // Correct UK to GB in data
+      $.each(data, function () {
+          if (this.code === 'UK') {
+              this.code = 'GB';
+          }
+      });
 
-        $('#containerMap').highcharts('Map', {
-            chart : {
-                borderWidth : 1
+      $('#containerMap').highcharts('Map', {
+        chart : {
+            borderWidth : 1
+        },
+
+        title : {
+            text : 'Registrations By Country'
+        },
+
+        legend: {
+            layout: 'horizontal',
+            borderWidth: 0,
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            floating: true,
+            verticalAlign: 'top',
+            y: 25
+        },
+
+        mapNavigation: {
+            enabled: true
+        },
+
+        colorAxis: {
+            min: 1,
+            type: 'logarithmic',
+            minColor: '#EEEEFF',
+            maxColor: '#000022',
+            stops: [
+                [0, '#EFEFFF'],
+                [0.67, '#4444FF'],
+                [1, '#000022']
+            ]
+        },
+
+        series : [{
+            animation: {
+                duration: 1000
             },
-
-            title: {
-                text: 'Registrations by country'
-            },
-
-            subtitle : {
-                text : ''
-            },
-
-            legend: {
-                enabled: false
-            },
-
-            mapNavigation: {
+            data : data,
+            mapData: mapData,
+            joinBy: ['iso-a2', 'code'],
+            dataLabels: {
                 enabled: true,
-                buttonOptions: {
-                    verticalAlign: 'bottom'
-                }
+                color: 'white',
+                format: '{point.code}'
             },
-
-            series : [{
-                name: 'Countries',
-                mapData: mapData,
-                color: '#E0E0E0',
-                enableMouseTracking: false
-            }, {
-                type: 'mapbubble',
-                mapData: mapData,
-                name: 'Registrations',
-                joinBy: ['iso-a2', 'code'],
-                data: data,
-                minSize: 4,
-                maxSize: '12%',
-                tooltip: {
-                    pointFormat: '{point.name}: {point.z}'
-                }
-            }]
-        });
+            name: 'Registrations',
+            tooltip: {
+                pointFormat: '{point.name}: {point.value}'
+            }
+        }]        
+      });
     });
-
-    //});  
 }]);
-
 
 reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout','$stateParams','uiGridConstants', 
 function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
