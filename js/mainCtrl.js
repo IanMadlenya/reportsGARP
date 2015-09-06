@@ -36,11 +36,94 @@ var spinnerOptions = {
               left: 'auto' // Left position relative to parent in px
             };
 
+var currentTableData = null;
+
 /* Controllers */
 var reportsGARPControllers = angular.module('reportsGARPControllers', []);
 
 reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
   $scope.envPath = envPath;
+}]);
+
+reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+  $scope.envPath = envPath;
+
+    //$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
+
+    $rootScope.$on('drawMap', function(event, sdata) {
+
+        var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+
+        var data = [];
+
+        for(var i=0; i<sdata.length; i++) {
+
+          var fnd = _.findWhere(mapData, {name: sdata[i].Country})
+
+          if(defined(fnd)) {
+            var obj = {
+              code: fnd.properties['iso-a2'],
+              z: sdata[i].Total,
+              name: sdata[i].Country
+            }
+            data.push(obj);
+          } else {
+            console.log('Not Found: ' + sdata.Country);
+          }
+        }
+
+        // Correct UK to GB in data
+        $.each(data, function () {
+            if (this.code === 'UK') {
+                this.code = 'GB';
+            }
+        });
+
+        $('#containerMap').highcharts('Map', {
+            chart : {
+                borderWidth : 1
+            },
+
+            title: {
+                text: 'Registrations by country'
+            },
+
+            subtitle : {
+                text : ''
+            },
+
+            legend: {
+                enabled: false
+            },
+
+            mapNavigation: {
+                enabled: true,
+                buttonOptions: {
+                    verticalAlign: 'bottom'
+                }
+            },
+
+            series : [{
+                name: 'Countries',
+                mapData: mapData,
+                color: '#E0E0E0',
+                enableMouseTracking: false
+            }, {
+                type: 'mapbubble',
+                mapData: mapData,
+                name: 'Registrations',
+                joinBy: ['iso-a2', 'code'],
+                data: data,
+                minSize: 4,
+                maxSize: '12%',
+                tooltip: {
+                    pointFormat: '{point.name}: {point.z}'
+                }
+            }]
+        });
+    });
+
+    //});  
 }]);
 
 
@@ -512,11 +595,13 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           $scope.myData = sdata;
           $scope.gridOptions1.columnDefs = fndRpt.columnDefs;
           $scope.gridOptions1.data = sdata;
+          $rootScope.$broadcast('drawMap', sdata);
         });
       } else {
         $scope.myData = sdata;
         $scope.gridOptions1.columnDefs = fndRpt.columnDefs;
         $scope.gridOptions1.data = sdata;        
+        $rootScope.$broadcast('drawMap', sdata);
       }
     }
 

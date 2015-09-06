@@ -36,8 +36,19 @@ ${demo.css}
   </div>
   <div class="row">
     <div class="col-md-12">
-      <div ng-if="fndRpt.reportType == 'table'" ui-grid="gridOptions1" class="myGrid"></div>
       <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
+
+      <div class="row" ng-if="fndRpt.reportType == 'table'" >
+        <div class="col-md-6">
+          <div ui-grid="gridOptions1" class="myGrid"></div>
+        </div>
+      </div>
+      <div class="row" ng-if="fndRpt.reportType == 'table'" >
+        <div class="col-md-6" ng-controller="mapCtrl">
+          <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
+        </div>
+      </div>
     </div>
   </div>
+
 </div>
