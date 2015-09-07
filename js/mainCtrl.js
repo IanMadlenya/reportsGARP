@@ -215,7 +215,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
   if(defined(localStorage,"rptData"))
     $scope.rptData = JSON.parse(localStorage.rptData);
-
+  else $scope.rptData = {};
 
   $scope.rptData.disableExamYear=false;  
   $scope.rptData.disableExamMonth=false;
