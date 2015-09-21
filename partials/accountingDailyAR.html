@@ -45,7 +45,7 @@
           <td>
             <b>Total</b>
           </td>
-          <td ng-repeat="prod in prods">
+          <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <div ng-if="prod.Product2.ProductCode!=SHIP">
               {{prod.Name}}<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
             </div>
