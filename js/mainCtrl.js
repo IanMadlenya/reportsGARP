@@ -1,9 +1,48 @@
 'use strict';
 
+function defined (ref, strNames) {
+  var name;
+
+  if(typeof ref === "undefined" || ref === null) {
+    return false;
+  }
+
+  if(strNames !== null && typeof strNames !== "undefined") {
+    var arrNames = strNames.split('.');
+    while (name = arrNames.shift()) {        
+        if (ref[name] === null || typeof ref[name] === "undefined") return false;
+        ref = ref[name];
+    } 
+  }
+  return true;
+}
+
+var spinnerOptions = {
+              lines: 13, // The number of lines to draw
+              length: 20, // The length of each line
+              width: 10, // The line thickness
+              radius: 30, // The radius of the inner circle
+              corners: 0.5, // Corner roundness (0..1)
+              rotate: 0, // The rotation offset
+              direction: 1, // 1: clockwise, -1: counterclockwise
+              color: '#8b8989', // #rgb or #rrggbb or array of colors
+              speed: 1, // Rounds per second
+              trail: 60, // Afterglow percentage
+              shadow: false, // Whether to render a shadow
+              hwaccel: false, // Whether to use hardware acceleration
+              className: 'spinner', // The CSS class to assign to the spinner
+              zIndex: 2e9, // The z-index (defaults to 2000000000)
+              top: '10', // Top position relative to parent in px
+              left: 'auto' // Left position relative to parent in px
+            };
+
+var currentTableData = null;
+
 /* Controllers */
 var reportsGARPControllers = angular.module('reportsGARPControllers', []);
 
 reportsGARPControllers.controller('mainCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+  $scope.envPath = envPath;
 }]);
 
 
@@ -351,7 +390,9 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       var sdt = moment.tz($scope.formVars.startDate + ' 00:00:01','America/Los_Angeles').unix();
       var edt = moment.tz($scope.formVars.endDate + ' 23:59:59','America/Los_Angeles').unix();
 
-      reportsGARPServices.getReportDataTrans(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, function(err, data) {
+      $scope.filterProdIds=null;
+
+      reportsGARPServices.getReportDataTrans(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
 
         if(data.event.status == false) {
           if(defined($scope,"spinner"))
