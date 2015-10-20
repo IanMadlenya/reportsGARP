@@ -70,7 +70,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedGL : '4000MERGE',
       mergedName : 'ICBRR Exam',
       sort: 50,
-      weight: 0
+      weight: 4
     },
     {
       glCodes: [
@@ -85,7 +85,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedGL : '4000MERGE',
       mergedName : 'FFR Exam',
       sort: 57,
-      weight: 0
+      weight: 1
     },    
     {
       glCodes: [
