@@ -817,7 +817,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
                                       y: e.pageY || e.clientY
                                   },
                                   headingText: this.series.name,
-                                  maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                                  maincontentText: this.series.data[this.x].category + ':<br/> ' +
                                       this.y + ' Registrations',
                                   width: 200
                               });
@@ -919,44 +919,46 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           
     } // Bar
 
-    if(fndRpt.reportType == 'stackedbar') {
+if(fndRpt.reportType == 'stackedbar') {
 
-      var  labels = _.pluck(data.groupingsDown.groupings, "label");    
-      var sdata = [];
-
-      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
-        var group = data.groupingsDown.groupings[i];
-        for(var j=0; j<group.groupings.length; j++) {
-          var g = group.groupings[j];
-          var sd = _.findWhere(sdata, {name: g.label});
-          if(sd == null) {
-            var obj = {
-              name: g.label,
-              data: []
-            }
-            sdata.push(obj);      
-          }
+        var  labels = _.pluck(data.groupingsDown.groupings, "label");    
+        var sdata = [];
+        
+        for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+          var group = data.groupingsDown.groupings[i];
+          for(var j=0; j<group.groupings.length; j++) {
+            var g = group.groupings[j];
+      var sd = _.findWhere(sdata, {name: g.label});
+      if(sd == null) {
+        var obj = {
+          name: g.label,
+          data: []
+        }
+        sdata.push(obj);      
+      }
+      }
+    }
+    
+        for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+          var group = data.groupingsDown.groupings[i];
+          //for(var j=0; j<group.groupings.length; j++) {
+      //var g = group.groupings[j];
+      for(var j=0; j<sdata.length; j++) {
+      var sd = sdata[j];
+      var g = _.findWhere(group.groupings, {label: sd.name});
+      
+      if(g == null) {
+        sd.data.push(0);
+      } else {
+        var da = data.factMap[g.key+'!T'].aggregates[0].value;
+        if(da == null) {
+          sd.data.push(0);
+        } else {
+          sd.data.push(da);
         }
       }
-
-      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
-        var group = data.groupingsDown.groupings[i];
-        for(var j=0; j<sdata.length; j++) {
-          var sd = sdata[j];
-          var g = _.findWhere(group.groupings, {label: sd.name});
-
-          if(g == null) {
-            sd.data.push(0);
-          } else {
-            var da = data.factMap[g.key+'!T'].aggregates[0].value;
-            if(da == null) {
-              sd.data.push(0);
-            } else {
-              sd.data.push(da);
-            }
-          }
-        }
       }
+    }
 
 
       $('#container').highcharts({
@@ -1021,6 +1023,8 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
     } // Stacked Bar
 
+
+    
   }
   //}); -- Query Data
   drawGraph();

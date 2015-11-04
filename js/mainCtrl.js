@@ -100,7 +100,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'FRMIMAY',
       mergedGL : '4001MERGE',
       mergedName : 'FRM Exam Part I - May',
-      sort: 18,
+      sort: 5,
       weight: 0
     },
     {
@@ -116,7 +116,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'FRMINOV',
       mergedGL : '4002MERGE',
       mergedName : 'FRM Exam Part I - Nov',
-      sort: 19,
+      sort: 7,
       weight: 0
     },
 
@@ -133,7 +133,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'FRMIIMAY',
       mergedGL : '4001MERGE',
       mergedName : 'FRM Exam Part II - May',
-      sort: 18,
+      sort: 6,
       weight: 0
     },
     {
@@ -149,7 +149,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'FRMIINOV',
       mergedGL : '4002MERGE',
       mergedName : 'FRM Exam Part II - Nov',
-      sort: 19,
+      sort: 8,
       weight: 0
     },
     {
@@ -165,7 +165,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ENCMAY',
       mergedGL : '4001MERGE',
       mergedName : 'ERP Exam - May',
-      sort: 9,
+      sort: 35,
       weight: 0
     },
     {
@@ -181,7 +181,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ENCNOV',
       mergedGL : '4002MERGE',
       mergedName : 'ERP Exam - Nov',
-      sort: 10,
+      sort: 36,
       weight: 0
     }
 
@@ -372,7 +372,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
     if(cnt == 0)
       $scope.filterProdIds=null;
 
-    reportsGARPServices.getReportDataTrans(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
+    reportsGARPServices.getReportDataTransFilters(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
 
       if(data.event.status == false) {
         if(defined($scope,"spinner"))
@@ -386,7 +386,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       if(defined(data,"result.trans"))
         $scope.transactions = data.result.trans;
 
-      reportsGARPServices.getReportDataOpp(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
+      reportsGARPServices.getReportDataOppFilters(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
 
         if(data.event.status == false) {
           if(defined($scope,"spinner"))
@@ -433,7 +433,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
         }
           
 
-        reportsGARPServices.getReportDataRefunds(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
+        reportsGARPServices.getReportDataRefundsFilters(sdt, edt, $scope.formVars.garp, $scope.formVars.gra, $scope.formVars.nj, $scope.filterProdIds, function(err, data) {
 
           if(data.event.status == false) {
             if(defined($scope,"spinner"))
