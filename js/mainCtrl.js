@@ -87,6 +87,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       sort: 57,
       weight: 1
     },    
+
     {
       glCodes: [
         '4001'
@@ -150,6 +151,71 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedGL : '4002MERGE',
       mergedName : 'FRM Exam Part II - Nov',
       sort: 8,
+      weight: 0
+    },
+    
+    {
+      glCodes: [
+        '4001'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'ENC1E',
+        'ENC1S',
+        'ENC1L'
+      ],
+      mergedCode : 'ERPIMAY',
+      mergedGL : '4001MERGE',
+      mergedName : 'ERP Exam Part I - May',
+      sort: 35,
+      weight: 0
+    },
+    {
+      glCodes: [
+        '4002'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'ENC1E',
+        'ENC1S',
+        'ENC1L'
+      ],
+      mergedCode : 'ERPINOV',
+      mergedGL : '4002MERGE',
+      mergedName : 'ERP Exam Part I - Nov',
+      sort: 37,
+      weight: 0
+    },
+    {
+      glCodes: [
+        '4001'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'ENC2E',
+        'ENC2S',
+        'ENC2L'
+      ],
+      mergedCode : 'ERPIIMAY',
+      mergedGL : '4001MERGE',
+      mergedName : 'ERP Exam Part II - May',
+      sort: 36,
+      weight: 0
+    },
+    {
+      glCodes: [
+        '4002'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'ENC2E',
+        'ENC2S',
+        'ENC2L'
+      ],
+      mergedCode : 'ERPIINOV',
+      mergedGL : '4002MERGE',
+      mergedName : 'ERP Exam Part II - Nov',
+      sort: 38,
       weight: 0
     },
     {
