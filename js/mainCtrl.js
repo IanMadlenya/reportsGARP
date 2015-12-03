@@ -217,40 +217,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedName : 'ERP Exam Part II - Nov',
       sort: 38,
       weight: 0
-    },
-    {
-      glCodes: [
-        '4001'
-      ],
-      company: 'GRA',
-      prodCodes : [
-        'ENCE',
-        'ENCS',
-        'ENCL',
-      ],
-      mergedCode : 'ENCMAY',
-      mergedGL : '4001MERGE',
-      mergedName : 'ERP Exam - May',
-      sort: 35,
-      weight: 0
-    },
-    {
-      glCodes: [
-        '4002'
-      ],
-      company: 'GRA',
-      prodCodes : [
-        'ENCE',
-        'ENCS',
-        'ENCL',
-      ],
-      mergedCode : 'ENCNOV',
-      mergedGL : '4002MERGE',
-      mergedName : 'ERP Exam - Nov',
-      sort: 36,
-      weight: 0
     }
-
   ];
 
   $scope.shippingProductId = null;

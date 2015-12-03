@@ -103,7 +103,7 @@
 
     myApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
-    var startPath = 'exams';
+    var startPath = 'daily';
 
     // For unmatched routes:
     if(defined(startPath)) {
