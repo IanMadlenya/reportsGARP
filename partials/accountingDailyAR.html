@@ -46,17 +46,12 @@
             <b>Total</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
-            <div ng-if="prod.Product2.ProductCode!=SHIP">
-              {{prod.Name}}<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
-            </div>
-            <div ng-if="prod.Product2.ProductCode==SHIP">
-              Shipping<br>{{prod.Name}}<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
-            </div>
+            {{prod.Name}}<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
           </td>
 
-          <!-- td ng-repeat="prod in prods | filter:criteriaMatchShip()">
+          <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
             {{prod.Name}} Shipping<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.
-          </td-->          
+          </td>          
           <td>
             <b>Total</b>
           </td>
