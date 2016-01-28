@@ -665,7 +665,8 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   }
 
 
-  $scope.getProductAmountShipping = function(opp, prod) {
+
+$scope.getProductAmountShipping = function(opp, prod) {
 
     var prodId = prod.Id
     if(!defined(opp,"OpportunityLineItems.length"))
@@ -693,18 +694,17 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
       //var match = _.findWhere(opp.OpportunityLineItems, {PricebookEntry.product2.Id: Product2.Id});
       //var fndProd=_.findWhere($scope.prods, {Id: prodId})
-      var found=false;
+      var foundCnt=0;
       for(var j=0; j<opp.OpportunityLineItems.length; j++) {
         var oppLine = opp.OpportunityLineItems[j];
         if(oppLine.PricebookEntry.Product2.Id == prod.Product2.Id) {
-          found=true;
-          break;
+          foundCnt++;
         }
       }
 
     }
 
-    if(!found && !foundRefundShipping)
+    if(foundCnt==0 && !foundRefundShipping)
       return 0;
 
     var fndProd=prod;
@@ -730,12 +730,12 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
       if(opp.isRefund) {
         if(foundRefundShipping) {
-          return shippingCost * percent * -1;
+          return (shippingCost * foundCnt) * percent * -1;
         } else {
           return 0;
         }
       } else {
-        return shippingCost * percent;
+        return (shippingCost * foundCnt) * percent;
       }
         
       
@@ -744,7 +744,9 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
   }
 
-  $scope.getProductAmount = function(opp, prod) {
+
+
+$scope.getProductAmount = function(opp, prod) {
 
     var prodId = prod.Id;
     if(defined(opp,"isRefund") && opp.isRefund) {
@@ -761,12 +763,21 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       return 0;
     }
 
-    var match = _.findWhere(opp.OpportunityLineItems, {PricebookEntryId: prodId});
-    if(defined(match))
-      return match.TotalPrice;
+    //var match = _.findWhere(opp.OpportunityLineItems, {PricebookEntryId: prodId});
+    var matches = _.where(opp.OpportunityLineItems, {PricebookEntryId: prodId});
+    if(defined(matches,"length") && matches.length > 0) {
+      var totAmt = 0;
+      for(var i=0; i<matches.length; i++) {
+        var match = matches[i];
+        if(defined(match,"TotalPrice"))
+          totAmt+=match.TotalPrice;
+      }
+      return totAmt;
+    }
     else return 0;
   }
 
+  
   function formatAmountExport(amount) {
     if(!defined(amount)) {
       amount=0;
