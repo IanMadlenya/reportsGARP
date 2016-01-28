@@ -434,33 +434,35 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
           $scope.oppsData = data.result.opps;
           for(var t=0; t<$scope.oppsData.length; t++) {
             var opp = $scope.oppsData[t];
-            for(var z=0; z<opp.OpportunityLineItems.length; z++) {
-              var li = opp.OpportunityLineItems[z];
+            if(defined(opp,"OpportunityLineItems.length")) {
+              for(var z=0; z<opp.OpportunityLineItems.length; z++) {
+                var li = opp.OpportunityLineItems[z];
 
-              var found=false;
-              for(var k=0; k<mergeProds.length; k++) {
-                var idxgl = _.indexOf(mergeProds[k].glCodes, li.PricebookEntry.Product2.GL_Code__c);  
-                var idxpc = _.indexOf(mergeProds[k].prodCodes, li.PricebookEntry.ProductCode);  
-                if(idxgl > -1 && idxpc > -1) {              
-                  found=true;
-                  break;
+                var found=false;
+                for(var k=0; k<mergeProds.length; k++) {
+                  var idxgl = _.indexOf(mergeProds[k].glCodes, li.PricebookEntry.Product2.GL_Code__c);  
+                  var idxpc = _.indexOf(mergeProds[k].prodCodes, li.PricebookEntry.ProductCode);  
+                  if(idxgl > -1 && idxpc > -1) {              
+                    found=true;
+                    break;
+                  }
                 }
+
+                if(found) {
+                  li.PricebookEntry.Id = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
+                  li.PricebookEntry.Product2.Id = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
+                  li.PricebookEntryId = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;                  
+                }
+
+
+                // if(li.PricebookEntry.Product2.GL_Code__c == FRM1_GLCODE && 
+                //   (li.PricebookEntry.ProductCode == FRM1EARLY || li.PricebookEntry.ProductCode == FRM1STANDARD || li.PricebookEntry.ProductCode == FRM1LATE)) {
+                  
+                //     li.PricebookEntry.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                //     li.PricebookEntry.Product2.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                //     li.PricebookEntryId = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
+                // }
               }
-
-              if(found) {
-                li.PricebookEntry.Id = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
-                li.PricebookEntry.Product2.Id = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;
-                li.PricebookEntryId = mergeProds[k].mergedCode+':'+mergeProds[k].mergedGL;                  
-              }
-
-
-              // if(li.PricebookEntry.Product2.GL_Code__c == FRM1_GLCODE && 
-              //   (li.PricebookEntry.ProductCode == FRM1EARLY || li.PricebookEntry.ProductCode == FRM1STANDARD || li.PricebookEntry.ProductCode == FRM1LATE)) {
-                
-              //     li.PricebookEntry.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
-              //     li.PricebookEntry.Product2.Id = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
-              //     li.PricebookEntryId = FRM1_CODE_MERGED+':'+FRM1_GLCODE_MERGED;
-              // }
             }
           }
         }
