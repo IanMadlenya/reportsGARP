@@ -11,11 +11,17 @@ ${demo.css}
       Exam:<br> <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
               <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
             </select>
+            <div>
+              {{getDescription()}}
+            </div>
     </div>
     <div class="col-md-2">
       Exam Type:<br> <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
                     <option ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
                   </select>
+                  <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O4000000492wq' || rptData.currentReportType == '00O4000000493cI')">
+                    <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
+                  </div>
     </div>
     <div class="col-md-2">
 
@@ -31,7 +37,7 @@ ${demo.css}
     </div>
     <div class="col-md-2">
       <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid"> Include Unpaid<br>
-      <button ng-click="refresh(false)">Graph</button>&nbsp;<button ng-click="refresh(true)">Reload Data</button>
+      <button ng-click="refresh(true)">Load and Graph Data</button>&nbsp;<button ng-click="refresh(false)">Reload</button>
     </div>
   </div>
   <div class="row">
