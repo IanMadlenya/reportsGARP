@@ -550,8 +550,11 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
     //var rptId = $scope.rptData.currentReportType
     var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
-    if(!defined($scope.rptData[key]))
+    if(!defined($scope.rptData[key])) {
+      alert("Data not found! Please reload page and try again.");
       return;
+    }
+      
 
     var data = $scope.rptData[key];
     console.log(data);
