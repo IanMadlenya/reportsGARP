@@ -174,6 +174,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   $scope.rptData.disableExamMonth=false;
   $scope.rptData.disableExamType=false;
   $scope.rptData.includeUnPaid=false;
+  $scope.rptData.combineExams=false;
   $scope.rptData.allOrders = "New Lead,Closed Won,Closed, Closed Lost";
   $scope.rptData.paidOrders = "Closed Won, Closed";
   $scope.rptData.currentReportType= null;
@@ -185,6 +186,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   $scope.rptData.reportTypeList = [
       {
         name: "Exam Registrations By Country",
+        description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000494UK",
         reportType: 'table',
         cumlative: false,
@@ -223,6 +225,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       },
       {
         name: "Exam Attendance By Country",
+        description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000494Tb",
         reportType: 'table',
         cumlative: false,
@@ -261,27 +264,33 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       },
       {
         name: "Exam Registrations By Day Of Year",
+        description: "Cumlative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000492wq",
+        reportIdCombined: "00O40000004HEOG",
         reportType: 'stackedline',
         cumlative: true,
         applyFilters: true
       },
       {
         name: "Exam Registrations By Type By Year",
+        description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000493cI",
+        reportIdCombined: "00O40000004HEPs",
         reportType: 'stackedbar',
         cumlative: false,
         applyFilters: true
       },
       {
         name: "ERP Exam Registrations By Year",
+        description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000493iL",
-        reportType: 'bar',
+        reportType: 'stackedbar',
         cumlative: false,
         applyFilters: false
       },
       {
         name: "FRM Exam Registrations By Year",
+        description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000493eE",
         reportType: 'stackedbar',
         cumlative: false,
@@ -295,6 +304,18 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       value: "ERP"
     },
     {
+      name: "ERP I",
+      value: "ERP Exam Part I"
+    },
+    {
+      name: "ERP II",
+      value: "ERP Exam Part II"
+    },
+    {
+      name: "ERP All",
+      value: "ERP, ERP Exam Part I, ERP Exam Part II"
+    },
+    {
       name: "FRM I",
       value: "FRM Part 1"
     },
@@ -303,7 +324,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       value: "FRM Part 2"
     },
     {
-      name: "FRM Both",
+      name: "FRM All",
       value: "FRM Part 1,FRM Part 2"
     },
     {
@@ -330,7 +351,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   ];
 
   $scope.rptData.examYearList=[];
-  for(var i=2010; i<=2015; i++) {
+  for(var i=2010; i<=2016; i++) {
     var obj = {
       name: i,
       value: i
@@ -338,6 +359,13 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
     $scope.rptData.examYearList.push(obj);
   }
 
+  $scope.getDescription = function() {
+    var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+    if(fndRpt != null) {
+      return fndRpt.description;
+    }
+
+  }
 
   $scope.selectType = function() {
     var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
@@ -384,7 +412,15 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
   $scope.refresh=function(reload) {
     if(defined($scope,"rptData.currentReportType")) {
-      var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+
+      $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+      $scope.reportId = $scope.fndRpt.reportId;
+
+      if($scope.rptData.combineExams) {
+        $scope.reportId = $scope.fndRpt.reportIdCombined;
+      }
+
+      var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
       if(reload)
         $scope.rptData[key]=null;
       if(defined($scope.rptData[key])) {
@@ -402,9 +438,17 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
   function loadData() {
 
-    var report = conn.analytics.report($scope.rptData.currentReportType);
 
-    conn.analytics.report($scope.rptData.currentReportType).describe(function(err, meta) {
+    $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+    $scope.reportId = $scope.fndRpt.reportId;
+
+    if($scope.rptData.combineExams) {
+      $scope.reportId = $scope.fndRpt.reportIdCombined;
+    }
+      
+    var report = conn.analytics.report($scope.reportId);
+
+    conn.analytics.report($scope.reportId).describe(function(err, meta) {
       if (err) { return console.error(err); }
       console.log(meta.reportMetadata);
       console.log(meta.reportTypeMetadata);
@@ -420,19 +464,17 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       if($scope.rptData.currentExamMonth == 'Nov')
         var srtDate = '2015-05-01'
 
-      var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
-
       if(defined(meta,"reportMetadata.reportFilters.length")) {
         for(var i=0; i<meta.reportMetadata.reportFilters.length; i++) {
           var rf = meta.reportMetadata.reportFilters[i];
           switch(rf.column) {
             case 'Exam_Attempt__c.RPT_Exam_Description__c':
-              if(fndRpt.applyFilters)
+              if($scope.fndRpt.applyFilters)
                 rf.value = $scope.rptData.currentExamMonth;
               break;
 
             case 'Exam_Attempt__c.Section__c':
-              if(fndRpt.applyFilters)
+              if($scope.fndRpt.applyFilters)
                 rf.value = $scope.rptData.currentExamType;
               break;
 
@@ -443,7 +485,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
             case 'Exam_Attempt__c.RPT_Exam_Year__c':
               if($scope.rptData.currentExamYear != null)
                   rf.value = $scope.rptData.currentExamYear;
-              else rf.value = '2010,2011,2012,2013,2014,2015';
+              else rf.value = '2010,2011,2012,2013,2014,2015,2016';
               break;
           }
         }        
@@ -478,7 +520,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
         var data = result;
         debugger;
 
-        var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+        var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
         $scope.rptData[key] = data;
         localStorage.rptData = JSON.stringify($scope.rptData);
 
@@ -498,8 +540,16 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
     if(!defined($scope,"rptData.currentReportType"))
       return;
 
-    var rptId = $scope.rptData.currentReportType
-    var key = $scope.rptData.currentReportType + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+    $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+    $scope.reportId = $scope.fndRpt.reportId;
+
+    if($scope.rptData.combineExams) {
+      $scope.reportId = $scope.fndRpt.reportIdCombined;
+    }
+
+
+    //var rptId = $scope.rptData.currentReportType
+    var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
     if(!defined($scope.rptData[key]))
       return;
 
@@ -511,14 +561,14 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       return;
     }
 
-    var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: rptId});
-    if(!defined(fndRpt)) {
+    //var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.reportId});
+    if(!defined($scope.fndRpt)) {
       alert('Report not found!');
       return;
     }  
 
 
-    if(fndRpt.reportType == 'table') {
+    if($scope.fndRpt.reportType == 'table') {
 
       var sdata = [];
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
@@ -533,7 +583,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
         }
         if(defined(group,"groupings.length")) {
 
-          var types = _.pluck(fndRpt.columnDefs, "field");
+          var types = _.pluck($scope.fndRpt.columnDefs, "field");
           types= _.reject(types, function(obj){ return (obj == 'Country' || obj == 'Total'); });
           //var types = ['Attended','Deferred','No-Show'];
           
@@ -554,20 +604,20 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       if(async) {
         $rootScope.$apply(function(){
           $scope.myData = sdata;
-          $scope.gridOptions1.columnDefs = fndRpt.columnDefs;
+          $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
           $scope.gridOptions1.data = sdata;
           $rootScope.$broadcast('drawMap', sdata);
         });
       } else {
         $scope.myData = sdata;
-        $scope.gridOptions1.columnDefs = fndRpt.columnDefs;
+        $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
         $scope.gridOptions1.data = sdata;        
         $rootScope.$broadcast('drawMap', sdata);
       }
     }
 
     // Setup X and Y Axis, line does not require stackLabels data...
-    if(fndRpt.reportType == 'stackedline') {
+    if($scope.fndRpt.reportType == 'stackedline') {
 
       var sdata =[];
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
@@ -608,7 +658,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
             var sd = _.findWhere(sdata, {name: series[j]});
             var val = 0;
 
-            if(fndRpt.cumlative == true) {
+            if($scope.fndRpt.cumlative == true) {
               if(sd.last != null)
                 val = sd.last + val;
               sd.last = val;
@@ -623,7 +673,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
             var gname = g.label;
             var sd = _.findWhere(sdata, {name: g.label});
 
-            if(fndRpt.cumlative == true) {
+            if($scope.fndRpt.cumlative == true) {
               if(sd.last != null)
                 val = sd.last + val;
               sd.last = val;
@@ -834,7 +884,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
     }
 
 
-    if(fndRpt.reportType == 'bar') {
+    if($scope.fndRpt.reportType == 'bar') {
 
       var  labels = _.pluck(data.groupingsDown.groupings, "label");    
       var sdata = {
@@ -871,7 +921,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
                   type: 'column'
               },
               title: {
-                  text: fndRpt.Name
+                  text: $scope.fndRpt.Name
               },
               subtitle: {
                   text: ''
@@ -919,7 +969,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           
     } // Bar
 
-if(fndRpt.reportType == 'stackedbar') {
+if($scope.fndRpt.reportType == 'stackedbar') {
 
         var  labels = _.pluck(data.groupingsDown.groupings, "label");    
         var sdata = [];
