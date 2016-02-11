@@ -264,7 +264,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       },
       {
         name: "Exam Registrations By Day Of Year",
-        description: "Cumlative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+        description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
         reportId: "00O4000000492wq",
         reportIdCombined: "00O40000004HEOG",
         reportType: 'stackedline',
