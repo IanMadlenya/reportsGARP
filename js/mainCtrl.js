@@ -58,6 +58,36 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   var mergeProds = [
       {
       glCodes: [
+        '4030'
+      ],
+      company: 'GARP',
+      prodCodes : [
+        'FRMC1',
+        'FRMC2'
+      ],
+      mergedCode : 'FRMC',
+      mergedGL : '4030MERGE',
+      mergedName : 'FRM Practice Exams',
+      sort: 25,
+      weight: 0
+    },
+      {
+      glCodes: [
+        '4030'
+      ],
+      company: 'GRA',
+      prodCodes : [
+        'ENCC1',
+        'ENCC2'
+      ],
+      mergedCode : 'ENCC',
+      mergedGL : '4030MERGE',
+      mergedName : 'ERP Practice Exams',
+      sort: 49,
+      weight: 0
+    },
+      {
+      glCodes: [
         '4000'
       ],
       company: 'GRA',
@@ -824,8 +854,7 @@ $scope.getProductAmount = function(opp, prod) {
 
   $scope.export = function() {
 
-    var json = [{"invoiceNumber":"Invoice #","garpId":"GARP ID","firstName":"First Name","lastName":"Last Name","county":"Country","state":"State","payPalId":"PayPal Trans ID",
-                  "type":"Type","method":"Payment Method","company":"Company","paidDate":"Paid Date","total":"Total"}];
+    var json = [{"company":"Company","type":"Type","total":"Total","invoiceNumber":"Invoice #","garpId":"GARP ID","firstName":"First Name","lastName":"Last Name","county":"Country","state":"State","method":"Payment Method","paidDate":"Paid Date","payPalId":"PayPal Trans ID"}];
     for(var i=0; i<$scope.prods.length; i++) {  
       var prod = $scope.prods[i];
       var func = $scope.criteriaMatch();
@@ -849,18 +878,18 @@ $scope.getProductAmount = function(opp, prod) {
       var func = $scope.filterMatch();
       if(func(opp)) {
         var obj = {
+          "company":formatDefined(opp.Company__c),
+          "type":formatDefined(opp.trans.ChargentSFA__Type__c),
+          "total":formatAmountExport($scope.getRowTotal(opp)),
           "invoiceNumber":formatDefined(opp.Display_Invoice_Number__c),
           "garpId":formatDefined(opp.GARP_Member_ID__c),
           "firstName":formatDefined(opp.Member_First_Name__c),
           "lastName":formatDefined(opp.Member_Last_Name__c),
           "county":formatDefined(opp.Shipping_Country__c),
           "state":formatDefined(opp.Shipping_State__c),
-          "payPalId":formatDefined(opp.trans.ChargentSFA__Gateway_ID__c),
-          "type":formatDefined(opp.trans.ChargentSFA__Type__c),
           "method":formatDefined(opp.trans.ChargentSFA__Payment_Method__c),
-          "company":formatDefined(opp.Company__c),
           "paidDate":formatDefined(formatDate(opp.closeDate, "MM-DD-YYYY")),
-          "total":formatAmountExport($scope.getRowTotal(opp))
+          "payPalId":formatDefined(opp.trans.ChargentSFA__Gateway_ID__c)
         };
 
         for(var i=0; i<$scope.prods.length; i++) {  

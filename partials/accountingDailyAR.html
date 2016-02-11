@@ -9,6 +9,17 @@
       <table border=1 class="table table-condensed examday-reminder-area">
 
         <tr>
+
+          <td style="min-width:100px;">
+            <b>Company</b>
+          </td>
+          <td style="min-width:100px;">
+            <b>Type</b>
+          </td>
+          <td>
+            <b>Total</b>
+          </td>
+
           <td>
             <b><a href="" ng-click="sortItems('Display_Invoice_Number__c')">Invoice #</a></b>
           </td>
@@ -28,22 +39,13 @@
             <b>State</b>
           </td>
           <td style="min-width:100px;">
-            <b>PayPal Trans ID</b>
-          </td>
-          <td style="min-width:100px;">
-            <b>Type</b>
-          </td>
-          <td style="min-width:100px;">
             <b>Payment Method</b>
-          </td>
-          <td style="min-width:100px;">
-            <b>Company</b>
           </td>
           <td style="min-width:100px;">
             <b>Paid Date</b>
           </td>
-          <td>
-            <b>Total</b>
+          <td style="min-width:100px;">
+            <b>PayPal Trans ID</b>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             {{prod.Name}}<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.</span>
@@ -58,6 +60,15 @@
         </tr>
 
         <tr ng-repeat="opp in opps | filter:filterMatch() track by $index" emit-when="{event: 'allRendered', condition: $last}">
+          <td>
+            {{opp.Company__c}}
+          </td>
+          <td>
+            {{opp.trans.ChargentSFA__Type__c}}
+          </td>
+          <td>
+            <b>${{formatAmountDisplay(getRowTotal(opp))}}</b>
+          </td>
           <td>
             {{opp.Display_Invoice_Number__c}}
           </td>
@@ -77,22 +88,13 @@
             {{opp.Shipping_State__c}}
           </td>
           <td>
-            {{opp.trans.ChargentSFA__Gateway_ID__c}}
-          </td>
-          <td>
-            {{opp.trans.ChargentSFA__Type__c}}
-          </td>
-          <td>
             {{opp.trans.ChargentSFA__Payment_Method__c}}
           </td>
           <td>
-            {{opp.Company__c}}
-          </td>
-          <td>
             {{formatDate(opp.closeDate, "MM-DD-YYYY")}}
-          </td>
+          </td>          
           <td>
-            <b>${{formatAmountDisplay(getRowTotal(opp))}}</b>
+            {{opp.trans.ChargentSFA__Gateway_ID__c}}
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <div ng-if="getProductAmount(opp, prod)">
@@ -112,28 +114,28 @@
           <td>
           </td>
           <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
-          </td>
-          <td>
              <b>Totals</b>
           </td>
           <td>
               <b>${{formatAmountDisplay(getOppTotals())}}</b>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+          <td>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <b>${{formatAmountDisplay(getProdTotals(prod.Id))}}</b>    
