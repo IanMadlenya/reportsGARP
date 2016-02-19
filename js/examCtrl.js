@@ -522,7 +522,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
         var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
         $scope.rptData[key] = data;
-        localStorage.rptData = JSON.stringify($scope.rptData);
+        //localStorage.rptData = JSON.stringify($scope.rptData);
 
          $scope.mainSpinner.stop();
 
