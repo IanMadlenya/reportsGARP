@@ -1,0 +1,72 @@
+<div class="container page-container" ng-controller="SFDCAppErrorCtrl">
+
+  <div class="modal fade" id="myGlobalErrorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 id="subject"></h4>
+        </div>
+        <div class="modal-body">
+
+          <p id="message"></p>
+
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  <div class="modal fade" id="myGlobalInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">
+            Information
+          </h4>
+        </div>
+        <div class="modal-body">
+
+          <p id="message"></p>
+
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+<div class="modal fade" id="myGlobalLeaveSiteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 id="subject">You are now leaving the GARP website</h4>
+        </div>
+        <div class="modal-body">
+
+          <p id="message">GARP uses maps from the Google Maps website. GARP is not responsible for the content or functionality of Google Maps and assumes no liability or responsibility for Google Maps, including the functionality or security of the Google Maps site or the accuracy of any content or services from that site. You should review Google's terms of use for the rules governing access to and use of Google Maps in connection with your use of the GARP Programs or GARP websites, including use of "cookies" and the collection of information from visitors to Google Maps.</p>
+
+          <p>
+            <button name="leaveButton" ng-click="leaveSite()" class="btn garp-btn-orange">Go to external Website</button>
+          </p>          
+
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+  <div class="modal fade" id="myGlobalInfoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel">
+            Information
+          </h4>
+        </div>
+        <div class="modal-body">
+          <p id="message"></p>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+</div>

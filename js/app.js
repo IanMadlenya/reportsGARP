@@ -101,6 +101,60 @@
 
     var myApp = angular.module('reportsGARP', ['reportsGARPControllers','ui.router','ui.grid']);
 
+angular.module('ErrorCatcher', [])
+    .factory('$exceptionHandler', ['$injector', function ($injector) {
+        return function errorCatcherHandler(exception, cause) {
+            console.error(exception.stack);
+            var msg = '';
+            var file = '';
+            var method = '';
+            if(defined(exception,"stack") && (!defined(exception,"message") || exception.message.length == 0 )) {
+
+              var jsonMsgRegx =  /"message":"([^"]*)"/ig;
+              var res = jsonMsgRegx.exec(exception.stack);
+              if(defined(res,"length") && res.length > 0) {
+                msg = res[1];
+              }
+
+              //"method":"getDefferedExam"
+              var jsonMethodRegx =  /"method":"([^"]*)"/ig;
+              res = jsonMethodRegx.exec(exception.stack);
+              if(defined(res,"length") && res.length > 0) {
+                method = res[1];
+              }
+
+
+            } else {
+              msg = exception.message;
+
+              //"method":"getDefferedExam"
+              var jsonMethodRegx =  /"method":"([^"]*)"/ig;
+              res = jsonMethodRegx.exec(msg);
+              if(defined(res,"length") && res.length > 0) {
+                method = res[1];
+              }
+
+            }
+
+            var stackRegx = /sfdcApp\/([^:]*):/ig;
+            var res = stackRegx.exec(exception.stack);
+            if(defined(res,"length") && res.length > 0) {
+              file = res[1];
+            }
+
+            //add the current state info to the message
+            var state = $injector.get('$state');
+            msg = state.current.name + ':' + msg;
+
+            //sfdcService.logError(exception.stack, msg, file, method, function(err, data) {
+            //});
+            $('#myGlobalErrorModal p').html("There has been an unexpected error. Please logout and try again. If this error persists please contact support at memberservices@garp.com")
+            $("#myGlobalErrorModal").modal();
+        };
+    }]);
+
+    
+
     myApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
     var startPath = 'daily';
@@ -150,3 +204,23 @@
         }
     });
     
+    myApp.controller('SFDCAppErrorCtrl', ['$scope', '$rootScope', '$state',
+      function ($scope, $rootScope, $state) {
+
+        $scope.$on("appError", function (event, msg, subject) {
+            $('#myGlobalErrorModal').find('.modal-header').find('#subject').html(subject)
+            $('#myGlobalErrorModal').find('.modal-body').find('#message').html(msg)
+            $("#myGlobalErrorModal").modal();
+        });
+
+        $scope.$on("leaveSite", function (event, siteURL) {
+          $scope.siteURL = siteURL;
+          $("#myGlobalLeaveSiteModal").modal();
+        });
+
+        $scope.leaveSite = function() {
+          document.location = $scope.siteURL;
+        }
+
+      }
+    ]);
