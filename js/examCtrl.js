@@ -166,10 +166,11 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
     }
   ]
 
-  if(defined(localStorage,"rptData"))
-    $scope.rptData = JSON.parse(localStorage.rptData);
-  else $scope.rptData = {};
+  //if(defined(localStorage,"rptData"))
+  //  $scope.rptData = JSON.parse(localStorage.rptData);
+  //else $scope.rptData = {};
 
+  $scope.rptData = {};
   $scope.rptData.disableExamYear=false;  
   $scope.rptData.disableExamMonth=false;
   $scope.rptData.disableExamType=false;
@@ -392,7 +393,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       $scope.rptData.disableExamMonth=false;
       $scope.rptData.disableExamType=false;
     }
-    localStorage.examsData = JSON.stringify($scope.rptData);
+    //localStorage.examsData = JSON.stringify($scope.rptData);
   }
 
   var conn = jsForceConn;
@@ -448,8 +449,15 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       
     var report = conn.analytics.report($scope.reportId);
 
+    var a = null;
+    a.b.c = 1;
+
     conn.analytics.report($scope.reportId).describe(function(err, meta) {
-      if (err) { return console.error(err); }
+      if (err) { 
+        $('#myGlobalErrorModal p').html("There has been an unexpected error:" + err)
+        $("#myGlobalErrorModal").modal();
+        return console.error(err); 
+      }
       console.log(meta.reportMetadata);
       console.log(meta.reportTypeMetadata);
       console.log(meta.reportExtendedMetadata);
@@ -510,6 +518,8 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       report.execute({ metadata : metadata },function(err, result) {
         if (err) { 
           $scope.mainSpinner.stop();
+          $('#myGlobalErrorModal p').html("There has been an unexpected error:" + err)
+          $("#myGlobalErrorModal").modal();          
           return console.error(err); 
         }
         console.log(result.reportMetadata);
