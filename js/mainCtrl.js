@@ -420,7 +420,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
 
     //var sdt = moment.tz($scope.formVars.startDate + ' 00:00:01','America/Los_Angeles').add(+3,'hours').unix();
     //var edt = moment.tz($scope.formVars.endDate + ' 23:59:59','America/Los_Angeles').add(+3,'hours').unix();
-    var sdt = moment.tz($scope.formVars.startDate + ' 00:00:01','America/Los_Angeles').unix();
+    var sdt = moment.tz($scope.formVars.startDate + ' 00:00:00','America/Los_Angeles').unix();
     var edt = moment.tz($scope.formVars.endDate + ' 23:59:59','America/Los_Angeles').unix();
 
     $scope.filterProdIds = [];
