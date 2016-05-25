@@ -3,105 +3,105 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
 
     //$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
 
-    $rootScope.$on('drawMap', function(event, sdata) {
+      $rootScope.$on('drawMap', function(event, sdata) {
 
-      var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+        var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
 
-      var data = [];
+        var data = [];
 
-      for(var i=0; i<sdata.length; i++) {
+        for(var i=0; i<sdata.length; i++) {
 
-        var fnd = _.findWhere(mapData, {name: sdata[i].Country})
+          var fnd = _.findWhere(mapData, {name: sdata[i].Country})
 
-        if(defined(fnd)) {
-          var obj = {
-            code: fnd.properties['iso-a2'],
-            z: sdata[i].Total,
-            name: sdata[i].Country,
-            value: sdata[i].Total
+          if(defined(fnd)) {
+            var obj = {
+              code: fnd.properties['iso-a2'],
+              z: sdata[i].Total,
+              name: sdata[i].Country,
+              value: sdata[i].Total
+            }
+            data.push(obj);
+          } else {
+            console.log('Not Found: ' + sdata.Country);
           }
-          data.push(obj);
-        } else {
-          console.log('Not Found: ' + sdata.Country);
         }
-      }
 
       // Correct UK to GB in data
       $.each(data, function () {
-          if (this.code === 'UK') {
-              this.code = 'GB';
-          }
+        if (this.code === 'UK') {
+          this.code = 'GB';
+        }
       });
 
       $('#containerMap').highcharts('Map', {
         chart : {
-            borderWidth : 1
+          borderWidth : 1
         },
 
         title : {
-            text : 'Registrations By Country'
+          text : 'Registrations By Country'
         },
 
         legend: {
-            layout: 'horizontal',
-            borderWidth: 0,
-            backgroundColor: 'rgba(255,255,255,0.85)',
-            floating: true,
-            verticalAlign: 'top',
-            y: 25
+          layout: 'horizontal',
+          borderWidth: 0,
+          backgroundColor: 'rgba(255,255,255,0.85)',
+          floating: true,
+          verticalAlign: 'top',
+          y: 25
         },
 
         mapNavigation: {
-            enabled: true
+          enabled: true
         },
 
         colorAxis: {
-            min: 1,
-            type: 'logarithmic',
-            minColor: '#EEEEFF',
-            maxColor: '#000022',
-            stops: [
-                [0, '#EFEFFF'],
-                [0.67, '#4444FF'],
-                [1, '#000022']
-            ]
+          min: 1,
+          type: 'logarithmic',
+          minColor: '#EEEEFF',
+          maxColor: '#000022',
+          stops: [
+          [0, '#EFEFFF'],
+          [0.67, '#4444FF'],
+          [1, '#000022']
+          ]
         },
 
         series : [{
-            animation: {
-                duration: 1000
-            },
-            data : data,
-            mapData: mapData,
-            joinBy: ['iso-a2', 'code'],
-            dataLabels: {
-                enabled: true,
-                color: 'white',
-                format: '{point.code}'
-            },
-            name: 'Registrations',
-            tooltip: {
-                pointFormat: '{point.name}: {point.value}'
-            }
+          animation: {
+            duration: 1000
+          },
+          data : data,
+          mapData: mapData,
+          joinBy: ['iso-a2', 'code'],
+          dataLabels: {
+            enabled: true,
+            color: 'white',
+            format: '{point.code}'
+          },
+          name: 'Registrations',
+          tooltip: {
+            pointFormat: '{point.name}: {point.value}'
+          }
         }]        
       });
-    });
+});
 }]);
 
 reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout','$stateParams','uiGridConstants', 
-function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
-  
-  $scope.envPath = envPath;
+  function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
-  $scope.sortingAlgorithm = function(a, b) {
-    if(a>b)
-      return 1;
-    else if(a<b)
-      return -1;
-    else return 0;
-  }
+    $scope.envPath = envPath;
 
-  $scope.gridOptions1 = {
+    $scope.sortingAlgorithm = function(a, b) {
+      if(a>b)
+        return 1;
+      else if(a<b)
+        return -1;
+      else return 0;
+    }
+
+    $scope.gridOptions1 = {
       enableSorting: true,
       enableFiltering: true,
       filterOptions: {
@@ -110,7 +110,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       data: null
     };
 
-  $scope.examDatesMay = [
+    $scope.examDatesMay = [
     {
       datetext: '12/1/2009',
       key:'May 2010',
@@ -136,9 +136,9 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       key:'May 2015',
       done: false
     }
-  ]
+    ]
 
-  $scope.examDatesNov = [
+    $scope.examDatesNov = [
     {
       datetext: '12/1/2010',
       key:'Nov 2010',
@@ -164,7 +164,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       key:'Nov 2015',
       done: false
     }
-  ]
+    ]
 
   //if(defined(localStorage,"rptData"))
   //  $scope.rptData = JSON.parse(localStorage.rptData);
@@ -176,6 +176,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   $scope.rptData.disableExamType=false;
   $scope.rptData.includeUnPaid=false;
   $scope.rptData.combineExams=false;
+  $scope.rptData.combineParts=false;
   $scope.rptData.allOrders = "New Lead,Closed Won,Closed, Closed Lost";
   $scope.rptData.paidOrders = "Closed Won, Closed";
   $scope.rptData.currentReportType= null;
@@ -185,214 +186,227 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
 
 
   $scope.rptData.reportTypeList = [
-      {
-        name: "Exam Registrations By Country",
-        description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-        reportId: "00O4000000494UK",
-        reportType: 'table',
-        cumlative: false,
-        applyFilters: true,
-        columnDefs: [
-          { field: 'Country' },
-          { field: 'Total',
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 1
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm
-          },
-          { field: 'Closed',          
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 2
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm        
-          },
-          { field: 'Closed Lost',          
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 3
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm
-          },
-          { field: 'New Lead',          
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 4
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm
-          }
-        ]
-      },
-      {
-        name: "Exam Attendance By Country",
-        description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-        reportId: "00O4000000494Tb",
-        reportType: 'table',
-        cumlative: false,
-        applyFilters: true,
-        columnDefs: [
-          { field: 'Country' },
-          { field: 'Total',
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 1
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm
-          },
-          { field: 'Attended',          
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 2
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm        
-          },
-          { field: 'Deferred',          
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 3
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm
-          },
-          { field: 'No-Show',          
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 4
-            },
-            sortingAlgorithm: $scope.sortingAlgorithm
-          }
-        ]
-      },
-      {
-        name: "Exam Registrations By Day Of Year",
-        description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-        reportId: "00O4000000492wq",
-        reportIdCombined: "00O40000004HEOG",
-        reportType: 'stackedline',
-        cumlative: true,
-        applyFilters: true
-      },
-      {
-        name: "Exam Registrations By Type By Year",
-        description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-        reportId: "00O4000000493cI",
-        reportIdCombined: "00O40000004HEPs",
-        reportType: 'stackedbar',
-        cumlative: false,
-        applyFilters: true
-      },
-      {
-        name: "ERP Exam Registrations By Year",
-        description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-        reportId: "00O4000000493iL",
-        reportType: 'stackedbar',
-        cumlative: false,
-        applyFilters: false
-      },
-      {
-        name: "FRM Exam Registrations By Year",
-        description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-        reportId: "00O4000000493eE",
-        reportType: 'stackedbar',
-        cumlative: false,
-        applyFilters: false
-      }
-    ];
+  {
+    name: "Exam Registrations By Country",
+    description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+    reportId: "00O4000000494UK",
+    reportType: 'table',
+    cumlative: false,
+    applyFilters: true,
+    columnDefs: [
+    { field: 'Country' },
+    { field: 'Total',
+    sort: {
+      direction: uiGridConstants.DESC,
+      priority: 1
+    },
+    sortingAlgorithm: $scope.sortingAlgorithm
+  },
+  { field: 'Closed',          
+  sort: {
+    direction: uiGridConstants.DESC,
+    priority: 2
+  },
+  sortingAlgorithm: $scope.sortingAlgorithm        
+},
+{ field: 'Closed Lost',          
+sort: {
+  direction: uiGridConstants.DESC,
+  priority: 3
+},
+sortingAlgorithm: $scope.sortingAlgorithm
+},
+{ field: 'New Lead',          
+sort: {
+  direction: uiGridConstants.DESC,
+  priority: 4
+},
+sortingAlgorithm: $scope.sortingAlgorithm
+}
+]
+},
+{
+  name: "Exam Attendance By Country",
+  description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+  reportId: "00O4000000494Tb",
+  reportType: 'table',
+  cumlative: false,
+  applyFilters: true,
+  columnDefs: [
+  { field: 'Country' },
+  { field: 'Total',
+  sort: {
+    direction: uiGridConstants.DESC,
+    priority: 1
+  },
+  sortingAlgorithm: $scope.sortingAlgorithm
+},
+{ field: 'Attended',          
+sort: {
+  direction: uiGridConstants.DESC,
+  priority: 2
+},
+sortingAlgorithm: $scope.sortingAlgorithm        
+},
+{ field: 'Deferred',          
+sort: {
+  direction: uiGridConstants.DESC,
+  priority: 3
+},
+sortingAlgorithm: $scope.sortingAlgorithm
+},
+{ field: 'No-Show',          
+sort: {
+  direction: uiGridConstants.DESC,
+  priority: 4
+},
+sortingAlgorithm: $scope.sortingAlgorithm
+}
+]
+},
+{
+  name: "Exam Registrations By Day Of Year",
+  description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+  reportId: "00O4000000492wq",
+  reportIdCombined: "00O40000004HEOG",
+  reportType: 'stackedline',
+  cumlative: true,
+  applyFilters: true
+},
+{
+  name: "Exam Registrations By Type By Year",
+  description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+  reportId: "00O4000000493cI",
+  reportIdCombined: "00O40000004HEPs",
+  reportType: 'stackedbar',
+  cumlative: false,
+  applyFilters: true
+},
+{
+  name: "ERP Exam Registrations By Year",
+  description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+  reportId: "00O4000000493iL",
+  reportType: 'stackedbar',
+  cumlative: false,
+  applyFilters: false
+},
+{
+  name: "FRM Exam Registrations By Year",
+  description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+  reportId: "00O4000000493eE",
+  reportType: 'stackedbar',
+  cumlative: false,
+  applyFilters: false
+},
+{
+  name: "Exam Registrations By Year",
+  description: "",
+  reportId: "00O40000004PErn",
+  reportIdCombined: "00O40000004PEu8",
+  reportType: 'stackedbar',
+  cumlative: false,
+  applyFilters: false
+}
+];
 
-  $scope.rptData.examTypeList = [
-    {
-      name: "ERP",
-      value: "ERP"
-    },
-    {
-      name: "ERP I",
-      value: "ERP Exam Part I"
-    },
-    {
-      name: "ERP II",
-      value: "ERP Exam Part II"
-    },
-    {
-      name: "ERP All",
-      value: "ERP, ERP Exam Part I, ERP Exam Part II"
-    },
-    {
-      name: "FRM I",
-      value: "FRM Part 1"
-    },
-    {
-      name: "FRM II",
-      value: "FRM Part 2"
-    },
-    {
-      name: "FRM All",
-      value: "FRM Part 1,FRM Part 2"
-    },
-    {
-      name: "All",
-      value: "FRM Part 1,FRM Part 2,ERP"
-    }
-  ];
+$scope.rptData.examTypeList = [
+{
+  name: "ERP",
+  value: "ERP"
+},
+{
+  name: "ERP I",
+  value: "ERP Exam Part I"
+},
+{
+  name: "ERP II",
+  value: "ERP Exam Part II"
+},
+{
+  name: "ERP All",
+  value: "ERP, ERP Exam Part I, ERP Exam Part II"
+},
+{
+  name: "FRM I",
+  value: "FRM Part 1"
+},
+{
+  name: "FRM II",
+  value: "FRM Part 2"
+},
+{
+  name: "FRM All",
+  value: "FRM Part 1,FRM Part 2"
+},
+{
+  name: "All",
+  value: "FRM Part 1,FRM Part 2,ERP"
+}
+];
 
 
 
-  $scope.rptData.examMonthList = [
-    {
-      name: "May",
-      value: "May"
-    },
-    {
-      name: "November",
-      value: "Nov"
-    },
-    {
-      name: "Both",
-      value: "May,Nov"
-    }
-  ];
+$scope.rptData.examMonthList = [
+{
+  name: "May",
+  value: "May"
+},
+{
+  name: "November",
+  value: "Nov"
+},
+{
+  name: "Both",
+  value: "May,Nov"
+}
+];
 
-  $scope.rptData.examYearList=[];
-  for(var i=2010; i<=2016; i++) {
-    var obj = {
-      name: i,
-      value: i
-    }
-    $scope.rptData.examYearList.push(obj);
+$scope.rptData.examYearList=[];
+for(var i=2010; i<=2016; i++) {
+  var obj = {
+    name: i,
+    value: i
+  }
+  $scope.rptData.examYearList.push(obj);
+}
+
+$scope.getDescription = function() {
+  var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+  if(fndRpt != null) {
+    return fndRpt.description;
   }
 
-  $scope.getDescription = function() {
-    var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
-    if(fndRpt != null) {
-      return fndRpt.description;
-    }
+}
 
+$scope.selectType = function() {
+  var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+  $scope.fndRpt = fndRpt;
+
+  if(fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
+    $scope.rptData.disableExamYear=true;      
+    $scope.rptData.currentExamYear=null;
+
+    $scope.rptData.disableExamMonth=false;
+    $scope.rptData.disableExamType=false;
+  } else if(fndRpt.name == 'ERP Exam Registrations By Year' || fndRpt.name == 'FRM Exam Registrations By Year') {
+    $scope.rptData.disableExamYear=true;
+    $scope.rptData.currentExamYear=null;
+
+    $scope.rptData.disableExamMonth=true;
+    $scope.rptData.currentExamMonth=null;
+
+    $scope.rptData.disableExamType=true;
+    $scope.rptData.currentExamType=null;
+
+  } else if(fndRpt.name == 'Exam Registrations By Year') {
+    $scope.rptData.disableExamYear=true;
+    $scope.rptData.disableExamType=false;
+    $scope.rptData.disableExamMonth=true;
+  } else  {
+    $scope.rptData.disableExamYear=false;
+    $scope.rptData.disableExamMonth=false;
+    $scope.rptData.disableExamType=false;
   }
-
-  $scope.selectType = function() {
-    var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
-    $scope.fndRpt = fndRpt;
-
-    if(fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
-      $scope.rptData.disableExamYear=true;      
-      $scope.rptData.currentExamYear=null;
-
-      $scope.rptData.disableExamMonth=false;
-      $scope.rptData.disableExamType=false;
-    } else if(fndRpt.name == 'ERP Exam Registrations By Year' || fndRpt.name == 'FRM Exam Registrations By Year') {
-      $scope.rptData.disableExamYear=true;
-      $scope.rptData.currentExamYear=null;
-
-      $scope.rptData.disableExamMonth=true;
-      $scope.rptData.currentExamMonth=null;
-
-      $scope.rptData.disableExamType=true;
-      $scope.rptData.currentExamType=null;
-
-    } else  {
-      $scope.rptData.disableExamYear=false;
-      $scope.rptData.disableExamMonth=false;
-      $scope.rptData.disableExamType=false;
-    }
     //localStorage.examsData = JSON.stringify($scope.rptData);
   }
 
@@ -411,13 +425,13 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
     $scope.cumlative=$stateParams.cumlative;
   }
 
-  $scope.refresh=function(reload) {
+  $scope.refresh=function(reload, exportData) {
     if(defined($scope,"rptData.currentReportType")) {
 
       $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
       $scope.reportId = $scope.fndRpt.reportId;
 
-      if($scope.rptData.combineExams) {
+      if($scope.rptData.combineExams || $scope.rptData.combineParts) {
         $scope.reportId = $scope.fndRpt.reportIdCombined;
       }
 
@@ -427,7 +441,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       if(defined($scope.rptData[key])) {
         drawGraph(false);
       } else {
-        loadData();
+        loadData(exportData);
       }
     } else {
       // Error
@@ -437,20 +451,17 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
   }
 
 
-  function loadData() {
+  function loadData(exportData) {
 
 
     $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
     $scope.reportId = $scope.fndRpt.reportId;
 
-    if($scope.rptData.combineExams) {
+    if($scope.rptData.combineExams || $scope.rptData.combineParts) {
       $scope.reportId = $scope.fndRpt.reportIdCombined;
     }
-      
-    var report = conn.analytics.report($scope.reportId);
 
-    var a = null;
-    a.b.c = 1;
+    var report = conn.analytics.report($scope.reportId);
 
     conn.analytics.report($scope.reportId).describe(function(err, meta) {
       if (err) { 
@@ -477,24 +488,24 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           var rf = meta.reportMetadata.reportFilters[i];
           switch(rf.column) {
             case 'Exam_Attempt__c.RPT_Exam_Description__c':
-              if($scope.fndRpt.applyFilters)
-                rf.value = $scope.rptData.currentExamMonth;
-              break;
+            if($scope.fndRpt.applyFilters)
+              rf.value = $scope.rptData.currentExamMonth;
+            break;
 
             case 'Exam_Attempt__c.Section__c':
-              if($scope.fndRpt.applyFilters)
-                rf.value = $scope.rptData.currentExamType;
-              break;
+            if($scope.fndRpt.applyFilters)
+              rf.value = $scope.rptData.currentExamType;
+            break;
 
             case 'Exam_Attempt__c.Opportunity_StageName__c':
-              rf.value = oppStages;
-              break;
+            rf.value = oppStages;
+            break;
 
             case 'Exam_Attempt__c.RPT_Exam_Year__c':
-              if($scope.rptData.currentExamYear != null)
-                  rf.value = $scope.rptData.currentExamYear;
-              else rf.value = '2010,2011,2012,2013,2014,2015,2016';
-              break;
+            if($scope.rptData.currentExamYear != null)
+              rf.value = $scope.rptData.currentExamYear;
+            else rf.value = '2010,2011,2012,2013,2014,2015,2016';
+            break;
           }
         }        
       }
@@ -534,28 +545,28 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
         $scope.rptData[key] = data;
         //localStorage.rptData = JSON.stringify($scope.rptData);
 
-         $scope.mainSpinner.stop();
+        $scope.mainSpinner.stop();
 
-        drawGraph(true);
+        drawGraph(true, exportData);
       });
     });
 
+}
+
+function drawGraph(async, exportData) {
+
+  if(!defined($scope,"rptData.currentReportType"))
+    return;
+
+  if(!defined($scope,"rptData.currentReportType"))
+    return;
+
+  $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
+  $scope.reportId = $scope.fndRpt.reportId;
+
+  if($scope.rptData.combineExams || $scope.rptData.combineParts) {
+    $scope.reportId = $scope.fndRpt.reportIdCombined;
   }
-
-  function drawGraph(async) {
-
-    if(!defined($scope,"rptData.currentReportType"))
-      return;
-
-    if(!defined($scope,"rptData.currentReportType"))
-      return;
-
-    $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType});
-    $scope.reportId = $scope.fndRpt.reportId;
-
-    if($scope.rptData.combineExams) {
-      $scope.reportId = $scope.fndRpt.reportIdCombined;
-    }
 
 
     //var rptId = $scope.rptData.currentReportType
@@ -564,7 +575,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       alert("Data not found! Please reload page and try again.");
       return;
     }
-      
+
 
     var data = $scope.rptData[key];
     console.log(data);
@@ -589,7 +600,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
         var val = data.factMap[group.key+'!T'].aggregates[0].value;
 
         if(group.label == "-" || group.label == "&nbsp;")
-          continue;
+        continue;
         var obj = {
           Country: group.label,
           Total: val
@@ -649,12 +660,12 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           last: null,
           lineWidth: 4,
           marker: {
-              radius: 4
+            radius: 4
           }          
         }
         sdata.push(obj);
       }
-        
+
       $scope.deferred = [];
       
       for(var i=0; i<data.groupingsDown.groupings.length; i++) {
@@ -789,7 +800,7 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
       //     });
       //   });
 
-        $('#container').highcharts({
+$('#container').highcharts({
 
           // data: {
           //     csv: csv
@@ -808,11 +819,11 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           },
 
           title: {
-              text: 'Registrations by Day'
+            text: 'Registrations by Day'
           },
 
           subtitle: {
-              text: ''
+            text: ''
           },
 
           xAxis: {
@@ -820,103 +831,103 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
               tickWidth: 0,
               gridLineWidth: 1,
               labels: {
-                  align: 'left',
-                  x: 3,
-                  y: -3,
-                  enabled: true
+                align: 'left',
+                x: 3,
+                y: -3,
+                enabled: true
               },
               categories: labels
-          },
+            },
 
           yAxis: [{ // left y axis
-              title: {
-                  text: null
-              },
-              labels: {
-                  align: 'left',
-                  x: 3,
-                  y: 16,
-                  format: '{value:.,0f}'
-              },
-              showFirstLabel: false
+            title: {
+              text: null
+            },
+            labels: {
+              align: 'left',
+              x: 3,
+              y: 16,
+              format: '{value:.,0f}'
+            },
+            showFirstLabel: false
           }, { // right y axis
-              linkedTo: 0,
-              gridLineWidth: 0,
-              opposite: true,
-              title: {
-                  text: null
-              },
-              labels: {
-                  align: 'right',
-                  x: -3,
-                  y: 16,
-                  format: '{value:.,0f}'
-              },
-              showFirstLabel: false
+            linkedTo: 0,
+            gridLineWidth: 0,
+            opposite: true,
+            title: {
+              text: null
+            },
+            labels: {
+              align: 'right',
+              x: -3,
+              y: 16,
+              format: '{value:.,0f}'
+            },
+            showFirstLabel: false
           }],
 
           legend: {
-              align: 'left',
-              verticalAlign: 'top',
-              y: 20,
-              floating: true,
-              borderWidth: 0
+            align: 'left',
+            verticalAlign: 'top',
+            y: 20,
+            floating: true,
+            borderWidth: 0
           },
 
           tooltip: {
-              shared: true,
-              crosshairs: true
+            shared: true,
+            crosshairs: true
           },
 
           plotOptions: {
-              series: {
-                  cursor: 'pointer',
-                  point: {
-                      events: {
-                          click: function (e) {
-                              hs.htmlExpand(null, {
-                                  pageOrigin: {
-                                      x: e.pageX || e.clientX,
-                                      y: e.pageY || e.clientY
-                                  },
-                                  headingText: this.series.name,
-                                  maincontentText: this.series.data[this.x].category + ':<br/> ' +
-                                      this.y + ' Registrations',
-                                  width: 200
-                              });
-                          }
-                      }
-                  },
-                  marker: {
-                      lineWidth: 1
+            series: {
+              cursor: 'pointer',
+              point: {
+                events: {
+                  click: function (e) {
+                    hs.htmlExpand(null, {
+                      pageOrigin: {
+                        x: e.pageX || e.clientX,
+                        y: e.pageY || e.clientY
+                      },
+                      headingText: this.series.name,
+                      maincontentText: this.series.data[this.x].category + ':<br/> ' +
+                      this.y + ' Registrations',
+                      width: 200
+                    });
                   }
+                }
+              },
+              marker: {
+                lineWidth: 1
               }
+            }
           },
           series: sdata
-      });
-    }
+        });
+}
 
 
-    if($scope.fndRpt.reportType == 'bar') {
+if($scope.fndRpt.reportType == 'bar') {
 
-      var  labels = _.pluck(data.groupingsDown.groupings, "label");    
-      var sdata = {
-        name: 'Bar',
-        data: [],
-        dataLabels: {
-            enabled: true,
-            color: '#FFFFFF',
-            align: 'right',
+  var  labels = _.pluck(data.groupingsDown.groupings, "label");    
+  var sdata = {
+    name: 'Bar',
+    data: [],
+    dataLabels: {
+      enabled: true,
+      color: '#FFFFFF',
+      align: 'right',
             format: '{point.y:.1f}', // one decimal
             y: 10, // 10 pixels down from the top
             style: {
-                fontSize: '13px',
-                fontFamily: 'Verdana, sans-serif'
+              fontSize: '13px',
+              fontFamily: 'Verdana, sans-serif'
             }
-        }
-      };
+          }
+        };
 
-      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+        for(var i=0; i<data.groupingsDown.groupings.length; i++) {
           var group = data.groupingsDown.groupings[i];
           var da = data.factMap[group.key+'!T'].aggregates[0].value;
 
@@ -925,163 +936,204 @@ function ($scope, $rootScope, $timeout, $stateParams,uiGridConstants) {
           obj.push(da);
 
           sdata.data.push(obj);
-      }
+        }
 
-      var stuff = sdata.data;
+        var stuff = sdata.data;
 
-      $('#container').highcharts({
-              chart: {
-                  type: 'column'
-              },
-              title: {
-                  text: $scope.fndRpt.Name
-              },
-              subtitle: {
-                  text: ''
-              },
-              xAxis: {
-                  type: 'category',
-                  labels: {
-                      rotation: -45,
-                      style: {
-                          fontSize: '13px',
-                          fontFamily: 'Verdana, sans-serif'
-                      }
-                  }, title: {
-                      text: 'Year'
-                  }
-              },
-              yAxis: {
-                  min: 0,
-                  title: {
-                      text: 'Registrations'
-                  }
-              },
-              legend: {
-                  enabled: false
-              },
-              tooltip: {
-                  pointFormat: 'Registrations for a give year'
-              },
-              series: [{
-                  name: 'Population',
-                  data: stuff,
-                  dataLabels: {
-                      enabled: true,
-                      color: '#FFFFFF',
-                      align: 'right',
+        $('#container').highcharts({
+          chart: {
+            type: 'column'
+          },
+          title: {
+            text: $scope.fndRpt.Name
+          },
+          subtitle: {
+            text: ''
+          },
+          xAxis: {
+            type: 'category',
+            labels: {
+              rotation: -45,
+              style: {
+                fontSize: '13px',
+                fontFamily: 'Verdana, sans-serif'
+              }
+            }, title: {
+              text: 'Year'
+            }
+          },
+          yAxis: {
+            min: 0,
+            title: {
+              text: 'Registrations'
+            }
+          },
+          legend: {
+            enabled: false
+          },
+          tooltip: {
+            pointFormat: 'Registrations for a give year'
+          },
+          series: [{
+            name: 'Population',
+            data: stuff,
+            dataLabels: {
+              enabled: true,
+              color: '#FFFFFF',
+              align: 'right',
                       format: '{point.y:.1f}', // one decimal
                       y: 10, // 10 pixels down from the top
                       style: {
-                          fontSize: '13px',
-                          fontFamily: 'Verdana, sans-serif'
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif'
                       }
-                  }
-              }]
-          });
-          
+                    }
+                  }]
+                });
+
     } // Bar
 
-if($scope.fndRpt.reportType == 'stackedbar') {
+    if($scope.fndRpt.reportType == 'stackedbar') {
 
-        var  labels = _.pluck(data.groupingsDown.groupings, "label");    
-        var sdata = [];
-        
-        for(var i=0; i<data.groupingsDown.groupings.length; i++) {
-          var group = data.groupingsDown.groupings[i];
-          for(var j=0; j<group.groupings.length; j++) {
-            var g = group.groupings[j];
-      var sd = _.findWhere(sdata, {name: g.label});
-      if(sd == null) {
-        var obj = {
-          name: g.label,
-          data: []
+      var  labels = _.pluck(data.groupingsDown.groupings, "label");    
+      var sdata = [];
+
+      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+        var group = data.groupingsDown.groupings[i];
+        for(var j=0; j<group.groupings.length; j++) {
+          var g = group.groupings[j];
+          var sd = _.findWhere(sdata, {name: g.label});
+          if(sd == null) {
+            var obj = {
+              name: g.label,
+              data: []
+            }
+            sdata.push(obj);      
+          }
         }
-        sdata.push(obj);      
       }
-      }
-    }
-    
-        for(var i=0; i<data.groupingsDown.groupings.length; i++) {
-          var group = data.groupingsDown.groupings[i];
+
+      for(var i=0; i<data.groupingsDown.groupings.length; i++) {
+        var group = data.groupingsDown.groupings[i];
           //for(var j=0; j<group.groupings.length; j++) {
       //var g = group.groupings[j];
       for(var j=0; j<sdata.length; j++) {
-      var sd = sdata[j];
-      var g = _.findWhere(group.groupings, {label: sd.name});
-      
-      if(g == null) {
-        sd.data.push(0);
-      } else {
-        var da = data.factMap[g.key+'!T'].aggregates[0].value;
-        if(da == null) {
+        var sd = sdata[j];
+        var g = _.findWhere(group.groupings, {label: sd.name});
+
+        if(g == null) {
           sd.data.push(0);
         } else {
-          sd.data.push(da);
+          var da = data.factMap[g.key+'!T'].aggregates[0].value;
+          if(da == null) {
+            sd.data.push(0);
+          } else {
+            sd.data.push(da);
+          }
         }
-      }
       }
     }
 
+debugger;
+    if(exportData) {
+      var expData = [];
+      var cols = _.pluck(sdata, "name");  
+      cols.unshift("label");
 
-      $('#container').highcharts({
-        chart: {
-          type: 'column'
-        },
+      var obj = {};
+      for(var j=0; j<cols.length; j++) {
+        var col = cols[j];
+        obj[col]=col;
+      }
+      expData.push(obj);
+      
+      for(var i=0; i<labels.length; i++) {
+        var label = labels[i];
+        var obj = {};
+        for(var j=0; j<cols.length; j++) {
+          var col = cols[j];
+
+          if(j==0) {
+            obj[col] = label;
+          } else {
+            obj[col] = sdata[j-1].data[i];
+          }
+        }
+        expData.push(obj);
+      }
+
+      var csv = JSON2CSV(expData);
+      var fileName = 'data'
+      var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
+      var link = document.createElement("a");    
+      link.href = uri
+      //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
+      link.download = fileName + ".csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      return;
+    }
+
+    $('#container').highcharts({
+      chart: {
+        type: 'column'
+      },
+      title: {
+        text: 'Exam Registrations Over Time'
+      },
+      xAxis: {
+        categories: labels,
         title: {
-          text: 'Exam Registrations Over Time'
+          text: 'Exams'
+        }
+      },
+      yAxis: {
+        min: 0,
+        title: {
+          text: 'Exam Registrations'
         },
-        xAxis: {
-          categories: labels,
-          title: {
-            text: 'Exams'
+        stackLabels: {
+          enabled: true,
+          style: {
+            fontWeight: 'bold',
+            color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
           }
-        },
-        yAxis: {
-          min: 0,
-          title: {
-            text: 'Exam Registrations'
-          },
-          stackLabels: {
+        }
+      },
+      legend: {
+        align: 'right',
+        x: -30,
+        verticalAlign: 'top',
+        y: 25,
+        floating: true,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        borderColor: '#CCC',
+        borderWidth: 1,
+        shadow: false
+      },
+      tooltip: {
+        formatter: function () {
+          return '<b>' + this.x + '</b><br/>' +
+          this.series.name + ': ' + this.y + '<br/>' +
+          'Total: ' + this.point.stackTotal;
+        }
+      },
+      plotOptions: {
+        column: {
+          stacking: 'normal',
+          dataLabels: {
             enabled: true,
+            color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
             style: {
-              fontWeight: 'bold',
-              color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+              textShadow: '0 0 3px black'
             }
           }
-        },
-        legend: {
-          align: 'right',
-          x: -30,
-          verticalAlign: 'top',
-          y: 25,
-          floating: true,
-          backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-          borderColor: '#CCC',
-          borderWidth: 1,
-          shadow: false
-        },
-        tooltip: {
-          formatter: function () {
-            return '<b>' + this.x + '</b><br/>' +
-              this.series.name + ': ' + this.y + '<br/>' +
-              'Total: ' + this.point.stackTotal;
-          }
-        },
-        plotOptions: {
-          column: {
-            stacking: 'normal',
-            dataLabels: {
-              enabled: true,
-              color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
-              style: {
-                textShadow: '0 0 3px black'
-              }
-            }
-          }
-        },
-        series: sdata
-      });
+        }
+      },
+      series: sdata
+    });
 
 
     } // Stacked Bar
@@ -1090,6 +1142,82 @@ if($scope.fndRpt.reportType == 'stackedbar') {
     
   }
   //}); -- Query Data
-  drawGraph();
+drawGraph();
+
+$scope.export = function(expData) {
+
+  var json = [{"company":"Company","type":"Type","total":"Total","invoiceNumber":"Invoice #","garpId":"GARP ID","firstName":"First Name","lastName":"Last Name","county":"Country","state":"State","method":"Payment Method","paidDate":"Paid Date","payPalId":"PayPal Trans ID"}];
+  for(var i=0; i<$scope.prods.length; i++) {  
+    var prod = $scope.prods[i];
+    var func = $scope.criteriaMatch();
+    if(func(prod)) {
+      json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c;        
+    }
+  }
+  for(var i=0; i<$scope.prods.length; i++) {  
+    var func = $scope.criteriaMatchShip();
+    var prod = $scope.prods[i];
+    if(func(prod)) {
+      var prod = $scope.prods[i];
+      json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c + "Shipping";        
+    }
+  }
+  json[0].endTotal="Total";
+
+  for(var j=0; j<$scope.opps.length; j++) {  
+    var opp = $scope.opps[j];
+
+    var func = $scope.filterMatch();
+    if(func(opp)) {
+      var obj = {
+        "company":formatDefined(opp.Company__c),
+        "type":formatDefined(opp.trans.ChargentSFA__Type__c),
+        "total":formatAmountExport($scope.getRowTotal(opp)),
+        "invoiceNumber":formatDefined(opp.Display_Invoice_Number__c),
+        "garpId":formatDefined(opp.GARP_Member_ID__c),
+        "firstName":formatDefined(opp.Member_First_Name__c),
+        "lastName":formatDefined(opp.Member_Last_Name__c),
+        "county":formatDefined(opp.Shipping_Country__c),
+        "state":formatDefined(opp.Shipping_State__c),
+        "method":formatDefined(opp.trans.ChargentSFA__Payment_Method__c),
+        "paidDate":formatDefined(formatDate(opp.closeDate, "MM-DD-YYYY")),
+        "payPalId":formatDefined(opp.trans.ChargentSFA__Gateway_ID__c)
+      };
+
+      for(var i=0; i<$scope.prods.length; i++) {  
+        var prod = $scope.prods[i];
+        var func = $scope.criteriaMatch();
+        if(func(prod)) {
+         obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = formatAmountExport($scope.getProductAmount(opp, prod));
+       }
+     }
+     for(var i=0; i<$scope.prods.length; i++) {  
+      var func = $scope.criteriaMatchShip();
+      var prod = $scope.prods[i];
+      if(func(prod)) {
+        var prod = $scope.prods[i];
+        obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = formatAmountExport($scope.getProductAmountShipping(opp, prod));
+      }
+    }
+    obj.endTotal = formatAmountExport($scope.getRowTotal(opp));
+
+
+    json.push(obj);
+  }
+}
+
+var csv = JSON2CSV(json);
+var fileName = 'data'
+var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
+var link = document.createElement("a");    
+link.href = uri
+    //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
+    link.download = fileName + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    //window.open("data:text/csv;charset=utf-8," + escape(csv))
+  }
 
 }]);
