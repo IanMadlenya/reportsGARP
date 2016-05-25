@@ -305,7 +305,7 @@ sortingAlgorithm: $scope.sortingAlgorithm
   reportIdCombined: "00O40000004PEu8",
   reportType: 'stackedbar',
   cumlative: false,
-  applyFilters: false
+  applyFilters: true
 }
 ];
 
@@ -402,6 +402,8 @@ $scope.selectType = function() {
     $scope.rptData.disableExamYear=true;
     $scope.rptData.disableExamType=false;
     $scope.rptData.disableExamMonth=true;
+    $scope.rptData.currentExamYear=null;
+    $scope.rptData.currentExamMonth=null;    
   } else  {
     $scope.rptData.disableExamYear=false;
     $scope.rptData.disableExamMonth=false;
@@ -501,11 +503,20 @@ $scope.selectType = function() {
             rf.value = oppStages;
             break;
 
-            case 'Exam_Attempt__c.RPT_Exam_Year__c':
+            case 'Exam_Attempt__c.Exam_Type__c':
             if($scope.rptData.currentExamYear != null)
               rf.value = $scope.rptData.currentExamYear;
             else rf.value = '2010,2011,2012,2013,2014,2015,2016';
             break;
+
+            case 'Exam_Stat__c.Exam_Type__c':
+            if($scope.fndRpt.applyFilters) {
+              if($scope.rptData.currentExamType.indexOf('ERP') > -1 && $scope.rptData.currentExamType.indexOf('FRM') == -1)
+                rf.value = 'ERP';
+              else if($scope.rptData.currentExamType.indexOf('ERP') == -1 && $scope.rptData.currentExamType.indexOf('FRM') > -1)
+                rf.value = 'FRM';
+              else rf.value = 'FRM,ERP'
+            }
           }
         }        
       }
