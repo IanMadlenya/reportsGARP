@@ -22,6 +22,11 @@ ${demo.css}
                   <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O4000000492wq' || rptData.currentReportType == '00O4000000493cI')">
                     <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
                   </div>
+
+                  <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O40000004PErn')">
+                    <input type="checkbox" name="combineParts" ng-model="rptData.combineParts"> Combine Exam Parts<br>
+                  </div>
+
     </div>
     <div class="col-md-2">
 
@@ -37,7 +42,8 @@ ${demo.css}
     </div>
     <div class="col-md-2">
       <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid"> Include Unpaid<br>
-      <button ng-click="refresh(true)">Load and Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
+      <button ng-click="refresh(true,false)">Load and Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
+      <button ng-if="fndRpt.reportType == 'stackedbar'" ng-click="refresh(true,true)">Export Data</button>
     </div>
   </div>
   <div class="row">
