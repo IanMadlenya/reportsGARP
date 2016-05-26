@@ -52,7 +52,7 @@
       </div>
       <div class="col-md-2">
          <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid" ng-change="selectPaid()"> Include Unpaid<br>
-         <button ng-click="refresh(true,false)">Load and Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
+         <button ng-click="refresh(true,false)">Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
          <button ng-if="fndRpt.reportType == 'stackedbar'" ng-click="refresh(true,true)">Export Data</button>
       </div>
    </div>
