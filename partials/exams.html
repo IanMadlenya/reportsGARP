@@ -1,66 +1,74 @@
-
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <style type="text/css">
-${demo.css}
+   ${demo.css}
 </style>
-
 <div id="mainspin"></div>
 <div class="container page-container">
- <div class="row">
-    <div class="col-md-4">
-      Exam:<br> <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
-              <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
+   <div class="row">
+      <div class="col-md-4">
+         Exam:<br> 
+         <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
+            <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
+         </select>
+         <div>
+            {{getDescription()}}
+         </div>
+      </div>
+      <div class="col-md-2">
+         Exam Type:<br> 
+         <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
+            <option ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
+         </select>
+         <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O4000000492wq' || rptData.currentReportType == '00O4000000493cI')">
+            <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
+         </div>
+         <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O40000004PErn')">
+            <input type="checkbox" name="combineParts" ng-model="rptData.combineParts"> Combine Exam Parts<br>
+         </div>
+      </div>
+      <div class="col-md-2">
+         Exam Month:<br> 
+         <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disabled="rptData.disableExamMonth">
+            <option ng-repeat="examMonth in rptData.examMonthList" value="{{examMonth.value}}">{{examMonth.name}}</option>
+         </select>
+      </div>
+      <div class="col-md-2">
+         <div ng-if="rptData.currentReportType != '00O40000004PErn'">
+            Exam Year:<br> 
+            <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disabled="rptData.disableExamYear">
+               <option ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
             </select>
-            <div>
-              {{getDescription()}}
+         </div>
+         <div ng-if="rptData.currentReportType == '00O40000004PErn'">
+            Start Year: 
+            <select id="examStartYearSelect" data-ng-model="rptData.currentStartExamYear" name="examStartYear">
+               <option ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+            </select><br>
+            End Year: 
+            <select id="examEndYearSelect" data-ng-model="rptData.currentEndExamYear" name="examEndYear">
+               <option ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+            </select>
+         </div>
+      </div>
+      <div class="col-md-2">
+         <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid" ng-change="selectPaid()"> Include Unpaid<br>
+         <button ng-click="refresh(true,false)">Load and Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
+         <button ng-if="fndRpt.reportType == 'stackedbar'" ng-click="refresh(true,true)">Export Data</button>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-md-12">
+         <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
+         <div class="row" ng-if="fndRpt.reportType == 'table'" >
+            <div class="col-md-6">
+               <div ui-grid="gridOptions1" class="myGrid"></div>
             </div>
-    </div>
-    <div class="col-md-2">
-      Exam Type:<br> <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
-                    <option ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
-                  </select>
-                  <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O4000000492wq' || rptData.currentReportType == '00O4000000493cI')">
-                    <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
-                  </div>
-
-                  <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O40000004PErn')">
-                    <input type="checkbox" name="combineParts" ng-model="rptData.combineParts"> Combine Exam Parts<br>
-                  </div>
-
-    </div>
-    <div class="col-md-2">
-
-      Exam Month:<br> <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disabled="rptData.disableExamMonth">
-                    <option ng-repeat="examMonth in rptData.examMonthList" value="{{examMonth.value}}">{{examMonth.name}}</option>
-                   </select>
-    </div>
-    <div class="col-md-2">
-
-      Exam Year:<br> <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disabled="rptData.disableExamYear">
-                    <option ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
-                   </select>
-    </div>
-    <div class="col-md-2">
-      <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid"> Include Unpaid<br>
-      <button ng-click="refresh(true,false)">Load and Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
-      <button ng-if="fndRpt.reportType == 'stackedbar'" ng-click="refresh(true,true)">Export Data</button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-12">
-      <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
-
-      <div class="row" ng-if="fndRpt.reportType == 'table'" >
-        <div class="col-md-6">
-          <div ui-grid="gridOptions1" class="myGrid"></div>
-        </div>
+         </div>
+         <div class="row" ng-if="fndRpt.reportType == 'table'" >
+            <div class="col-md-6" ng-controller="mapCtrl">
+               <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
+            </div>
+         </div>
       </div>
-      <div class="row" ng-if="fndRpt.reportType == 'table'" >
-        <div class="col-md-6" ng-controller="mapCtrl">
-          <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+   </div>
 </div>
