@@ -99,7 +99,7 @@
     
     //var myApp = angular.module('reportsGARP', ['reportsGARPControllers']);    
 
-    var myApp = angular.module('reportsGARP', ['reportsGARPControllers','ui.router','ui.grid']);
+    var myApp = angular.module('reportsGARP', ['reportsGARPControllers','ui.router','ui.grid','mwl.calendar', 'ui.bootstrap']);
 
 angular.module('ErrorCatcher', [])
     .factory('$exceptionHandler', ['$injector', function ($injector) {
@@ -183,6 +183,11 @@ angular.module('ErrorCatcher', [])
         url: '/map',
         templateUrl: envPath + "/partials/map.html",
         controller: 'mapCtrl'
+      })
+      .state('deployCal', {
+        url: '/deployCal',
+        templateUrl: envPath + "/partials/deployCal.html",
+        controller: 'deployCalCtrl'
       });
    
 
