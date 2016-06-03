@@ -1,6 +1,49 @@
 <div>
 
-	<mwl-calendar calendar-events="events" calendar-view="calendarView" calendar-current-day="calendarDay" calendar-control="calendarControl" calendar-event-click="" calendar-edit-event-html="" calendar-delete-event-html="" calendar-edit-event-click="" calendar-delete-event-click="" calendar-auto-open="false" , calendar-update="calendarUpdate"></mwl-calendar>
+<div class="row">
 
-	</div>		
+    <div class="col-md-6 text-center">
+      <div class="btn-group">
+
+        <button class="btn btn-primary ng-isolate-scope" ng-click="nextCalendar(-1)">
+          Previous
+        </button>
+        <button class="btn btn-default ng-isolate-scope" ng-click="nextCalendar()">
+          Today
+        </button>
+        <button class="btn btn-primary ng-isolate-scope" ng-click="nextCalendar(1)">
+          Next
+        </button>
+      </div>
+    </div>
+
+    <br class="visible-xs visible-sm">
+
+    <div class="col-md-6 text-center">
+      <div class="btn-group">
+        <label class="btn btn-primary ng-pristine ng-untouched ng-valid ng-not-empty" ng-class="{active : vm.calendarView == 'year'}" ng-click="setView('year')">Year</label>
+        <label class="btn btn-primary ng-pristine ng-untouched ng-valid ng-not-empty" ng-class="{active : vm.calendarView == 'month'}" ng-click="setView('month')">Month</label>
+        <label class="btn btn-primary ng-pristine ng-untouched ng-valid ng-not-empty" ng-class="{active : vm.calendarView == 'week'}" ng-click="setView('week')">Week</label>
+        <label class="btn btn-primary ng-pristine ng-untouched ng-valid ng-not-empty" ng-class="{active : vm.calendarView == 'day'}" ng-click="setView('day')">Day</label>
+      </div>
+    </div>
+
+  </div>
+
+	<div class="row">
+    <div class="col-md-12 text-center">  
+    	&nbsp;
+    </div>
+  </div>
+
+<div class="row">
+    <div class="col-md-12 text-center">  
+    	<h2>{{getCalendarTitle()}}</h2>
+    </div>
+    <div class="col-md-12 text-center">  
+			<mwl-calendar calendar-events="vm.events" calendar-view="vm.calendarView" calendar-current-day="calendarDay" calendar-control="calendarControl" calendar-event-click="" calendar-edit-event-html="" calendar-delete-event-html="" calendar-edit-event-click="" calendar-delete-event-click="" calendar-auto-open="false" , calendar-update="calendarUpdate"></mwl-calendar>
+    </div>
+  </div>
+
+
 </div>
