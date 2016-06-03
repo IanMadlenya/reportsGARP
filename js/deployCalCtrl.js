@@ -54,9 +54,22 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 		$rootScope.$apply(function(){
 			for(var i=0; i<data.result.length; i++) {
 				var d = new Date(data.result[i].Target_Deployment_Date__c + (4*60*60*1000));
+
+				var type = 'success';
+				if(data.result[i].Type__c == 'email')
+					type = 'success';
+				else if(data.result[i].Type__c == 'Website')
+					type = 'info';
+				else if(data.result[i].Type__c == 'Marketing Asset')
+					type = 'warning';
+				else if(data.result[i].Type__c == 'User Portal')
+					type = 'danger';
+				else if(data.result[i].Type__c == 'Salesforce Tool')
+					type = 'active';
+
 				var obj = {
 			        title: data.result[i].Name,
-			        type: 'success',
+			        type: type,
 					starts_at: d,
 			        ends_at:  d
 				}
