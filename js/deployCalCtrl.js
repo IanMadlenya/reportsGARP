@@ -1,4 +1,4 @@
-reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout) {
+reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$timeout', '$window', function($scope, $rootScope, $timeout, $window) {
 	$scope.envPath = envPath;
 	$scope.calendarView = 'month';
 	$scope.calendarDay = null;
@@ -93,9 +93,13 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 					else if(res.Type__c == 'Marketing Asset')
 						type = 'evt-marketing-asset';
 
+					var regType = type;
+					if($scope.vm.filter == 'email' && res.Type__c != 'Email')
+						regType = 'hide';
+
 					var obj = {
 				        title: res.Name,
-				        type: type,
+				        type: regType,
 						starts_at: d,
 				        ends_at:  d,
 				        sfdc: res,
@@ -114,6 +118,10 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 	var dt = new Date();
 	loadEvents(dt,null);
 
+	$scope.eventClicked = function(evt) {
+		 $window.open('https://na2.salesforce.com/' + evt.sfdc.Id , '_new');
+	}
+
 	$scope.setView = function(view) {
 		$scope.vm.calendarView = view;
 	}
@@ -124,12 +132,6 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 				var ev = $scope.vm.events[i];
 				if(ev.sfdc.Type__c != 'Email') {
 					ev.type = 'hide';
-				} else {
-					if(ev.sfdc.Email_Recipient_Size__c == 'Large') {
-						ev.type = 'danger';
-					} else {
-						ev.type = 'info';
-					}
 				}
 			}
 		} else {
@@ -187,7 +189,7 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 				newDate = moment($scope.calendarDay).add(inc, 'day').toDate();
 				break;
 		}
-		loadEvents(newDate, null);
+		loadEvents(newDate, $scope.vm.calendarView);
 
 	}
 

@@ -38,8 +38,8 @@
     <div class="col-md-12 text-center">
       <h2>{{getCalendarTitle()}}</h2>
     </div>
-    <div class="col-md-12 text-center">
-      <mwl-calendar calendar-events="vm.events" calendar-view="vm.calendarView" calendar-current-day="calendarDay" calendar-control="calendarControl" calendar-event-click="" calendar-edit-event-html="" calendar-delete-event-html="" calendar-edit-event-click="" calendar-delete-event-click="" calendar-auto-open="false" , calendar-update="calendarUpdate"></mwl-calendar>
+    <div class="col-md-12">
+      <mwl-calendar calendar-events="vm.events" calendar-view="vm.calendarView" calendar-current-day="calendarDay" calendar-control="calendarControl" calendar-event-click="eventClicked($event)" calendar-edit-event-html="" calendar-delete-event-html="" calendar-edit-event-click="" calendar-delete-event-click="" calendar-auto-open="false" , calendar-update="calendarUpdate"></mwl-calendar>
     </div>
   </div>
   <div class="row">
