@@ -5,6 +5,7 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 	$scope.calendarUpdate = false;
 
 	$scope.vm = {};
+	$scope.vm.filter = 'all';
 	
     $scope.convertEpochFromEasternToLocalTime = function(epoch) {
         if(epoch !== null && typeof epoch !== "undefined") {
@@ -73,6 +74,7 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 		reportsGARPServices.getDeploymentData(currentMonth+1, currentYear, function(err, data) {	
 
 			$rootScope.$apply(function(){
+				$scope.vm.events=[];
 				for(var i=0; i<data.result.length; i++) {
 					var d = new Date(data.result[i].Target_Deployment_Date__c + ($scope.dls*60*60*1000));
 
