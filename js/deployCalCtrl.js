@@ -1,12 +1,11 @@
 reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout) {
 	$scope.envPath = envPath;
 	$scope.calendarView = 'month';
-	$scope.calendarDay = new Date();
+	$scope.calendarDay = null;
 	$scope.calendarUpdate = false;
 
 	$scope.vm = {};
-	$scope.vm.calendarView = 'month';
-
+	
     $scope.convertEpochFromEasternToLocalTime = function(epoch) {
         if(epoch !== null && typeof epoch !== "undefined") {
 
@@ -49,34 +48,64 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 	  // }
 	];	
 
-	reportsGARPServices.getDeploymentData(null, null, function(err, data) {	
+	Date.prototype.stdTimezoneOffset = function() {
+	    var jan = new Date(this.getFullYear(), 0, 1);
+	    var jul = new Date(this.getFullYear(), 6, 1);
+	    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+	}
 
-		$rootScope.$apply(function(){
-			for(var i=0; i<data.result.length; i++) {
-				var d = new Date(data.result[i].Target_Deployment_Date__c + (4*60*60*1000));
+	Date.prototype.dst = function() {
+	    return this.getTimezoneOffset() < this.stdTimezoneOffset();
+	}
 
-				var type = 'success';
-				if(data.result[i].Type__c == 'email')
-					type = 'success';
-				else if(data.result[i].Type__c == 'Website')
-					type = 'info';
-				else if(data.result[i].Type__c == 'Marketing Asset')
-					type = 'warning';
-				else if(data.result[i].Type__c == 'User Portal')
-					type = 'danger';
-				else if(data.result[i].Type__c == 'Salesforce Tool')
-					type = 'active';
+	var today = new Date();
+	$scope.dls = 4;
+	if (today.dst()) { 
+		$scope.dls = 5;
+	}
 
-				var obj = {
-			        title: data.result[i].Name,
-			        type: type,
-					starts_at: d,
-			        ends_at:  d
+
+	function loadEvents(newDate, view) {
+
+        var currentYear = moment(newDate).year();
+        var currentMonth = moment(newDate).month();
+
+		reportsGARPServices.getDeploymentData(currentMonth+1, currentYear, function(err, data) {	
+
+			$rootScope.$apply(function(){
+				for(var i=0; i<data.result.length; i++) {
+					var d = new Date(data.result[i].Target_Deployment_Date__c + ($scope.dls*60*60*1000));
+
+					var type = 'success';
+					if(data.result[i].Type__c == 'email')
+						type = 'success';
+					else if(data.result[i].Type__c == 'Website')
+						type = 'info';
+					else if(data.result[i].Type__c == 'Marketing Asset')
+						type = 'warning';
+					else if(data.result[i].Type__c == 'User Portal')
+						type = 'danger';
+					else if(data.result[i].Type__c == 'Salesforce Tool')
+						type = 'active';
+
+					var obj = {
+				        title: data.result[i].Name,
+				        type: type,
+						starts_at: d,
+				        ends_at:  d
+					}
+					$scope.vm.events.push(obj);
 				}
-				$scope.vm.events.push(obj);
-			}
-		});
-    });
+				if(view==null)
+					$scope.vm.calendarView = 'month';
+				else $scope.vm.calendarView = view;
+
+				$scope.calendarDay = newDate;
+			});
+	    });
+	}
+	var dt = new Date();
+	loadEvents(dt,null);
 
 	$scope.setView = function(view) {
 		$scope.vm.calendarView = view;
@@ -106,23 +135,26 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 			return;
 		}
 
+		var newDate;
 		switch($scope.vm.calendarView) {
 			case 'year':
-				$scope.calendarDay = moment($scope.calendarDay).add(inc, 'year').toDate();
+				newDate = moment($scope.calendarDay).add(inc, 'year').toDate();
 				break;
 
 			case 'month':
-				$scope.calendarDay = moment($scope.calendarDay).add(inc, 'month').toDate();
+				newDate = moment($scope.calendarDay).add(inc, 'month').toDate();
 				break;
 
 			case 'week':
-				$scope.calendarDay = moment($scope.calendarDay).add(inc, 'week').toDate();
+				newDate = moment($scope.calendarDay).add(inc, 'week').toDate();
 				break;
 
 			case 'day':
-				$scope.calendarDay = moment($scope.calendarDay).add(inc, 'day').toDate();
+				newDate = moment($scope.calendarDay).add(inc, 'day').toDate();
 				break;
 		}
+		loadEvents(newDate, null);
+
 	}
 
 	debugger;
