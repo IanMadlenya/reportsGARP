@@ -1,3 +1,32 @@
 .event-danger {
   background-color: #f05123 !important;
 }
+
+.event-hide {
+	display: none  !important;
+}
+
+.event-evt-large-email {
+  background-color: #ff0066 !important;
+}
+
+.event-evt-normal-email {
+  background-color: #1e90ff !important;
+}
+
+.event-evt-website {
+  background-color: #006400 !important;
+}
+
+.event-evt-user-portal {
+	background-color: #f7ecb5 !important;
+}
+
+.event-evt-salesforce-tool {
+	background-color: #ccff00 !important;
+}
+
+.event-evt-marketing-asset {
+	background-color: #ffff00 !important;
+}
+

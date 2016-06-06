@@ -77,24 +77,29 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 				$scope.vm.events=[];
 				for(var i=0; i<data.result.length; i++) {
 					var d = new Date(data.result[i].Target_Deployment_Date__c + ($scope.dls*60*60*1000));
+					var res = data.result[i];
 
-					var type = 'success';
-					if(data.result[i].Type__c == 'email')
-						type = 'success';
-					else if(data.result[i].Type__c == 'Website')
-						type = 'info';
-					else if(data.result[i].Type__c == 'Marketing Asset')
-						type = 'warning';
-					else if(data.result[i].Type__c == 'User Portal')
-						type = 'danger';
-					else if(data.result[i].Type__c == 'Salesforce Tool')
-						type = 'active';
+					var type = 'evt-normal-email';
+					if(res.Type__c == 'Email' && res.Email_Recipient_Size__c == 'Large')
+						type = 'evt-large-email';
+					if(res.Type__c == 'Email' && (!defined(res,"Email_Recipient_Size__c") || res.Email_Recipient_Size__c != 'Large'))
+						type = 'evt-normal-email';
+					else if(res.Type__c == 'Website')
+						type = 'evt-website';
+					else if(res.Type__c == 'User Portal')
+						type = 'evt-user-portal';
+					else if(res.Type__c == 'Salesforce Tool')
+						type = 'evt-salesforce-tool';
+					else if(res.Type__c == 'Marketing Asset')
+						type = 'evt-marketing-asset';
 
 					var obj = {
-				        title: data.result[i].Name,
+				        title: res.Name,
 				        type: type,
 						starts_at: d,
-				        ends_at:  d
+				        ends_at:  d,
+				        sfdc: res,
+				        orgType: type
 					}
 					$scope.vm.events.push(obj);
 				}
@@ -112,6 +117,33 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 	$scope.setView = function(view) {
 		$scope.vm.calendarView = view;
 	}
+
+	$scope.setFilter = function(view) {
+		if(view == 'email') {
+			for(var i=0; i<$scope.vm.events.length; i++) {
+				var ev = $scope.vm.events[i];
+				if(ev.sfdc.Type__c != 'Email') {
+					ev.type = 'hide';
+				} else {
+					if(ev.sfdc.Email_Recipient_Size__c == 'Large') {
+						ev.type = 'danger';
+					} else {
+						ev.type = 'info';
+					}
+				}
+			}
+		} else {
+			for(var i=0; i<$scope.vm.events.length; i++) {
+				var ev = $scope.vm.events[i];
+				if(ev.type != 'Email') {
+					ev.cssClass = '';
+				}
+				ev.type = ev.orgType;
+			}			
+		}
+		$scope.vm.filter = view;
+	}
+
 
 	$scope.getCalendarTitle = function() {
 
