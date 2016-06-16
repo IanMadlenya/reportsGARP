@@ -223,7 +223,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           priority: 4
         },
         sortingAlgorithm: $scope.sortingAlgorithm
-      }]
+      }],
+      hasYearToDate: false,
+      hasExamType: true,
+      hasExamMonth: true,
+      hasExamYear: true,
+      hasExamYearRange: false,
+      hasExport: false
     }, {
       name: "Exam Attendance By Country",
       description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -261,7 +267,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           priority: 4
         },
         sortingAlgorithm: $scope.sortingAlgorithm
-      }]
+      }],
+      hasYearToDate: false,
+      hasExamType: true,
+      hasExamMonth: true,
+      hasExamYear: true,
+      hasExamYearRange: false,
+      hasExport: false
     }, {
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -269,7 +281,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportIdCombined: "00O40000004HEOG",
       reportType: 'stackedline',
       cumlative: true,
-      applyFilters: true
+      applyFilters: true,
+      hasYearToDate: false,
+      hasExamType: true,
+      hasExamMonth: true,
+      hasExamYear: false,
+      hasExamYearRange: false,
+      hasExport: false
     }, {
       name: "Exam Registrations By Type By Year",
       description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -277,21 +295,39 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportIdCombined: "00O40000004HEPs",
       reportType: 'stackedbar',
       cumlative: false,
-      applyFilters: true
+      applyFilters: true,
+      hasYearToDate: true,
+      hasExamType: true,
+      hasExamMonth: true,
+      hasExamYear: false,
+      hasExamYearRange: false,
+      hasExport: true
     }, {
       name: "ERP Exam Registrations By Year",
       description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O4000000493iL",
       reportType: 'stackedbar',
       cumlative: false,
-      applyFilters: false
+      applyFilters: true,
+      hasYearToDate: true,
+      hasExamType: false,
+      hasExamMonth: true,
+      hasExamYear: false,
+      hasExamYearRange: false,
+      hasExport: true
     }, {
       name: "FRM Exam Registrations By Year",
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4000000493eE",
+      reportId: "00O40000004PKiw",
       reportType: 'stackedbar',
       cumlative: false,
-      applyFilters: false
+      applyFilters: true,
+      hasYearToDate: true,
+      hasExamType: false,
+      hasExamMonth: true,
+      hasExamYear: false,
+      hasExamYearRange: false,
+      hasExport: true
     }, {
       name: "Exam Registrations By Year All Time",
       description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Choose 'Combine Parts' to merge Exam Part I, II and FULL. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -299,7 +335,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportIdCombined: "00O40000004PEu8",
       reportType: 'stackedbar',
       cumlative: false,
-      applyFilters: true
+      applyFilters: true,
+      hasYearToDate: false,
+      hasExamType: true,
+      hasExamMonth: false,
+      hasExamYear: true,
+      hasExamYearRange: true,
+      hasExport: true
     }];
 
     $scope.rptData.examYearAllTimeList = [];
@@ -334,7 +376,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       value: "FRM Part 1,FRM Part 2"
     }, {
       name: "All",
-      value: "FRM Part 1,FRM Part 2,ERP"
+      value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II"
     }];
 
 
@@ -391,33 +433,39 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       $scope.fndRpt = fndRpt;
       $scope.rptData.aggregatesIndex = 0;
 
-      if (fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
-        $scope.rptData.disableExamYear = true;
-        $scope.rptData.currentExamYear = null;
+      $scope.rptData.currentExamYear = null;
+      $scope.rptData.currentExamMonth = null;
+      $scope.rptData.currentExamType = null;
+      $scope.rptData.yearToDate = null;
 
-        $scope.rptData.disableExamMonth = false;
-        $scope.rptData.disableExamType = false;
-      } else if (fndRpt.name == 'ERP Exam Registrations By Year' || fndRpt.name == 'FRM Exam Registrations By Year') {
-        $scope.rptData.disableExamYear = true;
-        $scope.rptData.currentExamYear = null;
 
-        $scope.rptData.disableExamMonth = true;
-        $scope.rptData.currentExamMonth = null;
+      // if (fndRpt.name == 'Exam Registrations By Day Of Year' || fndRpt.name == 'Exam Registrations By Type By Year') {
+      //   $scope.rptData.disableExamYear = true;
+      //   $scope.rptData.currentExamYear = null;
 
-        $scope.rptData.disableExamType = true;
-        $scope.rptData.currentExamType = null;
+      //   $scope.rptData.disableExamMonth = false;
+      //   $scope.rptData.disableExamType = false;
+      // } else if (fndRpt.name == 'ERP Exam Registrations By Year' || fndRpt.name == 'FRM Exam Registrations By Year') {
+      //   $scope.rptData.disableExamYear = true;
+      //   $scope.rptData.currentExamYear = null;
 
-      } else if (fndRpt.name == 'Exam Registrations By Year All Time') {
-        $scope.rptData.disableExamYear = true;
-        $scope.rptData.disableExamType = false;
-        $scope.rptData.disableExamMonth = true;
-        $scope.rptData.currentExamYear = null;
-        $scope.rptData.currentExamMonth = null;
-      } else {
-        $scope.rptData.disableExamYear = false;
-        $scope.rptData.disableExamMonth = false;
-        $scope.rptData.disableExamType = false;
-      }
+      //   $scope.rptData.disableExamMonth = true;
+      //   $scope.rptData.currentExamMonth = null;
+
+      //   $scope.rptData.disableExamType = true;
+      //   $scope.rptData.currentExamType = null;
+
+      // } else if (fndRpt.name == 'Exam Registrations By Year All Time') {
+      //   $scope.rptData.disableExamYear = true;
+      //   $scope.rptData.disableExamType = false;
+      //   $scope.rptData.disableExamMonth = true;
+      //   $scope.rptData.currentExamYear = null;
+      //   $scope.rptData.currentExamMonth = null;
+      // } else {
+      //   $scope.rptData.disableExamYear = false;
+      //   $scope.rptData.disableExamMonth = false;
+      //   $scope.rptData.disableExamType = false;
+      // }
       //localStorage.examsData = JSON.stringify($scope.rptData);
 
       if (fndRpt.name == 'Exam Registrations By Year All Time' && $scope.rptData.includeUnPaid) {
@@ -489,6 +537,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if (err) {
           $('#myGlobalErrorModal p').html("There has been an unexpected error:" + err)
           $("#myGlobalErrorModal").modal();
+          alert('There has been an error please refresh your browser window and try again.');
           return console.error(err);
         }
         console.log(meta.reportMetadata);
@@ -510,12 +559,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             var rf = meta.reportMetadata.reportFilters[i];
             switch (rf.column) {
               case 'Exam_Attempt__c.RPT_Exam_Description__c':
-                if ($scope.fndRpt.applyFilters)
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType)
                   rf.value = $scope.rptData.currentExamMonth;
                 break;
 
               case 'Exam_Attempt__c.Section__c':
-                if ($scope.fndRpt.applyFilters)
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType)
                   rf.value = $scope.rptData.currentExamType;
                 break;
 
@@ -524,13 +573,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Attempt__c.Exam_Type__c':
-                if ($scope.rptData.currentExamYear != null)
+                if ($scope.rptData.currentExamYear != null && $scope.fndRpt.hasExamYear)
                   rf.value = $scope.rptData.currentExamYear;
                 else rf.value = '2010,2011,2012,2013,2014,2015,2016';
                 break;
 
               case 'Exam_Stat__c.Exam_Type__c':
-                if ($scope.fndRpt.applyFilters) {
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType) {
                   if ($scope.rptData.currentExamType != null && $scope.rptData.currentExamType.indexOf('ERP') > -1 && $scope.rptData.currentExamType.indexOf('FRM') == -1)
                     rf.value = 'ERP';
                   else if ($scope.rptData.currentExamType != null && $scope.rptData.currentExamType.indexOf('ERP') == -1 && $scope.rptData.currentExamType.indexOf('FRM') > -1)
@@ -539,8 +588,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 }
                 break;
 
+              case 'Exam_Attempt__c.RPT_Exam_Month__c':
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamMonth) {
+                  rf.value = $scope.rptData.currentExamMonth;
+                }
+                break;
+
               case 'Exam_Stat__c.Year__c':
-                if ($scope.fndRpt.applyFilters) {
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamYear) {
                   var startYear=null;
                   var endYear=null;
                   if($scope.rptData.currentStartExamYear != null)
@@ -561,6 +616,20 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 }
                 break;
 
+              case 'Exam_Attempt__c.Days_Since_Dec__c':
+                if ($scope.rptData.yearToDate && $scope.fndRpt.hasYearToDate) {
+                  var mnow = moment();
+                  if(mnow.month() == 12) {
+                    var dec = moment('12/1/' + mnow.year());
+                    rf.value = mnow.diff(dec, 'days');
+                  } else {
+                   var dec = moment('12/1/' + (mnow.year()-1).toString());
+                    rf.value = mnow.diff(dec, 'days');
+                  }
+                } else {
+                  rf.value = 999999  
+                }
+                break;
 
             }
           }
