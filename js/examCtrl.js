@@ -233,7 +233,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Attendance By Country",
       description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4000000494Tb",
+      reportId: "00O40000004PW0X",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -590,29 +590,42 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               case 'Exam_Attempt__c.RPT_Exam_Month__c':
                 if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamMonth) {
-                  rf.value = $scope.rptData.currentExamMonth;
+                  if($scope.rptData.currentExamMonth == null) {
+                    var fnd = _.findWhere($scope.rptData.examMonthList, {name: 'Both'});
+                    if(fnd != null)
+                      rf.value = fnd.value;
+                  } else {
+                    rf.value = $scope.rptData.currentExamMonth;  
+                  }
+
+                  
                 }
                 break;
 
               case 'Exam_Stat__c.Year__c':
+              case 'Exam_Attempt__c.RPT_Exam_Year__c':
                 if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamYear) {
-                  var startYear=null;
-                  var endYear=null;
-                  if($scope.rptData.currentStartExamYear != null)
-                    startYear=$scope.rptData.currentStartExamYear;
-                  else startYear=$scope.rptData.examYearAllTimeList[0].value;
+                  if($scope.rptData.currentStartExamYear != null && $scope.rptData.currentEndExamYear != null) {
+                    var startYear=null;
+                    var endYear=null;
+                    if($scope.rptData.currentStartExamYear != null)
+                      startYear=$scope.rptData.currentStartExamYear;
+                    else startYear=$scope.rptData.examYearAllTimeList[0].value;
 
-                  if($scope.rptData.currentEndExamYear != null)
-                    endYear=$scope.rptData.currentEndExamYear;
-                  else endYear=$scope.rptData.examYearAllTimeList[$scope.rptData.examYearAllTimeList.length-1].value;
+                    if($scope.rptData.currentEndExamYear != null)
+                      endYear=$scope.rptData.currentEndExamYear;
+                    else endYear=$scope.rptData.examYearAllTimeList[$scope.rptData.examYearAllTimeList.length-1].value;
 
-                  var yearStr="";
-                  for(var i=startYear; i<=endYear; i++) {
-                    if(yearStr=="")
-                      yearStr = i;
-                    else yearStr = yearStr + "," + i;
+                    var yearStr="";
+                    for(var i=startYear; i<=endYear; i++) {
+                      if(yearStr=="")
+                        yearStr = i;
+                      else yearStr = yearStr + "," + i;
+                    }                    
+                    rf.value = yearStr;
+                  } else {
+                    rf.value = $scope.rptData.currentExamYear;
                   }
-                  rf.value = yearStr;
                 }
                 break;
 
