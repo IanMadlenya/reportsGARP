@@ -54,6 +54,11 @@
           <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
             {{prod.Name}} Shipping<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.
           </td>          
+
+          <td ng-repeat="prod in prods | filter:criteriaMatchTax()">
+            {{prod.Name}} Shipping<br>{{prod.Product2.ProductCode}}:{{prod.Product2.GL_Code__c}}<br><span ng-if="prod.Product2.Weight__c">{{prod.Product2.Weight__c}} lbs.
+          </td>          
+
           <td>
             <b>Total</b>
           </td>
@@ -106,6 +111,11 @@
               ${{formatAmountDisplay(getProductAmountShipping(opp, prod))}}
             </div>
           </td>
+          <td ng-repeat="prod in prods | filter:criteriaMatchTax()">
+            <div ng-if="getProductAmount(opp, prod)">
+              ${{formatAmountDisplay(getProductAmount(opp, prod))}}
+            </div>
+          </td>
           <td>
             <b>${{formatAmountDisplay(getRowTotal(opp))}}</b>
           </td>          
@@ -145,6 +155,9 @@
             <div ng-if="getProductAmountShipping(opp, prod)">
             </div>
           </td>          
+          <td ng-repeat="prod in prods | filter:criteriaMatchTax()">
+            <b>${{formatAmountDisplay(getProdTotalsTax(prod.Id))}}</b>    
+          </td>
           <td>
             <b>${{formatAmountDisplay(getOppTotals())}}</b>
           </td>

@@ -53,7 +53,8 @@ reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeo
 
 reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
 
-  var SHIP = 'SHIP';        
+  var SHIP = 'SHIP';     
+  var TAX = 'SLSTX';   
 
   var mergeProds = [
       {
@@ -696,6 +697,26 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
     return total;
   }
 
+  $scope.getProdTotalsTax = function(prodId) {
+
+    if(!defined($scope,"opps.length"))
+      return 0;
+
+    var total=0;
+    for(var j=0; j<$scope.opps.length; j++) {  
+      var opp = $scope.opps[j];    
+      var func = $scope.filterMatch();
+      if(func(opp)) {
+        var prod=_.findWhere($scope.prods, {Id: prodId})
+        var func = $scope.criteriaMatchTax();
+        if(defined(prod) && func(prod)) {
+          total+=$scope.getProductAmount(opp, prod);
+        }        
+      }
+    }
+    return total;
+  }
+
 
 
 $scope.getProductAmountShipping = function(opp, prod) {
@@ -870,6 +891,13 @@ $scope.getProductAmount = function(opp, prod) {
         json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c + "Shipping";        
       }
     }
+    for(var i=0; i<$scope.prods.length; i++) {  
+      var prod = $scope.prods[i];
+      var func = $scope.criteriaMatchTax();
+      if(func(prod)) {
+        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c;        
+      }
+    }
     json[0].endTotal="Total";
 
     for(var j=0; j<$scope.opps.length; j++) {  
@@ -905,6 +933,13 @@ $scope.getProductAmount = function(opp, prod) {
           if(func(prod)) {
             var prod = $scope.prods[i];
             obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = formatAmountExport($scope.getProductAmountShipping(opp, prod));
+          }
+        }
+        for(var i=0; i<$scope.prods.length; i++) {  
+          var prod = $scope.prods[i];
+          var func = $scope.criteriaMatchTax();
+          if(func(prod)) {
+           obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = formatAmountExport($scope.getProductAmount(opp, prod));
           }
         }
         obj.endTotal = formatAmountExport($scope.getRowTotal(opp));
@@ -976,9 +1011,39 @@ $scope.getProductAmount = function(opp, prod) {
       var fnd=_.findWhere($scope.prods, {Id: item.Id})
 
       if(defined(fnd,"Product2")) {
-        if(fnd.Product2.ProductCode==SHIP)
+        if(fnd.Product2.ProductCode==SHIP || fnd.Product2.ProductCode==TAX)
           return 0;
         else return 1;
+      } else {
+        return 0;
+      }
+
+    }
+  }
+
+  $scope.criteriaMatchTax = function(value) {
+    return function( item ) {   
+
+      var found = false;
+      var cnt=0;
+      for(var propertyName in $scope.formVars.prods) { 
+        var fProd = $scope.formVars.prods[propertyName];
+        if(item.Id == fProd.id && fProd.checked == false) {
+          found=true;
+        }
+        if(fProd.checked == true)
+          cnt++;
+      }
+      if(cnt > 0 && found)
+        return 0;
+
+
+      var fnd=_.findWhere($scope.prods, {Id: item.Id})
+
+      if(defined(fnd,"Product2")) {
+        if(fnd.Product2.ProductCode==TAX)
+          return 1;
+        else return 0;
       } else {
         return 0;
       }
