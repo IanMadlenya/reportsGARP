@@ -775,15 +775,16 @@ $scope.getProductAmountShipping = function(opp, prod) {
         shippingCost = oppLine.TotalPrice;
       }
 
-      if(oppLine.PricebookEntry.Product2.Id == prod.Product2.Id)
+      //if(oppLine.PricebookEntry.Product2.Id == prod.Product2.Id)
+      if(oppLine.PricebookEntry.ProductCode == "SHIP")
         boughtShipping=true
     }        
     if(defined(fndProd,"Product2.Weight__c") && fndProd.Product2.Weight__c > 0 && shippingCost > 0 && totalWeight > 0 && boughtShipping == true) {
       var percent = fndProd.Product2.Weight__c / totalWeight;
 
       if(opp.isRefund) {
-        if(foundRefundShipping) {
-          return (shippingCost * foundCnt) * percent * -1;
+        if(found && foundRefundShipping) {
+          return shippingCost * percent * -1;
         } else {
           return 0;
         }
