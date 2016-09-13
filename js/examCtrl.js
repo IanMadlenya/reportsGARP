@@ -339,7 +339,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasYearToDate: false,
       hasExamType: true,
       hasExamMonth: false,
-      hasExamYear: true,
+      hasExamYear: false,
       hasExamYearRange: true,
       hasExport: true
     }];
@@ -604,7 +604,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               case 'Exam_Stat__c.Year__c':
               case 'Exam_Attempt__c.RPT_Exam_Year__c':
-                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamYear) {
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamYearRange) {
                   if($scope.rptData.currentStartExamYear != null && $scope.rptData.currentEndExamYear != null) {
                     var startYear=null;
                     var endYear=null;
@@ -661,6 +661,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if (obj !== null && typeof obj !== "undefined" && obj.length !== null && typeof obj.length !== "undefined") {
           $scope.mainSpinner = new Spinner(spinnerOptions).spin(obj[0]);
         }
+
+
+
+
+
 
 
         // execute report synchronously
