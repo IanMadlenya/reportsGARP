@@ -229,7 +229,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: true,
       hasExamYearRange: false,
-      hasExport: false
+      hasExport: true
     }, {
       name: "Exam Attendance By Country",
       description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -330,7 +330,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExport: true
     }, {
       name: "Exam Registrations By Year All Time",
-      description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Choose 'Combine Parts' to merge Exam Part I, II and FULL. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+      description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004PErn",
       reportIdCombined: "00O40000004PEu8",
       reportType: 'stackedbar',
@@ -604,8 +604,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               case 'Exam_Stat__c.Year__c':
               case 'Exam_Attempt__c.RPT_Exam_Year__c':
-                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamYearRange) {
-                  if($scope.rptData.currentStartExamYear != null && $scope.rptData.currentEndExamYear != null) {
+                if ($scope.fndRpt.applyFilters) {
+                  if($scope.fndRpt.hasExamYearRange && $scope.rptData.currentStartExamYear != null && $scope.rptData.currentEndExamYear != null) {
                     var startYear=null;
                     var endYear=null;
                     if($scope.rptData.currentStartExamYear != null)
@@ -775,18 +775,36 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           }
           sdata.push(obj);
         }
-        if (async) {
-          $rootScope.$apply(function() {
+
+        if (exportData) {
+          var csv = JSON2CSV(sdata);
+          var fileName = 'data'
+          var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
+          var link = document.createElement("a");
+          link.href = uri
+            //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
+          link.download = fileName + ".csv";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          return;
+
+        } else {
+          if (async) {
+            $rootScope.$apply(function() {
+              $scope.myData = sdata;
+              $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
+              $scope.gridOptions1.data = sdata;
+              $rootScope.$broadcast('drawMap', sdata);
+            });
+          } else {
             $scope.myData = sdata;
             $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
             $scope.gridOptions1.data = sdata;
             $rootScope.$broadcast('drawMap', sdata);
-          });
-        } else {
-          $scope.myData = sdata;
-          $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
-          $scope.gridOptions1.data = sdata;
-          $rootScope.$broadcast('drawMap', sdata);
+          }
+
         }
       }
 
