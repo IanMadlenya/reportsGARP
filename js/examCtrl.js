@@ -624,7 +624,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     }                    
                     rf.value = yearStr;
                   } else {
-                    rf.value = $scope.rptData.currentExamYear;
+                    if($scope.fndRpt.hasExamYear)
+                      rf.value = $scope.rptData.currentExamYear;
                   }
                 }
                 break;
