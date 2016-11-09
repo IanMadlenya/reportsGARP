@@ -76,7 +76,12 @@ reportsGARPControllers.controller('deployCalCtrl', ['$scope', '$rootScope', '$ti
 			$rootScope.$apply(function(){
 				$scope.vm.events=[];
 				for(var i=0; i<data.result.length; i++) {
-					var d = new Date(data.result[i].Target_Deployment_Date__c + ($scope.dls*60*60*1000));
+
+					var epoch = data.result[i].Target_Deployment_Date__c;
+				    var est = moment.tz.zone('America/New_York');
+				    var estOffset = est.parse(epoch);   //Calculate EST/EDT offset from UTC; it will be either 300 or 240 minutes depending on whether epoch falls within Daylight Savings
+				    var estEpoch = epoch + (estOffset * 60 * 1000);
+					var d = new Date(moment(estEpoch));
 					var res = data.result[i];
 
 					var type = 'evt-normal-email';
