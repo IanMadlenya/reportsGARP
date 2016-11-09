@@ -839,10 +839,22 @@ $scope.getProductAmount = function(opp, prod) {
     return parseFloat(Math.round(amount * 100) / 100).toFixed(2).toString();
   }
 
-  function formatDefined(obj) {
-    if(defined(obj))
-      return obj;
-    else return '';
+
+  function getValueIfDefinedEmpty(ref, strNames) {
+    var name;
+
+    if(typeof ref === "undefined" || ref === null) {
+      return '';
+    }
+
+    if(strNames !== null && typeof strNames !== "undefined") {
+      var arrNames = strNames.split('.');
+      while (name = arrNames.shift()) {
+        if (ref[name] === null || typeof ref[name] === "undefined") return '';
+        ref = ref[name];
+      }
+    }
+    return '"' + ref + '"';
   }
 
   $scope.formatAmountDisplay = function(str) {
@@ -876,7 +888,7 @@ $scope.getProductAmount = function(opp, prod) {
 
   $scope.export = function() {
 
-    var json = [{"company":"Company","type":"Type","total":"Total","invoiceNumber":"Invoice #","garpId":"GARP ID","firstName":"First Name","lastName":"Last Name","county":"Country","state":"State","method":"Payment Method","paidDate":"Paid Date","payPalId":"PayPal Trans ID"}];
+    var json = [{"company":"Company","type":"Type","total":"Total","invoiceNumber":"Invoice #","garpId":"GARP ID","firstName":"First Name","lastName":"Last Name","county":"Country","state":"State","examSite":"Exam Site","method":"Payment Method","paidDate":"Paid Date","payPalId":"PayPal Trans ID"}];
     for(var i=0; i<$scope.prods.length; i++) {  
       var prod = $scope.prods[i];
       var func = $scope.criteriaMatch();
@@ -906,19 +918,21 @@ $scope.getProductAmount = function(opp, prod) {
 
       var func = $scope.filterMatch();
       if(func(opp)) {
+
         var obj = {
-          "company":formatDefined(opp.Company__c),
-          "type":formatDefined(opp.trans.ChargentSFA__Type__c),
-          "total":formatAmountExport($scope.getRowTotal(opp)),
-          "invoiceNumber":formatDefined(opp.Display_Invoice_Number__c),
-          "garpId":formatDefined(opp.GARP_Member_ID__c),
-          "firstName":formatDefined(opp.Member_First_Name__c),
-          "lastName":formatDefined(opp.Member_Last_Name__c),
-          "county":formatDefined(opp.Shipping_Country__c),
-          "state":formatDefined(opp.Shipping_State__c),
-          "method":formatDefined(opp.trans.ChargentSFA__Payment_Method__c),
-          "paidDate":formatDefined(formatDate(opp.closeDate, "MM-DD-YYYY")),
-          "payPalId":formatDefined(opp.trans.ChargentSFA__Gateway_ID__c)
+          "company":getValueIfDefinedEmpty(opp,"Company__c"),
+          "type":getValueIfDefinedEmpty(opp,"trans.ChargentSFA__Type__c"),
+          "total":getValueIfDefinedEmpty($scope.getRowTotal(opp)),
+          "invoiceNumber":getValueIfDefinedEmpty(opp,"Display_Invoice_Number__c"),
+          "garpId":getValueIfDefinedEmpty(opp,"GARP_Member_ID__c"),
+          "firstName":getValueIfDefinedEmpty(opp,"Member_First_Name__c"),
+          "lastName":getValueIfDefinedEmpty(opp,"Member_Last_Name__c"),
+          "county":getValueIfDefinedEmpty(opp,"Shipping_Country__c"),
+          "state":getValueIfDefinedEmpty(opp,"Shipping_State__c"),
+          "examSite":getValueIfDefinedEmpty(opp,"Deferred_Exam_Registration__r.Exam_Site__r.Site__r.Name"),
+          "method":getValueIfDefinedEmpty(opp,"trans.ChargentSFA__Payment_Method__c"),
+          "paidDate":getValueIfDefinedEmpty(formatDate(opp.closeDate, "MM-DD-YYYY")),
+          "payPalId":getValueIfDefinedEmpty(opp,"trans.ChargentSFA__Gateway_ID__c")
         };
 
         for(var i=0; i<$scope.prods.length; i++) {  
