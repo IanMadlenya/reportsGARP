@@ -345,7 +345,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }];
 
     $scope.rptData.examYearAllTimeList = [];
-    for (var i = 1997; i <= 2016; i++) {
+    for (var i = 1997; i <= 2017; i++) {
       var obj = {
         name: i.toString(),
         value: i
@@ -393,7 +393,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }];
 
     $scope.rptData.examYearList = [];
-    for (var i = 2010; i <= 2016; i++) {
+    for (var i = 2010; i <= 2017; i++) {
       var obj = {
         name: i,
         value: i
@@ -575,7 +575,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               case 'Exam_Attempt__c.Exam_Type__c':
                 if ($scope.rptData.currentExamYear != null && $scope.fndRpt.hasExamYear)
                   rf.value = $scope.rptData.currentExamYear;
-                else rf.value = '2010,2011,2012,2013,2014,2015,2016';
+                else rf.value = '2010,2011,2012,2013,2014,2015,2016,2017';
                 break;
 
               case 'Exam_Stat__c.Exam_Type__c':
