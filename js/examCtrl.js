@@ -345,7 +345,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }];
 
     $scope.rptData.examYearAllTimeList = [];
-    for (var i = 1997; i <= 2016; i++) {
+    for (var i = 1997; i <= 2017; i++) {
       var obj = {
         name: i.toString(),
         value: i
