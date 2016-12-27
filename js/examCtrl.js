@@ -633,7 +633,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               case 'Exam_Attempt__c.Days_Since_Dec__c':
                 if ($scope.rptData.yearToDate && $scope.fndRpt.hasYearToDate) {
                   var mnow = moment();
-                  if(mnow.month() == 12) {
+                  if(mnow.month() == 11) {
                     var dec = moment('12/1/' + mnow.year());
                     rf.value = mnow.diff(dec, 'days');
                   } else {
