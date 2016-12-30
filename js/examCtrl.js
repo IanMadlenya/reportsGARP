@@ -277,8 +277,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4000000492wq",
-      reportIdCombined: "00O40000004HEOG",
+      reportId: "00O40000004Tl7M",
+      reportIdCombined: "00O40000004Tl7H",
       reportType: 'stackedline',
       cumlative: true,
       applyFilters: true,
@@ -399,6 +399,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         value: i
       }
       $scope.rptData.examYearList.push(obj);
+    }
+
+    $scope.isCombined = function(reportId) {
+      var fnd = _.findWhere($scope.rptData.reportTypeList, {reportId: reportId});
+      if(defined(fnd,'reportIdCombined'))
+        return true;
+      else return false;
     }
 
     $scope.getDescription = function() {
