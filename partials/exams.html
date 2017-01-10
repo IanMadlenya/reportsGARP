@@ -6,7 +6,7 @@
 <div class="container page-container">
    <div class="row">
       <div class="col-md-4">
-         Exam:<br> 
+         Report:<br> 
          <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
             <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
          </select>
@@ -46,11 +46,13 @@
          <div ng-if="fndRpt.hasExamYearRange">
             Start Year: 
             <select id="examStartYearSelect" data-ng-model="rptData.currentStartExamYear" name="examStartYear">
-               <option ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+               <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+               <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
             </select><br>
             End Year: 
             <select id="examEndYearSelect" data-ng-model="rptData.currentEndExamYear" name="examEndYear">
-               <option ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+               <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+               <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
             </select>
          </div>
       </div>
