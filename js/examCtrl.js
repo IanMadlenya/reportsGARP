@@ -318,7 +318,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "FRM Exam Registrations By Year",
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004PKiw",
+      reportId: "00O40000004TobU",
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
@@ -682,6 +682,22 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 }
                 break;
 
+              case 'Exam_Attempt__c.Days_Since_Dec_Cal_Date__c':
+              if ($scope.rptData.yearToDate && $scope.fndRpt.hasYearToDate) {
+                var mnow = moment();
+                if(mnow.month() == 11) {
+                  var day = mnow.date();
+                  rf.value = moment('11/' + day.toString() + '/15').format('YYYY-MM-DD');
+                } else {
+                  var month = mnow.month()+1 ;
+                  var day = mnow.date();
+                  rf.value = moment(month.toString() + '/' + day.toString() + '/16').format('YYYY-MM-DD');
+                }
+              } else {
+                  rf.value = '1/1/3030';  
+                }
+              break;
+
             }
           }
         }
@@ -1011,7 +1027,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         }
 
-
+        var displaylabels = [];
+        for(var i=0; i<labels.length; i++) {
+          var newLab = labels[i].replace('/2015','').replace('/2016','');
+          displaylabels.push(newLab);
+        }
+        labels = displaylabels;
 
         $('#container').highcharts({
 
