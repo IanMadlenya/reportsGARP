@@ -173,7 +173,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.disableExamMonth = false;
     $scope.rptData.disableExamType = false;
     $scope.rptData.includeUnPaid = false;
-    $scope.rptData.combineExams = false;
     $scope.rptData.combineParts = false;
     $scope.rptData.allOrders = "New Lead,Closed Won,Closed, Closed Lost";
     $scope.rptData.paidOrders = "Closed Won, Closed";
@@ -278,7 +277,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004To1R",
-      reportIdCombined: "00O40000004Tl7H",
+      reportIdCombined: "00O40000004TpDi",
       reportType: 'stackedline',
       cumlative: true,
       applyFilters: true,
@@ -287,7 +286,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: false,
       hasExamYearRange: true,
-      hasExport: false
+      hasExport: true
     }, {
       name: "Exam Registrations By Type By Year",
       description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -296,7 +295,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
-      hasYearToDate: true,
+      hasYearToDate: false,
       hasExamType: true,
       hasExamMonth: true,
       hasExamYear: false,
@@ -305,7 +304,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "ERP Exam Registrations By Year",
       description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4000000493iL",
+      reportId: "00O40000004TpDx",
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
@@ -318,7 +317,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "FRM Exam Registrations By Year",
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004TobU",
+      reportId: "00O40000004TpDs",
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
@@ -519,7 +518,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         });
         $scope.reportId = $scope.fndRpt.reportId;
 
-        if ($scope.rptData.combineExams || $scope.rptData.combineParts) {
+        if ($scope.rptData.combineParts) {
           $scope.reportId = $scope.fndRpt.reportIdCombined;
         }
 
@@ -564,7 +563,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       });
       $scope.reportId = $scope.fndRpt.reportId;
 
-      if ($scope.rptData.combineExams || $scope.rptData.combineParts) {
+      if ($scope.rptData.combineParts) {
         $scope.reportId = $scope.fndRpt.reportIdCombined;
       }
 
@@ -694,7 +693,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                   rf.value = moment(month.toString() + '/' + day.toString() + '/16').format('YYYY-MM-DD');
                 }
               } else {
-                  rf.value = '1/1/3030';  
+                  rf.value = '3030-01-01';  
                 }
               break;
 
@@ -817,7 +816,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       });
       $scope.reportId = $scope.fndRpt.reportId;
 
-      if ($scope.rptData.combineExams || $scope.rptData.combineParts) {
+      if($scope.rptData.combineParts) {
         $scope.reportId = $scope.fndRpt.reportIdCombined;
       }
 
@@ -947,7 +946,21 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         labels = _.sortBy(uniqueNames, function(obj){ 
           return moment(obj).unix();
         });
-
+        // create labels by calendar
+        var currDate = moment(labels[0]);
+        var lastDate = moment(labels[labels.length-1]);
+        var done = false;
+        var newLables = [];
+        while(!done) {
+          var dt = currDate.format("M/D/YYYY");
+          newLables.push(dt);
+          if(currDate.diff(lastDate) == 0) {
+            done = true;
+          } else {
+            currDate.add(1,'days');
+          }
+        }
+        labels = newLables;
 
         for (var i = 0; i < series.length; i++) {
           var obj = {
@@ -1034,114 +1047,159 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
         labels = displaylabels;
 
-        $('#container').highcharts({
+        if (exportData) {
 
-          // data: {
-          //     csv: csv
-          // },
 
-          // Edit chart spacing
-          chart: {
-            spacingBottom: 15,
-            spacingTop: 10,
-            spacingLeft: 10,
-            spacingRight: 10,
+          var expotData = [];
+          var exportLabels = {};
+          for(var i=0; i<sdata.length; i++) {
+            var lab = sdata[i].name;
+            exportLabels[lab] = lab;
+          }
+          exportLabels['label'] = label;
+          expotData.push(exportLabels);
 
-            // Explicitly tell the width and height of a chart
-            width: null,
-            height: 900,
-          },
-
-          title: {
-            text: 'Registrations by Day'
-          },
-
-          subtitle: {
-            text: ''
-          },
-
-          xAxis: {
-            tickInterval: 7, // one week
-            tickWidth: 0,
-            gridLineWidth: 1,
-            labels: {
-              align: 'left',
-              x: 3,
-              y: -3,
-              enabled: true
-            },
-            title: {
-                text: 'Days from Registration Open'
-            },
-            categories: labels
-          },
-
-          yAxis: [{ // left y axis
-            title: {
-              text: 'Registrations'
-            },
-            labels: {
-              align: 'left',
-              x: 3,
-              y: 16,
-              format: '{value:.,0f}'
-            },
-            showFirstLabel: false
-          }, { // right y axis
-            linkedTo: 0,
-            gridLineWidth: 0,
-            opposite: true,
-            title: {
-              text: null
-            },
-            labels: {
-              align: 'right',
-              x: -3,
-              y: 16,
-              format: '{value:.,0f}'
-            },
-            showFirstLabel: false
-          }],
-
-          legend: {
-            align: 'left',
-            verticalAlign: 'top',
-            y: 20,
-            floating: true,
-            borderWidth: 0
-          },
-
-          tooltip: {
-            shared: true,
-            crosshairs: true
-          },
-
-          plotOptions: {
-            series: {
-              cursor: 'pointer',
-              point: {
-                events: {
-                  click: function(e) {
-                    hs.htmlExpand(null, {
-                      pageOrigin: {
-                        x: e.pageX || e.clientX,
-                        y: e.pageY || e.clientY
-                      },
-                      headingText: this.series.name,
-                      maincontentText: this.series.data[this.x].category + ':<br/> ' +
-                        this.y + ' Registrations',
-                      width: 200
-                    });
-                  }
-                }
-              },
-              marker: {
-                lineWidth: 1
+          for(var i=0; i<labels.length; i++) {
+            var lab = labels[i];
+            var dataObj = {
+              label: lab
+            }
+            for(var j=0; j<sdata.length; j++) {
+              var sd = sdata[j];
+              if(sd.data.length > i && sd.data[i] != null) {
+                dataObj[sd.name] = sd.data[i];
+              } else {
+                dataObj[sd.name] = '';
               }
             }
-          },
-          series: sdata
-        });
+            expotData.push(dataObj);
+          }
+
+          var csv = JSON2CSV(expotData);
+          var fileName = 'data'
+          var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
+          var link = document.createElement("a");
+          link.href = uri
+            //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
+          link.download = fileName + ".csv";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          return;
+
+        } else {
+
+
+          $('#container').highcharts({
+
+            // data: {
+            //     csv: csv
+            // },
+
+            // Edit chart spacing
+            chart: {
+              spacingBottom: 15,
+              spacingTop: 10,
+              spacingLeft: 10,
+              spacingRight: 10,
+
+              // Explicitly tell the width and height of a chart
+              width: null,
+              height: 900,
+            },
+
+            title: {
+              text: 'Registrations by Day'
+            },
+
+            subtitle: {
+              text: ''
+            },
+
+            xAxis: {
+              tickInterval: 7, // one week
+              tickWidth: 0,
+              gridLineWidth: 1,
+              labels: {
+                align: 'left',
+                x: 3,
+                y: -3,
+                enabled: true
+              },
+              title: {
+                  text: 'Days'
+              },
+              categories: labels
+            },
+
+            yAxis: [{ // left y axis
+              title: {
+                text: 'Registrations'
+              },
+              labels: {
+                align: 'left',
+                x: 3,
+                y: 16,
+                format: '{value:.,0f}'
+              },
+              showFirstLabel: false
+            }, { // right y axis
+              linkedTo: 0,
+              gridLineWidth: 0,
+              opposite: true,
+              title: {
+                text: null
+              },
+              labels: {
+                align: 'right',
+                x: -3,
+                y: 16,
+                format: '{value:.,0f}'
+              },
+              showFirstLabel: false
+            }],
+
+            legend: {
+              align: 'left',
+              verticalAlign: 'top',
+              y: 20,
+              floating: true,
+              borderWidth: 0
+            },
+
+            tooltip: {
+              shared: true,
+              crosshairs: true
+            },
+
+            plotOptions: {
+              series: {
+                cursor: 'pointer',
+                point: {
+                  events: {
+                    click: function(e) {
+                      hs.htmlExpand(null, {
+                        pageOrigin: {
+                          x: e.pageX || e.clientX,
+                          y: e.pageY || e.clientY
+                        },
+                        headingText: this.series.name,
+                        maincontentText: this.series.data[this.x].category + ':<br/> ' +
+                          this.y + ' Registrations',
+                        width: 200
+                      });
+                    }
+                  }
+                },
+                marker: {
+                  lineWidth: 1
+                }
+              }
+            },
+            series: sdata
+          });
+        }
       }
 
 

@@ -20,10 +20,10 @@
             <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
                <option ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
             </select>
-            <div ng-if="isCombined(rptData.currentReportType)">
+            <!-- div ng-if="isCombined(rptData.currentReportType)">
                <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
-            </div>
-            <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O40000004PErn')">
+            </div -->
+            <div ng-if="rptData.currentExamType.indexOf(',') > -1 && fndRpt.reportIdCombined">
                <input type="checkbox" name="combineParts" ng-model="rptData.combineParts"> Combine Exam Parts<br>
             </div>
          </div>
