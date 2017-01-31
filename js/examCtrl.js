@@ -317,7 +317,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "FRM Exam Registrations By Year",
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004TpDs",
+      reportId: "00O40000004TtwS",
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
