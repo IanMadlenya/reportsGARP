@@ -18,7 +18,8 @@
          <div ng-if="fndRpt.hasExamType">
             Exam Type:<br> 
             <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
-               <option ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
+               <option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
+               <option ng-if="fndRpt.isAllTime" ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
             </select>
             <!-- div ng-if="isCombined(rptData.currentReportType)">
                <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
