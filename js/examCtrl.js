@@ -173,7 +173,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.disableExamMonth = false;
     $scope.rptData.disableExamType = false;
     $scope.rptData.includeUnPaid = false;
-    $scope.rptData.combineExams = false;
     $scope.rptData.combineParts = false;
     $scope.rptData.allOrders = "New Lead,Closed Won,Closed, Closed Lost";
     $scope.rptData.paidOrders = "Closed Won, Closed";
@@ -318,7 +317,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "FRM Exam Registrations By Year",
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004PKiw",
+      reportId: "00O40000004TtwS",
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
@@ -331,8 +330,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Year All Time",
       description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004PErn",
-      reportIdCombined: "00O40000004PEu8",
+      reportId: "00O40000004Tu8O",
+      reportIdCombined: "00O40000004Tu9g",
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
@@ -370,6 +369,53 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       name: "All",
       value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II"
     }];
+
+    $scope.rptData.examFullTypeList = [{
+      name: "ERP",
+      value: "ERP",
+      type: "ERP",
+      number: "Full"
+    }, {
+      name: "ERP I",
+      value: "ERP Exam Part I",
+      type: "ERP",
+      number: "I"      
+    }, {
+      name: "ERP II",
+      value: "ERP Exam Part II",
+      type: "ERP",
+      number: "I"            
+    }, {
+      name: "ERP All",
+      value: "ERP, ERP Exam Part I, ERP Exam Part II",
+      type: "ERP",
+      number: "Full,I,II"            
+    }, {
+      name: "FRM",
+      value: "FRM",
+      type: "FRM",
+      number: "Full"            
+    }, {
+      name: "FRM I",
+      value: "FRM Part 1",
+      type: "FRM",
+      number: "I"            
+    }, {
+      name: "FRM II",
+      value: "FRM Part 2",
+      type: "FRM",
+      number: "II"
+    }, {
+      name: "FRM All",
+      value: "FRM Part 1,FRM Part 2",
+      type: "FRM",
+      number: "Full,I,II"
+    }, {
+      name: "All",
+      value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II",
+      type: "FRM,ERP",
+      number: "Full,I,II"
+    }];    
 
     $scope.rptData.examMonthList = [{
       name: "May",
@@ -603,11 +649,21 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               case 'Exam_Stat__c.Exam_Type__c':
                 if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType) {
-                  if ($scope.rptData.currentExamType != null && $scope.rptData.currentExamType.indexOf('ERP') > -1 && $scope.rptData.currentExamType.indexOf('FRM') == -1)
-                    rf.value = 'ERP';
-                  else if ($scope.rptData.currentExamType != null && $scope.rptData.currentExamType.indexOf('ERP') == -1 && $scope.rptData.currentExamType.indexOf('FRM') > -1)
-                    rf.value = 'FRM';
+                  var fnd = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
+                  if(fnd != null) {
+                    rf.value = fnd.type;
+                  }
                   else rf.value = 'FRM,ERP'
+                }
+                break;
+
+              case 'Exam_Stat__c.Exam_Number__c':
+                if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType) {
+                  var fnd = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
+                  if(fnd != null) {
+                    rf.value = fnd.number;
+                  }
+                  else rf.value = 'Full,I,II'
                 }
                 break;
 
@@ -805,6 +861,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
       //"groupingsDown"
       if (data.groupingsDown.groupings.length <= 0) {
+        alert('No data found.');
         return;
       }
 
