@@ -1,3 +1,23 @@
+
+
+@media (min-width: 1400px) {
+	.container {
+	    width: 1300px;
+	}
+}
+
+@media (min-width: 1700px) {
+	.container {
+	    width: 1600px;
+	}	
+}
+
+@media (min-width: 1900px) {
+	.container {
+	    width: 1800px;
+	}	
+}
+
 .event-danger {
   background-color: #f05123 !important;
 }
