@@ -5,13 +5,22 @@
 <div id="mainspin"></div>
 <div class="container page-container">
    <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-3">
          Report:<br> 
          <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
             <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
          </select>
          <div>
             {{getDescription()}}
+         </div>
+      </div>
+      <div class="col-md-1">
+         <div ng-if="fndRpt.hasSite">
+            Location:<br> 
+            <select id="examCountrySelect" data-ng-model="rptData.currentCountryType" name="countryType">
+               <option selected="selected">Country</option>
+               <option>Exam Site</option>
+            </select>            
          </div>
       </div>
       <div class="col-md-2">
@@ -21,11 +30,8 @@
                <option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
                <option ng-if="fndRpt.isAllTime" ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
             </select>
-            <div ng-if="isCombined(rptData.currentReportType)">
+            <div ng-if="rptData.currentExamType.indexOf(',') > -1 && isCombined(rptData.currentReportType)">
                <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
-            </div>
-            <div ng-if="rptData.currentExamType.indexOf(',') > -1 && (rptData.currentReportType == '00O40000004PErn')">
-               <input type="checkbox" name="combineParts" ng-model="rptData.combineParts"> Combine Exam Parts<br>
             </div>
          </div>
       </div>
@@ -66,16 +72,16 @@
          <button ng-if="fndRpt.hasExport" ng-click="refresh(true,true)">Export Data</button>
       </div>
    </div>
+
+   <div ng-if="fndRpt.reportType == 'table'">
+      <div ui-grid="gridOptions1" class="myGrid" style="height:600px" ui-grid-cellNav ui-grid-auto-resize></div>
+   </div>
+
    <div class="row">
       <div class="col-md-12">
          <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
          <div class="row" ng-if="fndRpt.reportType == 'table'" >
-            <div class="col-md-6">
-               <div ui-grid="gridOptions1" class="myGrid"></div>
-            </div>
-         </div>
-         <div class="row" ng-if="fndRpt.reportType == 'table'" >
-            <div class="col-md-6" ng-controller="mapCtrl">
+            <div class="col-md-12" ng-controller="mapCtrl">
                <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
             </div>
          </div>

@@ -52,13 +52,13 @@
       return parseFloat(Math.round(amount * 100) / 100).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     
-    function JSON2CSV(objArray) {
+    function JSON2CSV(objArray, labels, quotes) {
         var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
     
         var str = '';
         var line = '';
     
-        if ($("#labels").is(':checked')) {
+        if (labels) {
             var head = array[0];
             if ($("#quote").is(':checked')) {
                 for (var index in array[0]) {
@@ -78,7 +78,7 @@
         for (var i = 0; i < array.length; i++) {
             var line = '';
     
-            if ($("#quote").is(':checked')) {
+            if (quotes) {
                 for (var index in array[i]) {
                     var value = array[i][index] + "";
                     line += '"' + value.replace(/"/g, '""') + '",';
