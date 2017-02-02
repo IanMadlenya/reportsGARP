@@ -56,7 +56,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   var SHIP = 'SHIP';     
   var TAX = 'SLSTX';   
 
-  var mergeProds = [
+var mergeProds = [
       {
       glCodes: [
         '4030'
@@ -100,7 +100,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ICBRR',
       mergedGL : '4000MERGE',
       mergedName : 'ICBRR Exam',
-      sort: 50,
+      sort: 35,
       weight: 4
     },
     {
@@ -115,7 +115,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'FFR',
       mergedGL : '4000MERGE',
       mergedName : 'FFR Exam',
-      sort: 57,
+      sort: 37,
       weight: 1
     },    
 
@@ -198,7 +198,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ERPIMAY',
       mergedGL : '4001MERGE',
       mergedName : 'ERP Exam Part I - May',
-      sort: 35,
+      sort: 39,
       weight: 0
     },
     {
@@ -214,7 +214,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ERPINOV',
       mergedGL : '4002MERGE',
       mergedName : 'ERP Exam Part I - Nov',
-      sort: 37,
+      sort: 41,
       weight: 0
     },
     {
@@ -230,7 +230,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ERPIIMAY',
       mergedGL : '4001MERGE',
       mergedName : 'ERP Exam Part II - May',
-      sort: 36,
+      sort: 40,
       weight: 0
     },
     {
@@ -246,11 +246,10 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       mergedCode : 'ERPIINOV',
       mergedGL : '4002MERGE',
       mergedName : 'ERP Exam Part II - Nov',
-      sort: 38,
+      sort: 42,
       weight: 0
     }
   ];
-
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
 

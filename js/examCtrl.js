@@ -466,7 +466,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     $scope.isCombined = function(reportId) {
       var fnd = _.findWhere($scope.rptData.reportTypeList, {reportId: reportId});
-      if(defined(fnd,'reportIdCombined') || fnd.name == "Exam Registrations By Country")
+      if(defined(fnd,'reportIdCombined'))
         return true;
       else return false;
     }
