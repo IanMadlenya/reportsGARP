@@ -958,7 +958,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       console.log(data);
 
       //"groupingsDown"
-      if (!async) {
+      if (!defined(data,"groupingsDowns")) {
         if(data.groupingsDown.groupings.length <= 0) {
           alert('No data found.');
           return;
@@ -1686,7 +1686,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             expData.push(obj);
           }
 
-          var csv = JSON2CSV(expData,true,true);
+          var csv = JSON2CSV(expData,false,true);
           var fileName = 'data'
           var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
           var link = document.createElement("a");
