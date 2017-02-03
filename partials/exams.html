@@ -1,90 +1,113 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <style type="text/css">
-   ${demo.css}
+  ${demo.css}
 </style>
 <div id="mainspin"></div>
 <div class="container page-container">
-   <div class="row">
+
+
+    <div class="row" style="background-color: #afc2d8;">
       <div class="col-md-3">
-         Report:<br> 
-         <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
-            <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
-         </select>
-         <div>
-            {{getDescription()}}
-         </div>
+        Report:<br> 
+        <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
+          <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
+        </select>
+        <div>
+          {{getDescription()}}
+        </div>
       </div>
       <div class="col-md-1">
-         <div ng-if="fndRpt.hasSite">
-            Location:<br> 
-            <select id="examCountrySelect" data-ng-model="rptData.currentCountryType" name="countryType">
-               <option selected="selected">Country</option>
-               <option>Exam Site</option>
-            </select>            
-         </div>
-      </div>
-      <div class="col-md-2">
-         <div ng-if="fndRpt.hasExamType">
-            Exam Type:<br> 
-            <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
-               <option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
-               <option ng-if="fndRpt.isAllTime" ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
-            </select>
-            <div ng-if="rptData.currentExamType.indexOf(',') > -1 && isCombined(rptData.currentReportType)">
-               <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
+        <div ng-if="fndRpt.hasSite">
+          <div class="row">
+            <div class="col-md-12">
+              Location:<br> 
+              <select id="examCountrySelect" data-ng-model="rptData.currentCountryType" name="countryType">
+                <option selected="selected">Country</option>
+                <option>Exam Site</option>
+              </select>
             </div>
-         </div>
-      </div>
-      <div class="col-md-2">
-         <div ng-if="fndRpt.hasExamMonth">
-            Exam Month:<br> 
-            <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disabled="rptData.disableExamMonth">
-               <option ng-repeat="examMonth in rptData.examMonthList" value="{{examMonth.value}}">{{examMonth.name}}</option>
-            </select>
-         </div>
-      </div>
-      <div class="col-md-2">
-         <div ng-if="fndRpt.hasExamYear">
-            Exam Year:<br> 
-            <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disabled="rptData.disableExamYear">
-               <option ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
-            </select>
-         </div>
-         <div ng-if="fndRpt.hasExamYearRange">
-            Start Year: 
-            <select id="examStartYearSelect" data-ng-model="rptData.currentStartExamYear" name="examStartYear">
-               <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
-               <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
-            </select><br>
-            End Year: 
-            <select id="examEndYearSelect" data-ng-model="rptData.currentEndExamYear" name="examEndYear">
-               <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
-               <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
-            </select>
-         </div>
-      </div>
-      <div class="col-md-2">
-         <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid" ng-change="selectPaid()"> Include Unpaid<br>
-         <div ng-if="fndRpt.hasYearToDate">
-            <input type="checkbox" name="yearToDate" ng-model="rptData.yearToDate" ng-change="selectYearToDate()"> Year To Date<br>
-         </div>
-         <button ng-click="refresh(true,false)">Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
-         <button ng-if="fndRpt.hasExport" ng-click="refresh(true,true)">Export Data</button>
-      </div>
-   </div>
-
-   <div ng-if="fndRpt.reportType == 'table'">
-      <div ui-grid="gridOptions1" class="myGrid" style="height:600px" ui-grid-cellNav ui-grid-auto-resize></div>
-   </div>
-
-   <div class="row">
-      <div class="col-md-12">
-         <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
-         <div class="row" ng-if="fndRpt.reportType == 'table'" >
-            <div class="col-md-12" ng-controller="mapCtrl">
-               <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              Map Display:<br>
+              <select id="examMapSelect" data-ng-model="rptData.currentMapType" name="mapType">
+                <option selected="selected">Total</option>
+                <option>%Diff</option>
+              </select>
             </div>
-         </div>
+          </div>
+        </div>
       </div>
-   </div>
+      <div class="col-md-2">
+        <div ng-if="fndRpt.hasExamType">
+          Exam Type:<br> 
+          <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
+            <option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
+            <option ng-if="fndRpt.isAllTime" ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
+          </select>
+          <div ng-if="rptData.currentExamType.indexOf(',') > -1 && isCombined(rptData.currentReportType)">
+            <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div ng-if="fndRpt.hasExamMonth">
+          Exam Month:<br> 
+          <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disabled="rptData.disableExamMonth">
+            <option ng-repeat="examMonth in rptData.examMonthList" value="{{examMonth.value}}">{{examMonth.name}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div ng-if="fndRpt.hasExamYear">
+          Exam Year:<br> 
+          <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disabled="rptData.disableExamYear">
+            <option ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
+          </select>
+        </div>
+        <div ng-if="fndRpt.hasExamYearRange">
+          Start Year: 
+          <select id="examStartYearSelect" data-ng-model="rptData.currentStartExamYear" name="examStartYear">
+            <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+            <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
+          </select>
+          <br>
+          End Year: 
+          <select id="examEndYearSelect" data-ng-model="rptData.currentEndExamYear" name="examEndYear">
+            <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
+            <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid" ng-change="selectPaid()"> Include Unpaid<br>
+        <div ng-if="fndRpt.hasYearToDate">
+          <input type="checkbox" name="yearToDate" ng-model="rptData.yearToDate" ng-change="selectYearToDate()"> Year To Date<br>
+        </div>
+        <div class="row">
+          <div class="col-md-12" style="margin-bottom:2px">
+            <button ng-click="refresh(true,false)">Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12" style="margin-bottom:2px">
+            <button ng-if="fndRpt.hasExport" ng-click="refresh(true,true)">Export Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div ng-if="fndRpt.reportType == 'table'">
+    <div ui-grid="gridOptions1" class="myGrid" style="height:600px" ui-grid-cellNav ui-grid-auto-resize></div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
+      <div class="row" ng-if="fndRpt.reportType == 'table'" >
+        <div class="col-md-12" ng-controller="mapCtrl">
+          <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
