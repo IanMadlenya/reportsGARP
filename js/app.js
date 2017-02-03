@@ -60,7 +60,7 @@
     
         if (labels) {
             var head = array[0];
-            if ($("#quote").is(':checked')) {
+            if (quotes) {
                 for (var index in array[0]) {
                     var value = index + "";
                     line += '"' + value.replace(/"/g, '""') + '",';
@@ -81,11 +81,14 @@
             if (quotes) {
                 for (var index in array[i]) {
                     var value = array[i][index] + "";
+                    value = value.replace('null', '');
                     line += '"' + value.replace(/"/g, '""') + '",';
                 }
             } else {
                 for (var index in array[i]) {
-                    line += array[i][index] + ',';
+                    var value = array[i][index];
+                    value = value.replace('null', '');
+                    line += value + ',';
                 }
             }
     

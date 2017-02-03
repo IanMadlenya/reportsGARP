@@ -250,6 +250,7 @@ var mergeProds = [
       weight: 0
     }
   ];
+  
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
 

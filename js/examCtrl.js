@@ -1,4 +1,4 @@
-reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout) {
+reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout, $location) {
   $scope.envPath = envPath;
 
   //$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
@@ -95,6 +95,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.envPath = envPath;
 
     $scope.sortingAlgorithm = function(a, b) {
+      if(a==null)
+        a = -99999;
+      if(b==null)
+        b = -999999;
+
       if (a > b)
         return 1;
       else if (a < b)
@@ -633,6 +638,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           $('#myGlobalErrorModal p').html("There has been an unexpected error:" + err)
           $("#myGlobalErrorModal").modal();
           alert('There has been an error please refresh your browser window and try again.');
+
+          window.location.href = 'https://c.na2.visual.force.com/apex/reportsGARP2#!/exams?rptId=' + $scope.reportId;
+
           return console.error(err);
         }
         console.log(meta.reportMetadata);
@@ -849,9 +857,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
             var yearArray = fnd.value.split(',');
             var options = [];
-            for(var i=yearArray.length-1; i>=0; i--) {
-            //for(var i=0; i<yearArray.length; i++) {
-
+            for(var i=0; i<yearArray.length; i++) {
               var obj = jQuery.extend(true, {}, metadata);
               fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
               if(defined(fnd,"value")) {
@@ -991,14 +997,17 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
           var allSData = {};
           var sdata = [];
-          $scope.fndRpt.columnDefs = [{ field: 'Country' }];
-          
+          var colDefNumberDefaults = {
+            type:'number',
+            sortingAlgorithm: $scope.sortingAlgorithm
+          }
 
+          $scope.fndRpt.columnDefs = [];
+          
           var emptyTotals = {};
 
           var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
           var showTotals = ((parseInt($scope.rptData.currentEndExamYear) - parseInt($scope.rptData.currentStartExamYear)) || !combo);
-
 
           if(!combo && fndExam != null) {
 
@@ -1023,11 +1032,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       priority: 1
                     }
                   }
-                  $scope.fndRpt.columnDefs.push(obj);
+                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults));
                 } else {
-                  $scope.fndRpt.columnDefs.push({field: yearTotalLable});
+                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable},colDefNumberDefaults));
                 }
-                $scope.fndRpt.columnDefs.push({field: yearDiffLable});                  
+                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable},colDefNumberDefaults));
               }
             }
 
@@ -1038,30 +1047,31 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             for(var propertyName in data.groupingsDowns) {
               if(parseInt(propertyName) < parseInt($scope.rptData.currentStartExamYear))
                 continue;
-              var yearTotalLable = propertyName + fndExam.name + ' Total';
-              var yearDiffLable = propertyName + fndExam.name + ' %Diff';
+              var yearTotalLable = propertyName + ' ' + fndExam.name + ' Total';
+              var yearDiffLable = propertyName + ' ' + fndExam.name + ' %Diff';
               emptyTotals[yearTotalLable] = 0;
               emptyTotals[yearDiffLable] = 0;
-              if(parseInt(propertyName) == parseInt($scope.rptData.currentEndExamYear)) {
-                var obj = {
-                  field: yearTotalLable,
-                  sort: {
-                    direction: uiGridConstants.DESC,
-                    priority: 1
-                  }
-                }
-                $scope.fndRpt.columnDefs.push(obj);
-              } else {
-                $scope.fndRpt.columnDefs.push({field: yearTotalLable});
-              }
-              $scope.fndRpt.columnDefs.push({field: yearDiffLable});
+              $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, rank: propertyName + 'B'},colDefNumberDefaults));
+              $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, rank: propertyName + 'A'},colDefNumberDefaults));
             }
           }
-          if(showTotals) {
-            $scope.fndRpt.columnDefs.push({field: 'Total'});
-            $scope.fndRpt.columnDefs.push({field: '%Diff'});                
-          }
+          $scope.fndRpt.columnDefs = _.sortBy($scope.fndRpt.columnDefs, function(row) { return row.rank })
+          $scope.fndRpt.columnDefs = $scope.fndRpt.columnDefs.reverse();
 
+          var obj = {
+            sort: {
+              direction: uiGridConstants.DESC,
+              priority: 1
+            }
+          }
+          $scope.fndRpt.columnDefs[1] = _.extend($scope.fndRpt.columnDefs[1], obj);
+
+
+          if(showTotals) {
+            $scope.fndRpt.columnDefs.push(_.extend({field: 'Total'},colDefNumberDefaults));
+            $scope.fndRpt.columnDefs.push(_.extend({field: '%Diff'},colDefNumberDefaults));                
+          }
+          $scope.fndRpt.columnDefs.unshift({ field: 'Country' });
 
           for(var propertyName in data.groupingsDowns) {
 
@@ -1113,11 +1123,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     if(fnd != null) {
                       obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
                     } else {
-                      obj[yearDiffLable] = 0;
+                      obj[yearDiffLable] = null;
                     }
                     var net = 0;
                     for(var propName in obj) {
-                      if(propName.indexOf('%') > -1 && propName != '%Diff')
+                      if(propName.indexOf('%') > -1 && propName != '%Diff' && defined(obj,propName))
                         net += obj[propName];
                     }
                     obj['%Diff'] = net;
@@ -1125,8 +1135,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 }
               } else {
                 var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
-                var yearTotalLable = propertyName + fndExam.name + ' Total';
-                var yearDiffLable = propertyName + fndExam.name + ' %Diff';
+                var yearTotalLable = propertyName + ' ' + fndExam.name + ' Total';
+                var yearDiffLable = propertyName + ' ' + fndExam.name + ' %Diff';
                 var val = data.factMaps[propertyName][group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
                 var allObj = {
                   Country: country,
@@ -1154,11 +1164,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                   if(fnd != null) {
                     obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
                   } else {
-                    obj[yearDiffLable] = 0;
+                    obj[yearDiffLable] = null;
                   }
                   var net = 0;
                   for(var propName in obj) {
-                    if(propName.indexOf('%') > -1 && propName != '%Diff')
+                    if(propName.indexOf('%') > -1 && propName != '%Diff' && defined(obj,propName))
                       net += obj[propName];
                   }
                   obj['%Diff'] = net;
@@ -1420,11 +1430,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
           var expotData = [];
           var exportLabels = {};
+          exportLabels['label'] = 'Date';
           for(var i=0; i<sdata.length; i++) {
             var lab = sdata[i].name;
             exportLabels[lab] = lab;
           }
-          exportLabels['label'] = label;
           expotData.push(exportLabels);
 
           for(var i=0; i<labels.length; i++) {
@@ -1443,7 +1453,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             expotData.push(dataObj);
           }
 
-          var csv = JSON2CSV(expotData);
+          var csv = JSON2CSV(expotData,false,true);
           var fileName = 'data'
           var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
           var link = document.createElement("a");
