@@ -368,7 +368,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       value: "ERP Exam Part II"
     }, {
       name: "ERP All",
-      value: "ERP, ERP Exam Part I, ERP Exam Part II"
+      value: "ERP,ERP Exam Part I,ERP Exam Part II"
     }, {
       name: "FRM I",
       value: "FRM Part 1"
@@ -380,7 +380,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       value: "FRM Part 1,FRM Part 2"
     }, {
       name: "All",
-      value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II"
+      value: "FRM Part 1,FRM Part 2,ERP,ERP Exam Part I,ERP Exam Part II"
     }];
 
     $scope.rptData.examFullTypeList = [{
@@ -861,7 +861,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               var obj = jQuery.extend(true, {}, metadata);
               fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
               if(defined(fnd,"value")) {
-                fnd.value = yearArray[i];
+                fnd.value = yearArray[i].trim();
                 options.push(obj);
               }
             }
@@ -925,7 +925,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               var obj = jQuery.extend(true, {}, metadata);
               fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
               if(defined(fnd,"value")) {
-                fnd.value = yearArray[i];
+                fnd.value = yearArray[i].trim();
                 options.push(obj);
               }
             }
@@ -1172,7 +1172,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               var parts = fndExam.value.split(',');
               for(var i=0; i<parts.length; i++) {
-                var part = parts[i];
+                var part = parts[i].trim();
                 var yearTotalLable = propertyName + ' ' + part + ' Total';
                 var yearDiffLable = propertyName  + ' ' + part + ' %Diff';
                 emptyTotals[yearTotalLable] = 0;
@@ -1186,11 +1186,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       priority: 1
                     }
                   }
-                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: propertyName + 'B'}));
+                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: propertyName + part + 'B'}));
                 } else {
-                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable},colDefNumberDefaults, {rank: propertyName + 'B'}));
+                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable},colDefNumberDefaults, {rank: propertyName + part + 'B'}));
                 }
-                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable},colDefNumberDefaults, {rank: propertyName + 'A'}));
+                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable},colDefNumberDefaults, {rank: propertyName + part + 'A'}));
               }
             }
 
