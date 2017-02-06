@@ -285,7 +285,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: true,
       hasExamYearRange: false,
-      hasExport: false
+      hasExport: true
     }, {
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -1333,7 +1333,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           return;
 
         } else {
-          if (async) {
+          if ($scope.fndRpt.name == 'Exam Registrations By Country') {
             $rootScope.$apply(function() {
               $scope.myData = sdata;
               $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
@@ -1384,10 +1384,19 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
             });
           } else {
-            $scope.myData = sdata;
-            $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
-            $scope.gridOptions1.data = sdata;
-            $rootScope.$broadcast('drawMap', sdata);
+            if (async) {
+              $rootScope.$apply(function() {
+                $scope.myData = sdata;
+                $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
+                $scope.gridOptions1.data = sdata;
+                $rootScope.$broadcast('drawMap', sdata);
+              });
+            } else {
+              $scope.myData = sdata;
+              $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
+              $scope.gridOptions1.data = sdata;
+              $rootScope.$broadcast('drawMap', sdata);              
+            }
           }
 
         }
