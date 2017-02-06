@@ -308,7 +308,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportType: 'stackedbar',
       cumlative: false,
       applyFilters: true,
-      hasYearToDate: true,
+      hasYearToDate: false,
       hasExamType: true,
       hasExamMonth: true,
       hasExamYear: false,
