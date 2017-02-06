@@ -245,7 +245,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Attendance By Country",
       description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004PW0X",
+      reportId: "00O40000004LVJV",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -1025,6 +1025,59 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     }
 
+
+    function drawCountryTable(sdata) {
+
+      $scope.myData = sdata;
+      $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
+      $scope.gridOptions1.data = sdata;
+      if($scope.rptData.currentCountryType == 'Exam Site') {
+        var mapData = [];
+
+        _.each(sdata, function(row) {                
+          var idx = row.Country.indexOf(",");
+           var country = row.Country;
+          if(idx > -1)
+            country = country.slice(0,idx);
+          if(country == 'US')
+            country = 'United States';
+          if(country == 'UK')
+            country = 'United Kingdom';
+
+          var fnd = _.findWhere(mapData, {Country: country});
+          if(fnd == null) {
+            if($scope.rptData.currentMapType == 'Total') {
+              mapData.push({Country: country, Total: row.Total});
+            } else {
+              mapData.push({Country: country, Total: row['%Diff']});
+            }
+          } else {
+            if($scope.rptData.currentMapType == 'Total') {
+              fnd.Total += row.Total;
+            } else {
+              fnd.Total += row['%Diff'];
+            }
+          }
+        });
+        $rootScope.$broadcast('drawMap', mapData);
+
+      } else {
+
+        if($scope.rptData.currentMapType == 'Total') {
+          $rootScope.$broadcast('drawMap', sdata);  
+        } else {
+          var mapData = [];
+          _.each(sdata, function(row) {
+            mapData.push({Country: row.Country, Total: row['%Diff']});
+          });
+          $rootScope.$broadcast('drawMap', mapData);  
+        }
+
+      }      
+
+    }
+
+
     function drawGraph(async, exportData) {
 
       if (!defined($scope, "rptData.currentReportType"))
@@ -1133,11 +1186,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       priority: 1
                     }
                   }
-                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults));
+                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: propertyName + 'B'}));
                 } else {
-                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable},colDefNumberDefaults));
+                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable},colDefNumberDefaults, {rank: propertyName + 'B'}));
                 }
-                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable},colDefNumberDefaults));
+                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable},colDefNumberDefaults, {rank: propertyName + 'A'}));
               }
             }
 
@@ -1333,56 +1386,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           return;
 
         } else {
-          if ($scope.fndRpt.name == 'Exam Registrations By Country') {
+          if ($scope.fndRpt.name == 'Exam Registrations By Country' && async) {
             $rootScope.$apply(function() {
-              $scope.myData = sdata;
-              $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
-              $scope.gridOptions1.data = sdata;
-              if($scope.rptData.currentCountryType == 'Exam Site') {
-                var mapData = [];
-
-                _.each(sdata, function(row) {                
-                  var idx = row.Country.indexOf(",");
-                   var country = row.Country;
-                  if(idx > -1)
-                    country = country.slice(0,idx);
-                  if(country == 'US')
-                    country = 'United States';
-                  if(country == 'UK')
-                    country = 'United Kingdom';
-
-                  var fnd = _.findWhere(mapData, {Country: country});
-                  if(fnd == null) {
-                    if($scope.rptData.currentMapType == 'Total') {
-                      mapData.push({Country: country, Total: row.Total});
-                    } else {
-                      mapData.push({Country: country, Total: row['%Diff']});
-                    }
-                  } else {
-                    if($scope.rptData.currentMapType == 'Total') {
-                      fnd.Total += row.Total;
-                    } else {
-                      fnd.Total += row['%Diff'];
-                    }
-                  }
-                });
-                $rootScope.$broadcast('drawMap', mapData);
-
-              } else {
-
-                if($scope.rptData.currentMapType == 'Total') {
-                  $rootScope.$broadcast('drawMap', sdata);  
-                } else {
-                  var mapData = [];
-                  _.each(sdata, function(row) {
-                    mapData.push({Country: row.Country, Total: row['%Diff']});
-                  });
-                  $rootScope.$broadcast('drawMap', mapData);  
-                }
-
-              }
-
+              drawCountryTable(sdata);
             });
+          } if($scope.fndRpt.name == 'Exam Registrations By Country' && !async) {
+            drawCountryTable(sdata);
           } else {
             if (async) {
               $rootScope.$apply(function() {
