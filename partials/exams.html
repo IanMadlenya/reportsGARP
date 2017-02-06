@@ -12,6 +12,7 @@
         <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
           <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
         </select>
+        <div ng-if="err['currentReportType']" class="form-err">{{err['currentReportType']}}</div>
         <div>
           {{getDescription()}}
         </div>
@@ -21,19 +22,21 @@
           <div class="row">
             <div class="col-md-12">
               Location:<br> 
-              <select id="examCountrySelect" data-ng-model="rptData.currentCountryType" name="countryType">
+              <select id="examCountrySelect" data-ng-model="rptData.currentCountryType" name="countryType" ng-change="selectOptions()">
                 <option selected="selected">Country</option>
                 <option>Exam Site</option>
               </select>
+              <div ng-if="err['hasSiteCountry']" class="form-err">{{err['hasSiteCountry']}}</div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-12">
               Map Display:<br>
-              <select id="examMapSelect" data-ng-model="rptData.currentMapType" name="mapType">
+              <select id="examMapSelect" data-ng-model="rptData.currentMapType" name="mapType" ng-change="selectOptions()">
                 <option selected="selected">Total</option>
                 <option>%Diff</option>
               </select>
+              <div ng-if="err['hasSiteMap']" class="form-err">{{err['hasSiteMap']}}</div>
             </div>
           </div>
         </div>
@@ -41,57 +44,66 @@
       <div class="col-md-2">
         <div ng-if="fndRpt.hasExamType">
           Exam Type:<br> 
-          <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType">
+          <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType" ng-change="selectOptions()">
             <option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
             <option ng-if="fndRpt.isAllTime" ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
           </select>
+          <div ng-if="err['hasExamType']" class="form-err">{{err['hasExamType']}}</div>
           <div ng-if="rptData.currentExamType.indexOf(',') > -1 && isCombined(rptData.currentReportType)">
-            <input type="checkbox" name="combineExams" ng-model="rptData.combineExams"> Combine Exams<br>
+            <input type="checkbox" name="combineExams" ng-model="rptData.combineExams" ng-change="selectOptions()"> Combine Exams<br>
           </div>
         </div>
       </div>
       <div class="col-md-2">
         <div ng-if="fndRpt.hasExamMonth">
           Exam Month:<br> 
-          <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disabled="rptData.disableExamMonth">
+          <select id="examMonthSelect" data-ng-model="rptData.currentExamMonth" name="examMonth" ng-disabled="rptData.disableExamMonth" ng-change="selectOptions()">
             <option ng-repeat="examMonth in rptData.examMonthList" value="{{examMonth.value}}">{{examMonth.name}}</option>
           </select>
+          <div ng-if="err['hasExamMonth']" class="form-err">{{err['hasExamMonth']}}</div>
         </div>
       </div>
       <div class="col-md-2">
         <div ng-if="fndRpt.hasExamYear">
           Exam Year:<br> 
-          <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disabled="rptData.disableExamYear">
+          <select id="examYearSelect" data-ng-model="rptData.currentExamYear" name="examYear" ng-disabled="rptData.disableExamYear" ng-change="selectOptions()">
             <option ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
           </select>
+          <div ng-if="err['hasExamYear']" class="form-err">{{err['hasExamYear']}}</div>
         </div>
         <div ng-if="fndRpt.hasExamYearRange">
           Start Year: 
-          <select id="examStartYearSelect" data-ng-model="rptData.currentStartExamYear" name="examStartYear">
+          <select id="examStartYearSelect" data-ng-model="rptData.currentStartExamYear" name="examStartYear" ng-change="selectOptions()">
             <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
             <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
           </select>
           <br>
           End Year: 
-          <select id="examEndYearSelect" data-ng-model="rptData.currentEndExamYear" name="examEndYear">
+          <select id="examEndYearSelect" data-ng-model="rptData.currentEndExamYear" name="examEndYear" ng-change="selectOptions()">
             <option ng-if="fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearAllTimeList" value="{{examYear.value}}">{{examYear.name}}</option>
             <option ng-if="!fndRpt.isAllTime" ng-repeat="examYear in rptData.examYearList" value="{{examYear.value}}">{{examYear.name}}</option>
           </select>
+          <div ng-if="err['hasExamYearRange']" class="form-err">{{err['hasExamYearRange']}}</div>
         </div>
       </div>
       <div class="col-md-2">
         <input type="checkbox" name="includeUnPaid" ng-model="rptData.includeUnPaid" ng-change="selectPaid()"> Include Unpaid<br>
         <div ng-if="fndRpt.hasYearToDate">
-          <input type="checkbox" name="yearToDate" ng-model="rptData.yearToDate" ng-change="selectYearToDate()"> Year To Date<br>
+          <input type="checkbox" name="yearToDate" ng-model="rptData.yearToDate" ng-change="selectOptions()"> Year To Date<br>
         </div>
         <div class="row">
           <div class="col-md-12" style="margin-bottom:2px">
-            <button ng-click="refresh(true,false)">Graph Data</button>&nbsp;<!-- button ng-click="refresh(false)">Reload</button -->
+            <button ng-click="refresh(true,false)">Graph Data</button><br>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12" style="margin-bottom:2px">
             <button ng-if="fndRpt.hasExport" ng-click="refresh(true,true)">Export Data</button>
+          </div>
+        </div>
+        <div class="row" ng-if="rptData.isCache">
+          <div class="col-md-12" style="margin-bottom:2px">
+            <input type="checkbox" name="forceReload" ng-model="rptData.forceReload"> Reload Data<br>
           </div>
         </div>
       </div>

@@ -29,6 +29,10 @@
 	display: none  !important;
 }
 
+.form-err {
+	color:red
+}
+
 
 .event-evt-large-email {
   background-color: #ff0066 !important;
