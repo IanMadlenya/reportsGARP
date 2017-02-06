@@ -52,7 +52,7 @@
       return parseFloat(Math.round(amount * 100) / 100).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
     
-    function JSON2CSV(objArray, labels, quotes) {
+    function JSON2CSV(objArray, labels, quotes, colDefs) {
         var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
     
         var str = '';
@@ -61,14 +61,29 @@
         if (labels) {
             var head = array[0];
             if (quotes) {
-                for (var index in array[0]) {
-                    var value = index + "";
+
+                if(this.defined(colDefs)) {
+                  _.each(colDefs, function(col) {
+                    var value = array[0][col.field] + "";
                     line += '"' + value.replace(/"/g, '""') + '",';
+                  });
+                } else {
+                  for (var index in array[0]) {
+                      var value = index + "";
+                      line += '"' + value.replace(/"/g, '""') + '",';
+                  }                  
                 }
+
             } else {
+              if(this.defined(colDefs)) {
+                _.each(colDefs, function(col) {
+                  line += array[0][col.field] + ',';
+                });
+              } else {
                 for (var index in array[0]) {
                     line += index + ',';
-                }
+                }                
+              }
             }
     
             line = line.slice(0, -1);
@@ -79,17 +94,33 @@
             var line = '';
     
             if (quotes) {
+              if(this.defined(colDefs)) {
+                _.each(colDefs, function(col) {
+                  var value = array[i][col.field] + "";
+                  value = value.replace('null', '');
+                  line += '"' + value.replace(/"/g, '""') + '",';
+                });                
+              } else {
                 for (var index in array[i]) {
                     var value = array[i][index] + "";
                     value = value.replace('null', '');
                     line += '"' + value.replace(/"/g, '""') + '",';
                 }
+              }
             } else {
+              if(this.defined(colDefs)) {
+                _.each(colDefs, function(col) {
+                  var value = array[i][col.field];
+                  value = value.replace('null', '');
+                  line += value + ',';
+                });                
+              } else {
                 for (var index in array[i]) {
-                    var value = array[i][index];
-                    value = value.replace('null', '');
-                    line += value + ',';
-                }
+                  var value = array[i][index];
+                  value = value.replace('null', '');
+                  line += value + ',';
+                }                
+              }
             }
     
             line = line.slice(0, -1);

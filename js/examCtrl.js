@@ -1372,7 +1372,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
 
         if (exportData) {
-          var csv = JSON2CSV(sdata,true,true);
+          var csv = JSON2CSV(sdata,true,true,$scope.fndRpt.columnDefs);
           var fileName = 'data'
           var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
           var link = document.createElement("a");
