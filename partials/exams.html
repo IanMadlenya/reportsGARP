@@ -6,7 +6,7 @@
 <div class="container page-container">
 
 
-    <div class="row" style="background-color: #afc2d8;">
+    <div class="row" style="background-color: #afc2d8;margin-bottom:5px">
       <div class="col-md-3">
         Report:<br> 
         <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
@@ -45,8 +45,8 @@
         <div ng-if="fndRpt.hasExamType">
           Exam Type:<br> 
           <select id="examTypeSelect" data-ng-model="rptData.currentExamType" name="examType" ng-disabled="rptData.disableExamType" ng-change="selectOptions()">
-            <option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option>
-            <option ng-if="fndRpt.isAllTime" ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
+            <!-- option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option -->
+            <option ng-repeat="examType in rptData.examFullTypeList" value="{{examType.value}}">{{examType.name}}</option>
           </select>
           <div ng-if="err['hasExamType']" class="form-err">{{err['hasExamType']}}</div>
           <div ng-if="rptData.currentExamType.indexOf(',') > -1 && isCombined(rptData.currentReportType)">

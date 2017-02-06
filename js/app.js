@@ -64,7 +64,7 @@
 
                 if(this.defined(colDefs)) {
                   _.each(colDefs, function(col) {
-                    var value = array[0][col.field] + "";
+                    var value = col.field + "";
                     line += '"' + value.replace(/"/g, '""') + '",';
                   });
                 } else {
