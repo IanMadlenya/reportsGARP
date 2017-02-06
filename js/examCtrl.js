@@ -501,7 +501,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       }
     }
 
+    $scope.selectOptions = function() {
+      $scope.rptData.rerun = true;
+    }
+
     $scope.selectType = function() {
+      $scope.rptData.rerun = true;
+
       var fndRpt = _.findWhere($scope.rptData.reportTypeList, {
         reportId: $scope.rptData.currentReportType
       });
@@ -582,11 +588,22 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           $scope.reportId = $scope.fndRpt.reportSiteId;
         }
 
-        var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
-        if (reload)
-          $scope.rptData[key] = null;
+        var key = $scope.reportId + "~" + 
+                  $scope.rptData.currentCountryType + "~" + 
+                  $scope.rptData.currentMapType + "~" + 
+                  $scope.rptData.currentExamType + "~" + 
+                  $scope.rptData.combineExams + "~" + 
+                  $scope.rptData.currentExamMonth + "~" + 
+                  $scope.rptData.currentExamYear + "~" + 
+                  $scope.rptData.currentStartExamYear + "~" + 
+                  $scope.rptData.currentEndExamYear + "~" + 
+                  $scope.rptData.includeUnPaid + "~" + 
+                  $scope.rptData.yearToDate;
+
+        //if (reload)
+        //  $scope.rptData[key] = null;
         if (defined($scope.rptData[key])) {
-          drawGraph(false);
+          drawGraph(false, exportData);
         } else {
           loadData(exportData);
         }
@@ -838,7 +855,18 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 }
               }
 
-            var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+          var key = $scope.reportId + "~" + 
+                  $scope.rptData.currentCountryType + "~" + 
+                  $scope.rptData.currentMapType + "~" + 
+                  $scope.rptData.currentExamType + "~" + 
+                  $scope.rptData.combineExams + "~" + 
+                  $scope.rptData.currentExamMonth + "~" + 
+                  $scope.rptData.currentExamYear + "~" + 
+                  $scope.rptData.currentStartExamYear + "~" + 
+                  $scope.rptData.currentEndExamYear + "~" + 
+                  $scope.rptData.includeUnPaid + "~" + 
+                  $scope.rptData.yearToDate;
+
             $scope.rptData[key] = $scope.reportDataCombined;
             $scope.mainSpinner.stop();
 
@@ -888,7 +916,17 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 }
               }
 
-            var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+            var key = $scope.reportId + "~" + 
+                  $scope.rptData.currentCountryType + "~" + 
+                  $scope.rptData.currentMapType + "~" + 
+                  $scope.rptData.currentExamType + "~" + 
+                  $scope.rptData.combineExams + "~" + 
+                  $scope.rptData.currentExamMonth + "~" + 
+                  $scope.rptData.currentExamYear + "~" + 
+                  $scope.rptData.currentStartExamYear + "~" + 
+                  $scope.rptData.currentEndExamYear + "~" + 
+                  $scope.rptData.includeUnPaid + "~" + 
+                  $scope.rptData.yearToDate;
             $scope.rptData[key] = $scope.reportDataCombined;
             $scope.mainSpinner.stop();
 
@@ -920,7 +958,17 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
             var data = result;
 
-            var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+            var key = $scope.reportId + "~" + 
+                  $scope.rptData.currentCountryType + "~" + 
+                  $scope.rptData.currentMapType + "~" + 
+                  $scope.rptData.currentExamType + "~" + 
+                  $scope.rptData.combineExams + "~" + 
+                  $scope.rptData.currentExamMonth + "~" + 
+                  $scope.rptData.currentExamYear + "~" + 
+                  $scope.rptData.currentStartExamYear + "~" + 
+                  $scope.rptData.currentEndExamYear + "~" + 
+                  $scope.rptData.includeUnPaid + "~" + 
+                  $scope.rptData.yearToDate;
             $scope.rptData[key] = data;
             //localStorage.rptData = JSON.stringify($scope.rptData);
 
@@ -954,7 +1002,18 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
 
       //var rptId = $scope.rptData.currentReportType
-      var key = $scope.reportId + "~" + $scope.rptData.currentExamType + "~" + $scope.rptData.currentExamMonth + "~" + $scope.rptData.currentExamYear;
+      var key = $scope.reportId + "~" + 
+                $scope.rptData.currentCountryType + "~" + 
+                $scope.rptData.currentMapType + "~" + 
+                $scope.rptData.currentExamType + "~" + 
+                $scope.rptData.combineExams + "~" + 
+                $scope.rptData.currentExamMonth + "~" + 
+                $scope.rptData.currentExamYear + "~" + 
+                $scope.rptData.currentStartExamYear + "~" + 
+                $scope.rptData.currentEndExamYear + "~" + 
+                $scope.rptData.includeUnPaid + "~" + 
+                $scope.rptData.yearToDate;      
+
       if (!defined($scope.rptData[key])) {
         alert("Data not found! Please reload page and try again.");
         return;
