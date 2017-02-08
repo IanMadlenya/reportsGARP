@@ -608,9 +608,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if($scope.fndRpt.hasExamYear == true && $scope.rptData.currentExamYear == null) {
           $scope.err['hasExamYear'] = 'Exam Year is required';
         }
+
         if($scope.fndRpt.hasExamYearRange == true && ($scope.rptData.currentStartExamYear == null || $scope.rptData.currentEndExamYear == null)) {
           $scope.err['hasExamYearRange'] = 'Start and End Year are required';
+        } else if(parseInt($scope.rptData.currentStartExamYear) > parseInt($scope.rptData.currentEndExamYear)) {
+          $scope.err['hasExamYearRange'] = 'Start Year must be less than End Year';
         }
+
+
         if($scope.fndRpt.hasSite == true && $scope.rptData.currentCountryType == null) {
           $scope.err['hasSiteCountry'] = 'Location is required.';
         }
@@ -1227,12 +1232,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           }
           $scope.fndRpt.columnDefs.unshift({ field: 'Country' });
 
-          for(var propertyName in data.groupingsDowns) {
+          var yearTotals = {};
+          for(var year in data.groupingsDowns) {
 
-            var groupDown = data.groupingsDowns[propertyName];
-            var allsd = allSData[propertyName] = [];
+            var groupDown = data.groupingsDowns[year];
+            var allsd = allSData[year] = [];
             var showInfo = false;
-            if(parseInt(propertyName) >= parseInt($scope.rptData.currentStartExamYear)) {
+            if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
               showInfo = true;                          
             }
 
@@ -1244,18 +1250,106 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               if (country == "-" || country == "&nbsp;")
                 continue;
 
+              yearTotals[country + '~' + year] = null;
+              var yearTotal = null;
               if(!combo) {
-                for(var j=0; j<group.groupings.length; j++) {
-                  var subgroup = group.groupings[j];
-                  var yearTotalLable = propertyName + ' ' + subgroup.label + ' Total';
-                  var yearDiffLable = propertyName + ' ' + subgroup.label + ' %Diff';
-                  var key = country+subgroup.label;
-                  var val = data.factMaps[propertyName][subgroup.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
+                var parts = fndExam.value.split(',');
+                for(var j=0; j<parts.length; j++) {
+
+                  var part = parts[j].trim();
+                  var yearTotalLable = year + ' ' + part + ' Total';
+                  var yearDiffLable = year + ' ' + part + ' %Diff';
+                  var key = country+part;
+
+                  var subgroup = _.findWhere(group.groupings, {label: part});
+                  if(!defined(subgroup,"key")) {
+                    if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
+                      var lastYear = parseInt(year)-1;
+                      var fnd = _.findWhere(allSData[lastYear], {Country: key});
+                      if(fnd != null) {
+                        if(fnd.Total > 0)
+                          obj[yearDiffLable] = -100;
+                        else obj[yearDiffLable] = 0;
+                        var allObj = {
+                          Country: key,
+                          Total: 0
+                        }
+                        yearTotal+=0;
+                        allsd.push(allObj);                      
+                      } else {
+                        obj[yearDiffLable] = null;
+                      }
+                    }
+                  } else {
+
+                    //var subgroup = group.groupings[j];
+                    var val = data.factMaps[year][subgroup.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
+                    var allObj = {
+                      Country: key,
+                      Total: val
+                    }
+                    yearTotal+=val;
+                    allsd.push(allObj);
+
+                    if(showInfo) {
+                      var obj = _.findWhere(sdata, {Country: country});
+                      if(obj == null) {
+                        obj = {
+                          Country: country,
+                          Total: val
+                        };                
+                        obj = _.extend(obj, emptyTotals);
+                        obj[yearTotalLable] = val;
+                        sdata.push(obj);
+                      } else {
+                        obj[yearTotalLable] = val;
+                        obj.Total += val;
+                      }
+
+                      var lastYear = parseInt(year)-1;
+                      var fnd = _.findWhere(allSData[lastYear], {Country: key});
+                      if(fnd != null) {
+                        obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
+                      } else {
+                        obj[yearDiffLable] = null;
+                      }
+                    }
+                  }
+                }
+                yearTotals[country + '~' + year] = yearTotal;
+
+              } else {
+                var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
+                var yearTotalLable = year + ' ' + fndExam.name + ' Total';
+                var yearDiffLable = year + ' ' + fndExam.name + ' %Diff';
+
+                if(!defined(data,"factMaps." + year + "." + group.key + '!T')) {
+                  if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
+                    var lastYear = parseInt(year)-1;
+                    var fnd = _.findWhere(allSData[lastYear], {Country: country});
+                    if(fnd != null) {
+                      if(fnd.Total > 0)
+                        obj[yearDiffLable] = -100;
+                      else obj[yearDiffLable] = 0;
+                      var allObj = {
+                        Country: country,
+                        Total: 0
+                      }
+                      yearTotal+=0;
+                      allsd.push(allObj);                      
+                    } else {
+                      obj[yearDiffLable] = null;
+                    }
+                  }
+                } else {
+
+                  var val = data.factMaps[year][group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
                   var allObj = {
-                    Country: key,
+                    Country: country,
                     Total: val
                   }
                   allsd.push(allObj);
+                  yearTotal+=val;
 
                   if(showInfo) {
                     var obj = _.findWhere(sdata, {Country: country});
@@ -1272,66 +1366,19 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       obj.Total += val;
                     }
 
-                    var lastYear = parseInt(propertyName)-1;
-                    var fnd = _.findWhere(allSData[lastYear], {Country: key});
+                    var lastYear = parseInt(year)-1;
+                    var fnd = _.findWhere(allSData[lastYear], {Country: country});
                     if(fnd != null) {
                       obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
                     } else {
                       obj[yearDiffLable] = null;
                     }
-                    var net = 0;
-                    for(var propName in obj) {
-                      if(propName.indexOf('%') > -1 && propName != '%Diff' && defined(obj,propName))
-                        net += obj[propName];
-                    }
-                    obj['%Diff'] = net;
-                  }     
+                  }                
                 }
-              } else {
-                var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
-                var yearTotalLable = propertyName + ' ' + fndExam.name + ' Total';
-                var yearDiffLable = propertyName + ' ' + fndExam.name + ' %Diff';
-                var val = data.factMaps[propertyName][group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                var allObj = {
-                  Country: country,
-                  Total: val
-                }
-                allsd.push(allObj);
-
-                if(showInfo) {
-                  var obj = _.findWhere(sdata, {Country: country});
-                  if(obj == null) {
-                    obj = {
-                      Country: country,
-                      Total: val
-                    };                
-                    obj = _.extend(obj, emptyTotals);
-                    obj[yearTotalLable] = val;
-                    sdata.push(obj);
-                  } else {
-                    obj[yearTotalLable] = val;
-                    obj.Total += val;
-                  }
-
-                  var lastYear = parseInt(propertyName)-1;
-                  var fnd = _.findWhere(allSData[lastYear], {Country: country});
-                  if(fnd != null) {
-                    obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
-                  } else {
-                    obj[yearDiffLable] = null;
-                  }
-                  var net = 0;
-                  for(var propName in obj) {
-                    if(propName.indexOf('%') > -1 && propName != '%Diff' && defined(obj,propName))
-                      net += obj[propName];
-                  }
-                  obj['%Diff'] = net;
-                }                
+                yearTotals[country + '~' + year] = yearTotal;
               }
             }
           }
-
-
         } else {
 
           var sdata = [];
@@ -1345,6 +1392,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               Country: group.label,
               Total: val
             }
+
             if (defined(group, "groupings.length")) {
 
               var types = _.pluck($scope.fndRpt.columnDefs, "field");
@@ -1370,19 +1418,32 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             sdata.push(obj);
           }
         }
+        // compute %diff total
+        var countryNets = {};
+        for(var totYearProp in yearTotals) {
+          var spliArr = totYearProp.split('~');
+          var country = spliArr[0];
+          var totYear = spliArr[1];
+          var lastYear = parseInt(totYear)-1;
+          var tot = yearTotals[totYearProp];
+          var lastTot = yearTotals[country + '~' + lastYear];
+          if(lastTot != null) {
+            if(defined(countryNets,country))
+              countryNets[country] += Math.ceil(((tot - lastTot)/tot)*100);
+             else countryNets[country] = Math.ceil(((tot - lastTot)/tot)*100);
+          }          }
+        for(var country in countryNets) {
+          var fnd = _.findWhere(sdata, {Country: country});
+          if(defined(fnd)) {
+            fnd['%Diff'] = countryNets[country];
+          }
+        }
+
 
         if (exportData) {
           var csv = JSON2CSV(sdata,true,true,$scope.fndRpt.columnDefs);
-          var fileName = 'data'
-          var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
-          var link = document.createElement("a");
-          link.href = uri
-            //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
-          link.download = fileName + ".csv";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
+          var filename = 'export.csv';
+          exportToCSV(csv,filename);
           return;
 
         } else {
@@ -1417,15 +1478,15 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var sdata = [];
         var labels = [];
         var series = [];
-        for(var propertyName in data.groupingsDowns) {
-          var groupings = data.groupingsDowns[propertyName].groupings;
+        for(var year in data.groupingsDowns) {
+          var groupings = data.groupingsDowns[year].groupings;
           for (var i = 0; i < groupings.length; i++) {
             for(j=0; j<groupings[i].groupings.length; j++) {
               var lab = groupings[i].groupings[j].label;
               var fnd = _.findWhere(series, {name: lab});
               if(!defined(fnd)) {
                 var obj = {
-                  year: propertyName,
+                  year: year,
                   name: lab
                 }
                 series.push(obj);
@@ -1572,17 +1633,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             expotData.push(dataObj);
           }
 
-          var csv = JSON2CSV(expotData,false,true);
-          var fileName = 'data'
-          var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
-          var link = document.createElement("a");
-          link.href = uri
-            //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
-          link.download = fileName + ".csv";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
+          var csv = JSON2CSV(expotData,false,true);          
+          var filename = 'export.csv';
+          exportToCSV(csv,filename);
           return;
 
         } else {
@@ -1858,16 +1911,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           }
 
           var csv = JSON2CSV(expData,false,true);
-          var fileName = 'data'
-          var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
-          var link = document.createElement("a");
-          link.href = uri
-            //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
-          link.download = fileName + ".csv";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
+          var filename = 'export.csv';
+          exportToCSV(csv,filename);
           return;
         }
 
@@ -2015,17 +2060,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       }
 
       var csv = JSON2CSV(json,true,true);
-      var fileName = 'data'
-      var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
-      var link = document.createElement("a");
-      link.href = uri
-        //link.style = "visibility:hidden"; Causing exception in Chrome - SR 6/15/2015
-      link.download = fileName + ".csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      //window.open("data:text/csv;charset=utf-8," + escape(csv))
+      var filename = 'export.csv';
+      exportToCSV(csv,filename);
     }
 
   }
