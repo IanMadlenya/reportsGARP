@@ -456,60 +456,60 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       type: "ERP",
       number: "Full",
       label: "ERP Exam Part Full",
-      color: '#15BCA5'
+      color: GREEN1
     }, {
       name: "ERP I",
       value: "ERP Exam Part I",
       type: "ERP",
       number: "I",
       label: "ERP Exam Part I",
-      color: '#29CEB7'
+      color: GREEN2
     }, {
       name: "ERP II",
       value: "ERP Exam Part II",
       type: "ERP",
       number: "II",
       label: "ERP Exam Part II",
-      color: '#56EBD7'       
+      color: GREEN3       
     }, {
       name: "ERP All",
       value: "ERP, ERP Exam Part I, ERP Exam Part II",
       type: "ERP",
       number: "Full,I,II",
-      color: '#15BCA5'          
+      color: GREEN1          
     }, {
       name: "FRM",
       value: "FRM",
       type: "FRM",
       number: "Full",
       label: "FRM Exam Part Full",
-      color: '#00A0DD'
+      color: BLUE1
     }, {
       name: "FRM I",
       value: "FRM Part 1",
       type: "FRM",
       number: "I",
       label: "FRM Exam Part I",
-      color: '#03B9FF'
+      color: BLUE2
     }, {
       name: "FRM II",
       value: "FRM Part 2",
       type: "FRM",
       number: "II",
       label: "FRM Exam Part II",
-      color: '#5BD2FF'
+      color: BLUE3
     }, {
       name: "FRM All",
       value: "FRM Part 1,FRM Part 2",
       type: "FRM",
       number: "Full,I,II",
-      color: '#00A0DD'
+      color: BLUE1
     }, {
       name: "All",
       value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II",
       type: "FRM,ERP",
       number: "Full,I,II",
-      color: '#1CE7D8'
+      color: BLUE1
     }];    
 
     $scope.rptData.examMonthList = [{
