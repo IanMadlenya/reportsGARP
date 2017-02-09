@@ -796,7 +796,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Attempt__c.Opportunity_StageName__c':
-              if($scope.rptData.hasUnpaid)
+              if($scope.fndRpt.hasUnpaid)
                   rf.value = oppStages;
                 break;
 
@@ -1315,9 +1315,10 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               
               var country = group.label;
               
-              if (country == "-" || country == "&nbsp;")
-                continue;
-
+              if (country == "-" || country == "&nbsp;" || country == "NULL") {
+                country = 'Other';
+              }
+                
               yearTotals[country + '~' + year] = null;
               var yearTotal = null;
               if(!combo) {
@@ -1473,11 +1474,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
             var group = data.groupingsDown.groupings[i];
             var val = data.factMap[group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
+            var country = group.label;
 
-            if (group.label == "-" || group.label == "&nbsp;")
-              continue;
+            if (country == "-" || country == "&nbsp;" || country == "NULL") {
+              country = 'Other';
+            }
+
             var obj = {
-              Country: group.label,
+              Country: country,
               Total: val
             }
 
@@ -1992,6 +1996,10 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           return;
         }
 
+        var showSubTotals = false;
+        if(sdata.length > 1)
+          showSubTotals = true;
+
         $('#container').highcharts({
 
           exporting: {
@@ -2021,7 +2029,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               enabled: true,
               style: {
                 fontWeight: 'bold',
-                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
               }
             }
           },
@@ -2047,11 +2055,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             column: {
               stacking: 'normal',
               dataLabels: {
-                enabled: true,
-                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
-                style: {
-                  textShadow: '0 0 3px black'
-                }
+                enabled: showSubTotals,
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'black',
               }
             }
           },
