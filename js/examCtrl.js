@@ -454,47 +454,62 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       name: "ERP",
       value: "ERP",
       type: "ERP",
-      number: "Full"
+      number: "Full",
+      label: "ERP Exam Part Full",
+      color: '#15BCA5'
     }, {
       name: "ERP I",
       value: "ERP Exam Part I",
       type: "ERP",
-      number: "I"      
+      number: "I",
+      label: "ERP Exam Part I",
+      color: '#29CEB7'
     }, {
       name: "ERP II",
       value: "ERP Exam Part II",
       type: "ERP",
-      number: "II"            
+      number: "II",
+      label: "ERP Exam Part II",
+      color: '#56EBD7'       
     }, {
       name: "ERP All",
       value: "ERP, ERP Exam Part I, ERP Exam Part II",
       type: "ERP",
-      number: "Full,I,II"            
+      number: "Full,I,II",
+      color: '#15BCA5'          
     }, {
       name: "FRM",
       value: "FRM",
       type: "FRM",
-      number: "Full"            
+      number: "Full",
+      label: "FRM Exam Part Full",
+      color: '#00A0DD'
     }, {
       name: "FRM I",
       value: "FRM Part 1",
       type: "FRM",
-      number: "I"            
+      number: "I",
+      label: "FRM Exam Part I",
+      color: '#03B9FF'
     }, {
       name: "FRM II",
       value: "FRM Part 2",
       type: "FRM",
-      number: "II"
+      number: "II",
+      label: "FRM Exam Part II",
+      color: '#5BD2FF'
     }, {
       name: "FRM All",
       value: "FRM Part 1,FRM Part 2",
       type: "FRM",
-      number: "Full,I,II"
+      number: "Full,I,II",
+      color: '#00A0DD'
     }, {
       name: "All",
       value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II",
       type: "FRM,ERP",
-      number: "Full,I,II"
+      number: "Full,I,II",
+      color: '#1CE7D8'
     }];    
 
     $scope.rptData.examMonthList = [{
@@ -506,6 +521,23 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Both",
       value: "May,Nov"
+    }];
+
+    $scope.rptData.examRegType = [{
+      name: "Deferral In",
+      color: '#1CE7D8'
+    }, {
+      name: "Deferral Out",
+      color: '#00A0DD'
+    }, {
+      name: "Early Registration",
+      color: '#5BD2FF'
+    }, {
+      name: "Late Registration",
+      color: '#56EBD7'
+    }, {
+      name: "Standard Registration",
+      color: '#29CEB7'
     }];
 
     $scope.rptData.examYearAllTimeList = [];
@@ -2000,8 +2032,29 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if(sdata.length > 1)
           showSubTotals = true;
 
+
+        var colors = [];
+        _.each(sdata, function(sd) {
+          var fnd = _.findWhere($scope.rptData.examFullTypeList, {label: sd.name});
+          if(!defined(fnd)) {
+            fnd = _.findWhere($scope.rptData.examFullTypeList, {name: sd.name});
+          }
+          if(!defined(fnd)) {
+            fnd = _.findWhere($scope.rptData.examFullTypeList, {value: sd.name});
+          }
+          if(!defined(fnd)) {
+            fnd = _.findWhere($scope.rptData.examRegType, {name: sd.name});
+          }
+          if(defined(fnd,'color')) {
+            colors.push(fnd.color);
+          } else {
+            colors.push('#1CE7D8');
+          }
+        });
+
         $('#container').highcharts({
 
+          colors: colors,
           exporting: {
             sourceWidth: 1200,
             sourceHeight: 800,
