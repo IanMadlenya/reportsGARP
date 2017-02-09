@@ -21,14 +21,15 @@ module.exports = function (grunt) {
             main: {
                 options: {
                     mode: 'zip',
-                    archive: 'build/staticresources/reportsGARP.resource'
+                    archive: 'build/staticresources/reportsGARP_dl.resource'
                 },
                 files: [
                     {
                         src: ['data/**', 'fonts/**', 'css/**', 'img/**', 'data/**', 'js/**', 'less/**', 'partials/**']
                     }
-            ]
-            },
+                ]
+            }
+            /*,
             lib: {
                 options: {
                     mode: 'zip',
@@ -38,8 +39,8 @@ module.exports = function (grunt) {
                     {
                         src: ['lib/**']
                     }
-            ]
-            }
+                ]
+            }*/
         },
         antretrieve: {
             options: {
@@ -218,6 +219,6 @@ module.exports = function (grunt) {
     grunt.registerTask('e2e-test', ['protractor:run']);
     grunt.registerTask('unit-test', ['karma:unit']);
     grunt.registerTask('unit-test-multi', ['karma:dev']);
-    grunt.registerTask('sfdc-push', ['compress:main','compress:lib']);
+    grunt.registerTask('sfdc-push', ['compress:main'/*,'compress:lib'*/]);
 
 };
