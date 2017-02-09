@@ -18,6 +18,15 @@
 	}	
 }
 
+th, td {
+    padding: 5px;
+    text-align: right;
+}
+
+.pad-bottom {
+	margin-bottom: 5px;
+}
+
 .event-danger {
   background-color: #f05123 !important;
 }

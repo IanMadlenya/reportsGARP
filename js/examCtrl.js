@@ -197,7 +197,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.reportTypeList = [{
       name: "Exam Registrations By Country",
       description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4000000494UK",
+      reportId: "00O40000004LWK5",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -211,27 +211,31 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }, {
-        field: 'Paid',
+        name: 'Paid',
+        field: 'Closed',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 2
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }, {
-        field: 'Cancelled',
+        name: 'Cancelled',
+        field: 'Closed Lost',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 3
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }, {
-        field: 'Unpiad',
+        name: 'Unpiad',
+        field: 'New Lead',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 4
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }],
+      hasUnpaid: false,
       hasYearToDate: false,
       hasExamType: true,
       hasExamMonth: true,
@@ -279,6 +283,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }],
+      hasUnpaid: true,
       hasYearToDate: true,
       hasExamType: true,
       hasExamMonth: true,
@@ -304,7 +309,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }, {
-        field: 'Attended',
+        field: 'Will Attend',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 2
@@ -318,6 +323,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }, {
+        field: 'Attended',
+        sort: {
+          direction: uiGridConstants.DESC,
+          priority: 2
+        },
+        sortingAlgorithm: $scope.sortingAlgorithm
+      }, {
         field: 'No-Show',
         sort: {
           direction: uiGridConstants.DESC,
@@ -325,6 +337,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         },
         sortingAlgorithm: $scope.sortingAlgorithm
       }],
+      hasUnpaid: true,
       hasYearToDate: false,
       hasExamType: true,
       hasExamMonth: true,
@@ -337,6 +350,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportId: "00O40000004To1R",
       reportIdCombined: "00O40000004TpDi",
       reportType: 'stackedline',
+      hasUnpaid: true,
       cumlative: true,
       applyFilters: true,
       hasYearToDate: false,
@@ -351,6 +365,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportId: "00O40000004LUNM",
       reportIdCombined: "00O40000004LUNW",
       reportType: 'stackedbar',
+      exportLabel: 'Date',
+      hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
       hasYearToDate: false,
@@ -364,6 +380,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004TpDx",
       reportType: 'stackedbar',
+      exportLabel: 'Year',
+      hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
       hasYearToDate: true,
@@ -377,6 +395,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004TtwS",
       reportType: 'stackedbar',
+      exportLabel: 'Year',
+      hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
       hasYearToDate: true,
@@ -391,6 +411,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportId: "00O40000004Tu8O",
       reportIdCombined: "00O40000004Tu9g",
       reportType: 'stackedbar',
+      exportLabel: 'Year',
+      hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
       hasYearToDate: false,
@@ -599,7 +621,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         $scope.rptData.aggregatesIndex = 1;
       }
 
-      if (fndRpt.name == 'Exam Registrations By Country') {
+      if (fndRpt.name == 'Exam Registrations By Country Year Over Year') {
         $scope.rptData.currentCountryType = 'Country';
         $scope.rptData.currentMapType = 'Total';
       }
@@ -774,7 +796,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Attempt__c.Opportunity_StageName__c':
-                rf.value = oppStages;
+              if($scope.rptData.hasUnpaid)
+                  rf.value = oppStages;
                 break;
 
               case 'Exam_Attempt__c.Exam_Type__c':
@@ -964,7 +987,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             }
           });
 
-        } else if(defined(fnd,"name") && fnd.name == 'Exam Registrations By Country') {
+        } else if(defined(fnd,"name") && fnd.name == 'Exam Registrations By Country Year Over Year') {
 
           fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
           if(defined(fnd,"value")) {
@@ -1424,6 +1447,26 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               }
             }
           }
+          // compute %diff total
+          var countryNets = {};
+          for(var totYearProp in yearTotals) {
+            var spliArr = totYearProp.split('~');
+            var country = spliArr[0];
+            var totYear = spliArr[1];
+            var lastYear = parseInt(totYear)-1;
+            var tot = yearTotals[totYearProp];
+            var lastTot = yearTotals[country + '~' + lastYear];
+            if(lastTot != null) {
+              if(defined(countryNets,country))
+                countryNets[country] += Math.ceil(((tot - lastTot)/tot)*100);
+               else countryNets[country] = Math.ceil(((tot - lastTot)/tot)*100);
+            }          }
+          for(var country in countryNets) {
+            var fnd = _.findWhere(sdata, {Country: country});
+            if(defined(fnd)) {
+              fnd['%Diff'] = countryNets[country];
+            }
+          }          
         } else {
 
           var sdata = [];
@@ -1463,27 +1506,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             sdata.push(obj);
           }
         }
-        // compute %diff total
-        var countryNets = {};
-        for(var totYearProp in yearTotals) {
-          var spliArr = totYearProp.split('~');
-          var country = spliArr[0];
-          var totYear = spliArr[1];
-          var lastYear = parseInt(totYear)-1;
-          var tot = yearTotals[totYearProp];
-          var lastTot = yearTotals[country + '~' + lastYear];
-          if(lastTot != null) {
-            if(defined(countryNets,country))
-              countryNets[country] += Math.ceil(((tot - lastTot)/tot)*100);
-             else countryNets[country] = Math.ceil(((tot - lastTot)/tot)*100);
-          }          }
-        for(var country in countryNets) {
-          var fnd = _.findWhere(sdata, {Country: country});
-          if(defined(fnd)) {
-            fnd['%Diff'] = countryNets[country];
-          }
-        }
-
 
         if (exportData) {
           var csv = JSON2CSV(sdata,true,true,$scope.fndRpt.columnDefs);
@@ -1492,11 +1514,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           return;
 
         } else {
-          if ($scope.fndRpt.name == 'Exam Registrations By Country' && async) {
+          if ($scope.fndRpt.name == 'Exam Registrations By Country Year Over Year' && async) {
             $rootScope.$apply(function() {
               drawCountryTable(sdata);
             });
-          } if($scope.fndRpt.name == 'Exam Registrations By Country' && !async) {
+          } if($scope.fndRpt.name == 'Exam Registrations By Country Year Over Year' && !async) {
             drawCountryTable(sdata);
           } else {
             if (async) {
@@ -1688,9 +1710,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
           $('#container').highcharts({
 
-            // data: {
-            //     csv: csv
-            // },
+            exporting: {
+              sourceWidth: 1200,
+              sourceHeight: 800,
+              scale: 1
+            },
 
             // Edit chart spacing
             chart: {
@@ -1830,6 +1854,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var stuff = sdata.data;
 
         $('#container').highcharts({
+
+          exporting: {
+            sourceWidth: 1200,
+            sourceHeight: 800,
+            scale: 1
+          },
+
           chart: {
             type: 'column'
           },
@@ -1931,7 +1962,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if (exportData) {
           var expData = [];
           var cols = _.pluck(sdata, "name");
-          cols.unshift("label");
+          cols.unshift($scope.fndRpt.exportLabel);
 
           var obj = {};
           for (var j = 0; j < cols.length; j++) {
@@ -1962,6 +1993,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
 
         $('#container').highcharts({
+
+          exporting: {
+            sourceWidth: 1200,
+            sourceHeight: 800,
+            scale: 1
+          },
+
           chart: {
             type: 'column'
           },
