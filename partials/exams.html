@@ -26,6 +26,7 @@
                 <option selected="selected">Country</option>
                 <option>Exam Site</option>
               </select>
+              <div ng-if="rptData.currentCountryType=='Country'">Note: Country is the Registratn's home address</div>
               <div ng-if="err['hasSiteCountry']" class="form-err">{{err['hasSiteCountry']}}</div>
             </div>
           </div>

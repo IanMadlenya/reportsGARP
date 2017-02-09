@@ -197,6 +197,51 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.reportTypeList = [{
       name: "Exam Registrations By Country",
       description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+      reportId: "00O4000000494UK",
+      reportType: 'table',
+      cumlative: false,
+      applyFilters: true,
+      columnDefs: [{
+        field: 'Country'
+      }, {
+        field: 'Total',
+        sort: {
+          direction: uiGridConstants.DESC,
+          priority: 1
+        },
+        sortingAlgorithm: $scope.sortingAlgorithm
+      }, {
+        field: 'Paid',
+        sort: {
+          direction: uiGridConstants.DESC,
+          priority: 2
+        },
+        sortingAlgorithm: $scope.sortingAlgorithm
+      }, {
+        field: 'Cancelled',
+        sort: {
+          direction: uiGridConstants.DESC,
+          priority: 3
+        },
+        sortingAlgorithm: $scope.sortingAlgorithm
+      }, {
+        field: 'Unpiad',
+        sort: {
+          direction: uiGridConstants.DESC,
+          priority: 4
+        },
+        sortingAlgorithm: $scope.sortingAlgorithm
+      }],
+      hasYearToDate: false,
+      hasExamType: true,
+      hasExamMonth: true,
+      hasExamYear: true,
+      hasExamYearRange: false,
+      hasExport: true
+    },
+    {
+      name: "Exam Registrations By Country Year Over Year",
+      description: "Table and Map of where people registered for exams over years. Choose an Location, Map Type, Exam Type, Month and Years. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004TuVm",
       reportSiteId: "00O40000004TuW1",
       reportIdCombined: "00O40000004TuVm",
