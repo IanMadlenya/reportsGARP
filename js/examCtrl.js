@@ -360,8 +360,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamYearRange: true,
       hasExport: true,
       colors: {
-        erp : ['#B0C636', '#90A51B', '#6C7F03'],
-        frm : ['#21C0FC', '#06BAFF', '#00A0DD']
+        erp : [GREEN1, GREEN2, GREEN3],
+        frm : [BLUE1,  BLUE2,  BLUE3 ]
       }
     }, {
       name: "Exam Registrations By Type By Year",
