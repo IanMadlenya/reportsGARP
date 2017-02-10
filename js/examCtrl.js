@@ -1632,7 +1632,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           var examType = (series[i].name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp'
 
           var colorIndex = (function(name){
-            return { index: /(Part I{2})|(Part 2)/i.test(name) && 0 || /(Part I{1})|(Part 1)/i.test(name) && 1 || 2 }
+            if(/(Part I{2})|(Part 2)$/i.test(name) ) return 0
+            else if(/(Part I{1})|(Part 1)$/i.test(name) ) return 1 
+            else return 2
           })(series[i].name)
 
           var obj = {
@@ -1644,7 +1646,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               radius: 4
             },
             year: series[i].year,
-            color: $scope.fndRpt.colors[examType][colorIndex.index]
+            color: $scope.fndRpt.colors[examType][colorIndex]
           }
           sdata.push(obj);
         }
