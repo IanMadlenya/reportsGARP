@@ -358,7 +358,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: false,
       hasExamYearRange: true,
-      hasExport: true
+      hasExport: true,
+      colors: {
+        erp : [GREEN1, GREEN2, GREEN3],
+        frm : [BLUE1,  BLUE2,  BLUE3 ]
+      }
     }, {
       name: "Exam Registrations By Type By Year",
       description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -1624,6 +1628,15 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         labels = newLables;
 
         for (var i = 0; i < series.length; i++) {
+
+          var examType = (series[i].name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp'
+
+          var colorIndex = (function(name){
+            if(/(Part I{2})|(Part 2)$/i.test(name) ) return 0
+            else if(/(Part I{1})|(Part 1)$/i.test(name) ) return 1 
+            else return 2
+          })(series[i].name)
+
           var obj = {
             name: series[i].name,
             data: [],
@@ -1632,7 +1645,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             marker: {
               radius: 4
             },
-            year: series[i].year
+            year: series[i].year,
+            color: $scope.fndRpt.colors[examType][colorIndex]
           }
           sdata.push(obj);
         }

@@ -25,8 +25,8 @@
 
     // Dark to Light
     var GREEN1 = '#15BCA5';
-    var GREEN2 = '#03B9FF';
-    var GREEN3 = '#5BD2FF';
+    var GREEN2 = '#29CEB7';
+    var GREEN3 = '#56EBD7';
 
     var defined = function(ref, strNames) {
         var name;
