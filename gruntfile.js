@@ -21,7 +21,7 @@ module.exports = function (grunt) {
             main: {
                 options: {
                     mode: 'zip',
-                    archive: 'build/staticresources/reportsGARP_dl.resource'
+                    archive: 'build/staticresources/reportsGARP.resource'
                 },
                 files: [
                     {
