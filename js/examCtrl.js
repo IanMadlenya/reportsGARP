@@ -643,13 +643,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       $scope.rptData.currentCountryType = null; 
       $scope.rptData.currentMapType = null; 
       $scope.rptData.currentExamType = null; 
-      $scope.rptData.combineExams = null; 
+      $scope.rptData.combineExams = false; 
       $scope.rptData.currentExamMonth = null; 
       $scope.rptData.currentExamYear = null; 
       $scope.rptData.currentStartExamYear = null; 
       $scope.rptData.currentEndExamYear = null;
-      $scope.rptData.includeUnPaid = null;
-      $scope.rptData.yearToDate = null;
+      $scope.rptData.includeUnPaid = false;
+      $scope.rptData.yearToDate = false;
 
       if (fndRpt.name == 'Exam Registrations By Year All Time' && $scope.rptData.includeUnPaid) {
         $scope.rptData.aggregatesIndex = 0;
@@ -2065,6 +2065,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             colors.push('#1CE7D8');
           }
         });
+
+        for(var i=0; i<sdata.length; i++) {
+          for(var j=0; j<sdata[i].data.length; j++) {
+            if(sdata[i].data[j] == 0)
+              sdata[i].data[j] = null;
+          }
+        }
 
         $('#container').highcharts({
 
