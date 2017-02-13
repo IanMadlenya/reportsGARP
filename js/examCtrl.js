@@ -209,7 +209,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 1
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }, {
         name: 'Paid',
         field: 'Closed',
@@ -217,7 +218,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }, {
         name: 'Cancelled',
         field: 'Closed Lost',
@@ -225,7 +227,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 3
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }, {
         name: 'Unpiad',
         field: 'New Lead',
@@ -233,7 +236,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 4
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }],
       hasUnpaid: false,
       hasYearToDate: false,
@@ -260,28 +264,32 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 1
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }, {
         field: 'Closed',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }, {
         field: 'Closed Lost',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 3
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }, {
         field: 'New Lead',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 4
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm, 
+        enableFiltering: false
       }],
       hasUnpaid: true,
       hasYearToDate: true,
@@ -529,19 +537,22 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     $scope.rptData.examRegType = [{
       name: "Deferral In",
-      color: '#1CE7D8'
+      color: '#ffff00'
     }, {
-      name: "Deferral Out",
-      color: '#00A0DD'
+      name: "Deferred Out",
+      color: '#33ffff'
+    }, {
+      name: "Deferral Out Pending",
+      color: '#00e6e6'
     }, {
       name: "Early Registration",
-      color: '#5BD2FF'
+      color: '#ff6600'
     }, {
       name: "Late Registration",
-      color: '#56EBD7'
+      color: '#ff6666'
     }, {
       name: "Standard Registration",
-      color: '#29CEB7'
+      color: '#ff1a1a'
     }];
 
     $scope.rptData.examYearAllTimeList = [];
@@ -1262,7 +1273,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           var sdata = [];
           var colDefNumberDefaults = {
             type:'number',
-            sortingAlgorithm: $scope.sortingAlgorithm
+            sortingAlgorithm: $scope.sortingAlgorithm, 
+            enableFiltering: false
           }
 
           $scope.fndRpt.columnDefs = [];
@@ -1293,7 +1305,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     sort: {
                       direction: uiGridConstants.DESC,
                       priority: 1
-                    }
+                    }, 
+                    enableFiltering: false
                   }
                   $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: propertyName + part + 'B'}));
                 } else {
@@ -1414,7 +1427,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       var lastYear = parseInt(year)-1;
                       var fnd = _.findWhere(allSData[lastYear], {Country: key});
                       if(fnd != null) {
-                        obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
+                        obj[yearDiffLable] = round(((val - fnd.Total)/val)*100,1);
                       } else {
                         obj[yearDiffLable] = null;
                       }
@@ -1474,7 +1487,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     var lastYear = parseInt(year)-1;
                     var fnd = _.findWhere(allSData[lastYear], {Country: country});
                     if(fnd != null) {
-                      obj[yearDiffLable] = Math.ceil(((val - fnd.Total)/val)*100);
+                      obj[yearDiffLable] = round(((val - fnd.Total)/val)*100,1);
                     } else {
                       obj[yearDiffLable] = null;
                     }
@@ -1495,8 +1508,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             var lastTot = yearTotals[country + '~' + lastYear];
             if(lastTot != null) {
               if(defined(countryNets,country))
-                countryNets[country] += Math.ceil(((tot - lastTot)/tot)*100);
-               else countryNets[country] = Math.ceil(((tot - lastTot)/tot)*100);
+                countryNets[country] += round(((tot - lastTot)/tot)*100,1);
+               else countryNets[country] = round(((tot - lastTot)/tot)*100,1);
             }          }
           for(var country in countryNets) {
             var fnd = _.findWhere(sdata, {Country: country});
@@ -1922,6 +1935,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                   }
                 },
                 marker: {
+                  enabled: false,
                   lineWidth: 1
                 }
               }
