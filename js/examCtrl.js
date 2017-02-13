@@ -1627,16 +1627,61 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
         labels = newLables;
 
+        var erpSeriesLength=0;
+        var frmSeriesLength=0;
+        var usedColor = [];
+
+        _.each(series, function(s) {
+          var examType = (s.name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp';
+          var key = s.name.replace(/[May]*[Nov]*[ ]*/,'');
+          var fnd = _.findWhere(usedColor, {key: key})
+          if(!defined(fnd)) {
+            var obj = {
+              key: key
+            }
+            usedColor.push(obj);
+
+            if(examType == 'frm')
+              frmSeriesLength++;
+            else erpSeriesLength++;
+          }         
+        });
+
+        var erpCount=0;
+        var frmCount=0;
         for (var i = 0; i < series.length; i++) {
-
-          var examType = (series[i].name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp'
-
-          var colorIndex = (function(name){
-            if(/(Part I{2})|(Part 2)$/i.test(name) ) return 0
-            else if(/(Part I{1})|(Part 1)$/i.test(name) ) return 1 
-            else return 2
-          })(series[i].name)
-
+          var examType = (series[i].name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp';
+          var colors;
+          var color;
+          var counter;
+          var lengthNum;
+          if(examType == 'erp') {
+            lengthNum = erpSeriesLength;
+            colors = greenColors;
+          } else {
+            lengthNum = frmSeriesLength;
+            colors = blueColors;
+          }
+          
+          var key = series[i].name.replace(/[May]*[Nov]*[ ]*/,'');
+          var fnd = _.findWhere(usedColor, {key: key})
+          if(!defined(fnd,"color")) {
+            if(examType == 'frm') {
+              frmCount++;
+              counter = frmCount;
+            } else {
+              erpCount++;
+              counter = erpCount;
+            }
+            var inc = Math.floor(colors.length/lengthNum);
+            var start = colors.length - (inc * lengthNum);
+            var index = (counter * inc) + start;
+            color = colors[index-1];
+            fnd.color = color;
+          } else {
+            color = fnd.color;
+          }
+            
           var obj = {
             name: series[i].name,
             data: [],
@@ -1646,12 +1691,27 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               radius: 4
             },
             year: series[i].year,
-            color: $scope.fndRpt.colors[examType][colorIndex]
+            color: color
           }
           sdata.push(obj);
         }
 
         $scope.deferred = [];
+
+        // clear last
+        _.each(sdata, function(sd) {
+          if(defined(sd,"last"))
+            sd.last=null;
+        });
+
+        _.each(data.groupingsDowns, function(gd) {
+            _.each(gd.groupings, function(gdg) {
+                _.each(gdg.groupings, function(g) {
+                   g.used=null; 
+                });
+            });
+        });
+
 
         // for each sdata
         for (var i = 0; i < sdata.length; i++) {

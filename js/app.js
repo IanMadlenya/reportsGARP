@@ -19,9 +19,52 @@
     };
 
     // Dark to Light
-    var BLUE1 = '#00A0DD';
-    var BLUE2 = '#03B9FF';
-    var BLUE3 = '#5BD2FF';
+    var BLUE1 = '#ccf1ff';
+    var BLUE2 = '#4dccff';
+    var BLUE3 = '#00b7ff';
+
+    var blueColors = [
+      '#e6f8ff',
+      '#ccf1ff',
+      '#b3e9ff',
+      '#99e2ff',
+      '#80dbff',
+      '#66d4ff',
+      '#4dccff',
+      '#33c5ff',
+      '#1abeff',
+      '#00b7ff',
+      '#00a4e6',
+      '#00a0dd',
+      '#0092cc',
+      '#0080b3',
+      '#006e99',
+      '#005b80',
+      '#004966',
+      '#00374d'
+    ];
+
+    var greenColors = [
+      '#eafbf9',
+      '#d4f7f2',
+      '#bff2ec',
+      '#aaeee5',
+      '#95eadf',
+      '#7fe6d8',
+      '#6ae2d2',
+      '#55ddcb',
+      '#3fd9c5',
+      '#2ad5be',
+      '#29ceb7',
+      '#26c0ab',
+      '#22aa98',
+      '#1d9585',
+      '#198072',
+      '#156a5f',
+      '#11554c',
+      '#0d4039'
+    ]
+
 
     // Dark to Light
     var GREEN1 = '#15BCA5';
