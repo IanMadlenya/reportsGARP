@@ -23,6 +23,11 @@ th, td {
     text-align: right;
 }
 
+.ui-grid-cell-contents {
+	white-space: normal !important;
+
+}
+
 .pad-bottom {
 	margin-bottom: 5px;
 }
