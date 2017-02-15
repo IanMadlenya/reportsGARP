@@ -94,7 +94,33 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     $scope.envPath = envPath;
 
+    $scope.sortingAlgorithmString = function(a, b) {
+      if(a==null) {
+        a = -99999;
+      } else {
+        if(a.indexOf('%') > -1) 
+          a = parseInt(a.replace('%',''));
+        else parseInt(a);
+      }
+        
+      if(b==null) {
+        b = -999999;
+      } else {
+       if(b.indexOf('%') > -1) 
+          b = parseInt(b.replace('%',''));
+        else parseInt(b); 
+      }
+        
+
+      if (a > b)
+        return 1;
+      else if (a < b)
+        return -1;
+      else return 0;
+    }
+
     $scope.sortingAlgorithm = function(a, b) {
+
       if(a==null)
         a = -99999;
       if(b==null)
@@ -1155,6 +1181,22 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       }
     }
 
+    function calcPercentGrowth(startVal, endVal) {
+      var val = 0;
+      if(endVal != 0)
+        val = round(((startVal - endVal)/startVal)*100,1);
+      return val;
+      //return val.toString() + '%';
+    }
+
+    function calcAnnualPercentGrowth(startVal, endVal, range) {
+      var val = 0;
+      if(endVal != 0)
+        val = round((Math.pow((endVal/startVal), (1/range)) - 1) * 100,1);
+      return val;
+      //return val.toString() + '%';
+    }
+
     function drawCountryTable(sdata) {
 
       $scope.myData = sdata;
@@ -1286,12 +1328,20 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             enableFiltering: false
           }
 
+          var colDefPercentDefaults = {
+            type:'number',
+            sortingAlgorithm: $scope.sortingAlgorithm, 
+            enableFiltering: false,
+            cellTemplate : '<span>{{COL_FIELD}}</span><span>%</span>'
+          }
+
           $scope.fndRpt.columnDefs = [];
           
           var emptyTotals = {};
 
           var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
           var showTotals = ((parseInt($scope.rptData.currentEndExamYear) - parseInt($scope.rptData.currentStartExamYear)) || !combo);
+          var showAnnualGrowth = (parseInt($scope.rptData.currentEndExamYear) - parseInt($scope.rptData.currentStartExamYear));
 
           if(!combo && fndExam != null) {
 
@@ -1322,7 +1372,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 } else {
                   $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable},colDefNumberDefaults, {rank: propertyName + part + 'B'}));
                 }
-                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable},colDefNumberDefaults, {rank: propertyName + part + 'A'}));
+                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable},colDefPercentDefaults, {rank: propertyName + part + 'A'}));
               }
             }
 
@@ -1338,7 +1388,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               emptyTotals[yearTotalLable] = 0;
               emptyTotals[yearDiffLable] = 0;
               $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable, rank: propertyName + 'B'},colDefNumberDefaults));
-              $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable, rank: propertyName + 'A'},colDefNumberDefaults));
+              $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable, rank: propertyName + 'A'},colDefPercentDefaults));
             }
           }
           $scope.fndRpt.columnDefs = _.sortBy($scope.fndRpt.columnDefs, function(row) { return row.rank })
@@ -1355,7 +1405,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
           if(showTotals) {
             $scope.fndRpt.columnDefs.push(_.extend({field: 'Total'},colDefNumberDefaults));
-            $scope.fndRpt.columnDefs.push(_.extend({field: '%Growth Annual'},colDefNumberDefaults));                
+            if(showAnnualGrowth)
+              $scope.fndRpt.columnDefs.push(_.extend({field: '%Growth Annual'},colDefPercentDefaults));                
           }
           $scope.fndRpt.columnDefs.unshift({ field: 'Country' });
 
@@ -1455,7 +1506,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       var lastYear = parseInt(year)-1;
                       var fnd = _.findWhere(allSData[lastYear], {Country: key});
                       if(fnd != null) {
-                        obj[yearDiffLable] = round(((val - fnd.Total)/val)*100,1);
+                        obj[yearDiffLable] = calcPercentGrowth(val, fnd.Total);
                       } else {
                         obj[yearDiffLable] = null;
                       }
@@ -1516,7 +1567,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     var lastYear = parseInt(year)-1;
                     var fnd = _.findWhere(allSData[lastYear], {Country: country});
                     if(fnd != null) {
-                      obj[yearDiffLable] = round(((val - fnd.Total)/val)*100,1);
+                      obj[yearDiffLable] = calcPercentGrowth(val, fnd.Total);
                     } else {
                       obj[yearDiffLable] = null;
                     }
@@ -1541,7 +1592,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               endValue=yearTotals[country][endYear];
             }
             if(startVal != 0) {
-              var agr = round((Math.pow((endValue/startVal), (1/range)) - 1) * 100,1);
+              var agr = calcAnnualPercentGrowth(startVal, endValue, range);
               yearTotals[country].agr = agr;
             }
           }
