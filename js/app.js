@@ -21,7 +21,7 @@
     // Dark to Light
     var BLUE1 = '#ccf1ff';
     var BLUE2 = '#4dccff';
-    var BLUE3 = '#00b7ff';
+    var BLUE3 = '#00a0dd';
 
     var blueColors = [
       '#e6f8ff',
@@ -67,9 +67,9 @@
 
 
     // Dark to Light
-    var GREEN1 = '#15BCA5';
-    var GREEN2 = '#29CEB7';
-    var GREEN3 = '#56EBD7';
+    var GREEN1 = '#95eadf';
+    var GREEN2 = '#3fd9c5';
+    var GREEN3 = '#22aa98';
 
     var defined = function(ref, strNames) {
         var name;

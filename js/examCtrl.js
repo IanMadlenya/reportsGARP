@@ -400,7 +400,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Type By Year",
       description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004LUNM",
+      reportId: "00O40000004LY8z",
       reportIdCombined: "00O40000004LUNW",
       reportType: 'stackedbar',
       exportLabel: 'Date',
@@ -561,24 +561,25 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       value: "May,Nov"
     }];
 
-    $scope.rptData.examRegType = [{
-      name: "Deferral In",
-      color: '#ffff00'
+    $scope.rptData.examRegType = [
+    {
+      name: "Deferred In",
+      color: '#EDC1B6'
     }, {
       name: "Deferred Out",
-      color: '#33ffff'
+      color: '#BACECE'
     }, {
-      name: "Deferral Out Pending",
-      color: '#00e6e6'
+      name: "Deferred Out Pending",
+      color: '#BACECE'
     }, {
       name: "Early Registration",
-      color: '#ff6600'
+      color: '#DE6E6A'
     }, {
       name: "Late Registration",
-      color: '#ff6666'
+      color: '#BDB76B'
     }, {
       name: "Standard Registration",
-      color: '#ff1a1a'
+      color: '#D8BFD8'
     }];
 
     $scope.rptData.examYearAllTimeList = [];
