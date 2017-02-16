@@ -89,10 +89,27 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
   });
 }]);
 
-reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout', '$stateParams', 'uiGridConstants',
-  function($scope, $rootScope, $timeout, $stateParams, uiGridConstants) {
+reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout', '$stateParams', 'uiGridConstants','$window',
+  function($scope, $rootScope, $timeout, $stateParams, uiGridConstants, $window) {
 
     $scope.envPath = envPath;
+
+    // In your controller
+    var w = angular.element($window);
+    $scope.$watch(
+      function () {
+        return $window.innerWidth;
+      },
+      function (value) {
+        $scope.windowWidth = value;
+      },
+      true
+    );
+
+    w.bind('resize', function(){
+      $scope.$apply();
+    });
+
 
     $scope.sortingAlgorithmString = function(a, b) {
       if(a==null) {
@@ -384,6 +401,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportId: "00O40000004To1R",
       reportIdCombined: "00O40000004TpDi",
       reportType: 'stackedline',
+      xaxisLabel: 'Days',
+      yaxisLabel: 'Exam Registrations',
       hasUnpaid: true,
       cumlative: true,
       applyFilters: true,
@@ -404,6 +423,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportIdCombined: "00O40000004LUNW",
       reportType: 'stackedbar',
       exportLabel: 'Date',
+      xaxisLabel: 'Exams',
+      yaxisLabel: 'Exam Registrations',
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -418,7 +439,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004TpDx",
       reportType: 'stackedbar',
-      exportLabel: 'Year',
+      exportLabel: 'Exam Year',
+      xaxisLabel: 'Exam Year',
+      yaxisLabel: 'Exam Registrations',
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -433,7 +456,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004TtwS",
       reportType: 'stackedbar',
-      exportLabel: 'Year',
+      exportLabel: 'Exam Year',
+      xaxisLabel: 'Exam Year',
+      yaxisLabel: 'Exam Registrations',      
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -449,7 +474,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportId: "00O40000004Tu8O",
       reportIdCombined: "00O40000004Tu9g",
       reportType: 'stackedbar',
-      exportLabel: 'Year',
+      exportLabel: 'Exam Year',
+      xaxisLabel: 'Exam Year',
+      yaxisLabel: 'Exam Registrations',      
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -1172,6 +1199,101 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     }
 
+    function computeSortRankReverse(year, label) {
+      var sortRank=year;
+
+      if(label.toLowerCase().indexOf('erp') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
+        sortRank+='A'
+      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
+        sortRank+='B'
+      } else {
+        sortRank+='C'
+      }
+
+      if(label.toLowerCase().indexOf('nov') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('total') > -1) {
+        sortRank+='B';
+      } else {
+        sortRank+='A';
+      }
+
+      if(label.toLowerCase().indexOf('early') > -1) {
+        sortRank+='G';
+      } else if(label.toLowerCase().indexOf('standard') > -1) {
+        sortRank+='F';
+      } else if(label.toLowerCase().indexOf('late') > -1) {
+        sortRank+='E';
+      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
+        sortRank+='D';
+      } else if(label.toLowerCase().indexOf('deferred out pending') > -1) {
+        sortRank+='B';
+      } else if(label.toLowerCase().indexOf('deferred out') > -1) {
+        sortRank+='C';
+      } else {
+        sortRank+='A';
+      }
+
+      return sortRank;
+    }
+
+    function computeSortRank(label) {
+      var sortRank='';
+
+      if(label.toLowerCase().indexOf('erp') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
+        sortRank+='C'
+      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
+        sortRank+='B'
+      } else {
+        sortRank+='A'
+      }
+
+      if(label.toLowerCase().indexOf('nov') > -1) {
+        sortRank+='B';
+      } else {
+        sortRank+='A';
+      }
+
+      if(label.toLowerCase().indexOf('total') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('early') > -1) {
+        sortRank+='A';
+      } else if(label.toLowerCase().indexOf('standard') > -1) {
+        sortRank+='B';
+      } else if(label.toLowerCase().indexOf('late') > -1) {
+        sortRank+='C';
+      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
+        sortRank+='D';
+      } else if(label.toLowerCase().indexOf('deferred out pending') > -1) {
+        sortRank+='F';
+      } else if(label.toLowerCase().indexOf('deferred out') > -1) {
+        sortRank+='E';
+      } else {
+        sortRank+='G';
+      }
+
+      return sortRank;
+    }    
 
     function addYearTotals(totals, country, year, value) {
       if(!defined(totals,country)) {
@@ -1347,15 +1469,15 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           if(!combo && fndExam != null) {
 
             var first=true;            
-            for(var propertyName in data.groupingsDowns) {
-              if(parseInt(propertyName) < parseInt($scope.rptData.currentStartExamYear))
+            for(var year in data.groupingsDowns) {
+              if(parseInt(year) < parseInt($scope.rptData.currentStartExamYear))
                 continue;
 
               var parts = fndExam.value.split(',');
               for(var i=0; i<parts.length; i++) {
                 var part = parts[i].trim();
-                var yearTotalLable = propertyName + ' ' + part + ' Total';
-                var yearDiffLable = propertyName  + ' ' + part + ' %Growth';
+                var yearTotalLable = year + ' ' + part + ' Total';
+                var yearDiffLable = year  + ' ' + part + ' %Growth';
                 emptyTotals[yearTotalLable] = 0;
                 emptyTotals[yearDiffLable] = 0;
                 if(first) {
@@ -1369,11 +1491,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     }, 
                     enableFiltering: false
                   }
-                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: propertyName + part + 'B'}));
+                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: computeSortRankReverse(year, yearTotalLable)}));
                 } else {
-                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable},colDefNumberDefaults, {rank: propertyName + part + 'B'}));
+                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable},colDefNumberDefaults, {rank: computeSortRankReverse(year, yearTotalLable)}));
                 }
-                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable},colDefPercentDefaults, {rank: propertyName + part + 'A'}));
+                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable},colDefPercentDefaults, {rank: computeSortRankReverse(year, yearDiffLable)}));
               }
             }
 
@@ -1388,8 +1510,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               var yearDiffLable = propertyName + ' ' + fndExam.name + ' %Growth';
               emptyTotals[yearTotalLable] = 0;
               emptyTotals[yearDiffLable] = 0;
-              $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable, rank: propertyName + 'B'},colDefNumberDefaults));
-              $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable, rank: propertyName + 'A'},colDefPercentDefaults));
+
+              var sortRank='A';
+              if(fndExam.name.indexOf('Part 1') > -1 || fndExam.name.indexOf('Part I') > -1)
+                sortRank='B'
+              $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable, rank: propertyName + 'B' + sortRank},colDefNumberDefaults));
+              $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable, rank: propertyName + 'A' + sortRank},colDefPercentDefaults));
             }
           }
           $scope.fndRpt.columnDefs = _.sortBy($scope.fndRpt.columnDefs, function(row) { return row.rank })
@@ -1732,7 +1858,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         _.each(series, function(s) {
           var examType = (s.name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp';
-          var key = s.name.replace(/[May]*[Nov]*[ ]*/,'');
+          var key = s.name.replace(/(May|Nov|Part 1|Part 2|Part I|Part II|\s)/g,'');
           var fnd = _.findWhere(usedColor, {key: key})
           if(!defined(fnd)) {
             var obj = {
@@ -1762,7 +1888,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             colors = blueColors;
           }
           
-          var key = series[i].name.replace(/[May]*[Nov]*[ ]*/,'');
+          var key = series[i].name.replace(/(May|Nov|Part 1|Part 2|Part I|Part II|\s)/g,'');
           var fnd = _.findWhere(usedColor, {key: key})
           if(!defined(fnd,"color")) {
             if(examType == 'frm') {
@@ -1938,7 +2064,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             },
 
             title: {
-              text: 'Registrations by Day'
+              text: $scope.fndRpt.name
             },
 
             subtitle: {
@@ -1956,14 +2082,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 enabled: true
               },
               title: {
-                  text: 'Days'
+                  text: $scope.fndRpt.xaxisLabel
               },
               categories: labels
             },
 
             yAxis: [{ // left y axis
               title: {
-                text: 'Registrations'
+                text: $scope.fndRpt.yaxisLabel
               },
               labels: {
                 align: 'left',
@@ -2127,47 +2253,87 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       if ($scope.fndRpt.reportType == 'stackedbar') {
 
         var labels = _.pluck(data.groupingsDown.groupings, "label");
+        var labels = _.sortBy(labels, function(row) { return computeSortRank(row) })
         var sdata = [];
 
-        for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
-          var group = data.groupingsDown.groupings[i];
-          for (var j = 0; j < group.groupings.length; j++) {
-            var g = group.groupings[j];
-            var sd = _.findWhere(sdata, {
-              name: g.label
-            });
-            if (sd == null) {
-              var obj = {
-                name: g.label,
-                data: []
+        _.each(labels, function(exam) {
+          var group = _.findWhere(data.groupingsDown.groupings, {label: exam});
+          if(defined(group,"groupings")) {
+            _.each(group.groupings, function(part) {
+              var sd = _.findWhere(sdata, {
+                name: part.label
+              });
+              if (sd == null) {
+                var obj = {
+                  name: part.label,
+                  data: []
+                }
+                sdata.push(obj);
               }
-              sdata.push(obj);
-            }
+            })
           }
-        }
+        });
 
-        for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
-          var group = data.groupingsDown.groupings[i];
-          //for(var j=0; j<group.groupings.length; j++) {
-          //var g = group.groupings[j];
-          for (var j = 0; j < sdata.length; j++) {
-            var sd = sdata[j];
-            var g = _.findWhere(group.groupings, {
-              label: sd.name
-            });
-
-            if (g == null) {
-              sd.data.push(0);
-            } else {
-              var da = data.factMap[g.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
+        _.each(labels, function(exam) {
+          // May 2010 FRM Part I
+          $scope.group = _.findWhere(data.groupingsDown.groupings, {label: exam});
+          _.each(sdata, function(part) {
+            // Deferred In
+            var fnd = _.findWhere($scope.group.groupings, {label: part.name});
+            if(defined(fnd)) {
+              var da = data.factMap[fnd.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
               if (da == null) {
-                sd.data.push(0);
+                part.data.push(0);
               } else {
-                sd.data.push(da);
+                part.data.push(da);
               }
+            } else {
+              part.data.push(0);
             }
-          }
-        }
+          });
+        });
+
+        
+
+        // for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
+        //   var group = data.groupingsDown.groupings[i];
+        //   for (var j = 0; j < group.groupings.length; j++) {
+        //     var g = group.groupings[j];
+        //     var sd = _.findWhere(sdata, {
+        //       name: g.label
+        //     });
+        //     if (sd == null) {
+        //       var obj = {
+        //         name: g.label,
+        //         data: []
+        //       }
+        //       sdata.push(obj);
+        //     }
+        //   }
+        // }
+
+        // for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
+        //   var group = data.groupingsDown.groupings[i];
+        //   //for(var j=0; j<group.groupings.length; j++) {
+        //   //var g = group.groupings[j];
+        //   for (var j = 0; j < sdata.length; j++) {
+        //     var sd = sdata[j];
+        //     var g = _.findWhere(group.groupings, {
+        //       label: sd.name
+        //     });
+
+        //     if (g == null) {
+        //       sd.data.push(0);
+        //     } else {
+        //       var da = data.factMap[g.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
+        //       if (da == null) {
+        //         sd.data.push(0);
+        //       } else {
+        //         sd.data.push(da);
+        //       }
+        //     }
+        //   }
+        // }
 
         if (exportData) {
           var expData = [];
@@ -2233,6 +2399,16 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           }
         }
 
+        _.each(sdata, function(sd) {
+          var rank = computeSortRank(sd.name);
+          sd.rank = rank;
+        })
+
+        var sortedData = _.sortBy(sdata, function(row) { return row.rank })
+        var reportName = $scope.fndRpt.name;
+        if($scope.rptData.yearToDate)
+          reportName+= ' - Year To Date';
+
         $('#container').highcharts({
 
           colors: colors,
@@ -2246,18 +2422,20 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             type: 'column'
           },
           title: {
-            text: 'Exam Registrations Over Time'
+            align: 'left',
+            x: 30,
+            text: reportName
           },
           xAxis: {
             categories: labels,
             title: {
-              text: 'Exams'
+              text: $scope.fndRpt.xaxisLabel
             }
           },
           yAxis: {
             min: 0,
             title: {
-              text: 'Exam Registrations'
+              text: $scope.fndRpt.yaxisLabel
             },
             stackLabels: {
               enabled: true,
@@ -2271,7 +2449,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             align: 'right',
             x: -30,
             verticalAlign: 'top',
-            y: 25,
+            y: 0,
             floating: true,
             backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
             borderColor: '#CCC',
@@ -2294,7 +2472,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               }
             }
           },
-          series: sdata
+          series: sortedData
         });
 
 
