@@ -1,3 +1,37 @@
+
+
+@media (min-width: 1400px) {
+	.container {
+	    width: 1300px;
+	}
+}
+
+@media (min-width: 1700px) {
+	.container {
+	    width: 1600px;
+	}	
+}
+
+@media (min-width: 1900px) {
+	.container {
+	    width: 1800px;
+	}	
+}
+
+th, td {
+    padding: 5px;
+    text-align: right;
+}
+
+.ui-grid-cell-contents {
+	white-space: normal !important;
+
+}
+
+.pad-bottom {
+	margin-bottom: 5px;
+}
+
 .event-danger {
   background-color: #f05123 !important;
 }
@@ -7,6 +41,10 @@
 }
 .dh-event-hide {
 	display: none  !important;
+}
+
+.form-err {
+	color:red
 }
 
 

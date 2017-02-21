@@ -18,6 +18,59 @@
       left: 'auto' // Left position relative to parent in px
     };
 
+    // Dark to Light
+    var BLUE1 = '#ccf1ff';
+    var BLUE2 = '#4dccff';
+    var BLUE3 = '#00a0dd';
+
+    var blueColors = [
+      '#e6f8ff',
+      '#ccf1ff',
+      '#b3e9ff',
+      '#99e2ff',
+      '#80dbff',
+      '#66d4ff',
+      '#4dccff',
+      '#33c5ff',
+      '#1abeff',
+      '#00b7ff',
+      '#00a4e6',
+      '#00a0dd',
+      '#0092cc',
+      '#0080b3',
+      '#006e99',
+      '#005b80',
+      '#004966',
+      '#00374d'
+    ];
+
+    var greenColors = [
+      '#eafbf9',
+      '#d4f7f2',
+      '#bff2ec',
+      '#aaeee5',
+      '#95eadf',
+      '#7fe6d8',
+      '#6ae2d2',
+      '#55ddcb',
+      '#3fd9c5',
+      '#2ad5be',
+      '#29ceb7',
+      '#26c0ab',
+      '#22aa98',
+      '#1d9585',
+      '#198072',
+      '#156a5f',
+      '#11554c',
+      '#0d4039'
+    ]
+
+
+    // Dark to Light
+    var GREEN1 = '#95eadf';
+    var GREEN2 = '#3fd9c5';
+    var GREEN3 = '#22aa98';
+
     var defined = function(ref, strNames) {
         var name;
         
@@ -51,24 +104,91 @@
       }
       return parseFloat(Math.round(amount * 100) / 100).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+
+    findInArray = function(dataArray, findProp1, findValue) {
+      if(defined(dataArray,"length")) {
+        for(var i=0; i<dataArray.length; i++) {
+          var dat = dataArray[i];
+          if(defined(dat,findProp1) && dat[findProp1] == findValue) {
+            return dat;       
+          }
+        }
+      }
+      return null;
+    }
+
+    findDeep = function(dataArray, findProp1, findProp2, findValue) {
+      if(defined(dataArray,"length")) {
+        for(var i=0; i<dataArray.length; i++) {
+          var dat = dataArray[i];
+          if(defined(dat,findProp1+'.'+findProp2)) {
+            if(dat[findProp1][findProp2] == findValue)
+              return dat[findProp1];       
+          }
+        }
+      }
+      return null;
+    }
+
+
+
+    function round(value, precision) {
+        var multiplier = Math.pow(10, precision || 0);
+        return Math.round(value * multiplier) / multiplier;
+    }
+
+    function exportToCSV(data, filename) {
+      var blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+      if (navigator.msSaveBlob) { // IE 10+
+          navigator.msSaveBlob(blob, filename);
+      } else {
+          var link = document.createElement("a");
+          if (link.download !== undefined) { // feature detection
+              // Browsers that support HTML5 download attribute
+              var url = URL.createObjectURL(blob);
+              link.setAttribute("href", url);
+              link.setAttribute("download", filename);
+              link.style.visibility = 'hidden';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+          }
+      }
+
+    }
     
-    function JSON2CSV(objArray) {
+    function JSON2CSV(objArray, labels, quotes, colDefs) {
         var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
     
         var str = '';
         var line = '';
     
-        if ($("#labels").is(':checked')) {
+        if (labels) {
             var head = array[0];
-            if ($("#quote").is(':checked')) {
-                for (var index in array[0]) {
-                    var value = index + "";
+            if (quotes) {
+
+                if(this.defined(colDefs)) {
+                  _.each(colDefs, function(col) {
+                    var value = col.field + "";
                     line += '"' + value.replace(/"/g, '""') + '",';
+                  });
+                } else {
+                  for (var index in array[0]) {
+                      var value = index + "";
+                      line += '"' + value.replace(/"/g, '""') + '",';
+                  }                  
                 }
+
             } else {
+              if(this.defined(colDefs)) {
+                _.each(colDefs, function(col) {
+                  line += array[0][col.field] + ',';
+                });
+              } else {
                 for (var index in array[0]) {
                     line += index + ',';
-                }
+                }                
+              }
             }
     
             line = line.slice(0, -1);
@@ -78,15 +198,34 @@
         for (var i = 0; i < array.length; i++) {
             var line = '';
     
-            if ($("#quote").is(':checked')) {
+            if (quotes) {
+              if(this.defined(colDefs)) {
+                _.each(colDefs, function(col) {
+                  var value = array[i][col.field] + "";
+                  value = value.replace('null', '');
+                  line += '"' + value.replace(/"/g, '""') + '",';
+                });                
+              } else {
                 for (var index in array[i]) {
                     var value = array[i][index] + "";
+                    value = value.replace('null', '');
                     line += '"' + value.replace(/"/g, '""') + '",';
                 }
+              }
             } else {
+              if(this.defined(colDefs)) {
+                _.each(colDefs, function(col) {
+                  var value = array[i][col.field];
+                  value = value.replace('null', '');
+                  line += value + ',';
+                });                
+              } else {
                 for (var index in array[i]) {
-                    line += array[i][index] + ',';
-                }
+                  var value = array[i][index];
+                  value = value.replace('null', '');
+                  line += value + ',';
+                }                
+              }
             }
     
             line = line.slice(0, -1);
@@ -157,7 +296,7 @@ angular.module('ErrorCatcher', [])
 
     myApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
-    var startPath = 'daily';
+    var startPath = 'exams';
 
     // For unmatched routes:
     if(defined(startPath)) {
@@ -229,3 +368,10 @@ angular.module('ErrorCatcher', [])
 
       }
     ]);
+
+
+myApp.filter('numberToLocalFilter', function () {
+  return function (value) {
+    return value.toLocaleString();
+  };
+})

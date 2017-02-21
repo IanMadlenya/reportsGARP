@@ -56,7 +56,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
   var SHIP = 'SHIP';     
   var TAX = 'SLSTX';   
 
-  var mergeProds = [
+var mergeProds = [
       {
       glCodes: [
         '4030'
@@ -250,7 +250,7 @@ reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout
       weight: 0
     }
   ];
-
+  
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
 
