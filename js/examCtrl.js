@@ -278,7 +278,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           priority: 1
         },
         sortingAlgorithm: $scope.sortingAlgorithm, 
-        enableFiltering: false
+        enableFiltering: false,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'        
       }, {
         name: 'Paid',
         field: 'Closed',
@@ -287,7 +289,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           priority: 2
         },
         sortingAlgorithm: $scope.sortingAlgorithm, 
-        enableFiltering: false
+        enableFiltering: false,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }, {
         name: 'Cancelled',
         field: 'Closed Lost',
@@ -296,7 +300,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           priority: 3
         },
         sortingAlgorithm: $scope.sortingAlgorithm, 
-        enableFiltering: false
+        enableFiltering: false,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }, {
         name: 'Unpiad',
         field: 'New Lead',
@@ -305,7 +311,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           priority: 4
         },
         sortingAlgorithm: $scope.sortingAlgorithm, 
-        enableFiltering: false
+        enableFiltering: false,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }],
       hasUnpaid: false,
       hasYearToDate: false,
@@ -383,35 +391,45 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 1
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }, {
         field: 'Will Attend',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }, {
         field: 'Deferred',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 3
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }, {
         field: 'Attended',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }, {
         field: 'No-Show',
         sort: {
           direction: uiGridConstants.DESC,
           priority: 4
         },
-        sortingAlgorithm: $scope.sortingAlgorithm
+        sortingAlgorithm: $scope.sortingAlgorithm,
+        type:'number',
+        cellFilter: 'numberToLocalFilter'
       }],
       hasUnpaid: true,
       hasYearToDate: false,
