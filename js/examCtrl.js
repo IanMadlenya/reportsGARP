@@ -3,15 +3,22 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
 
   //$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
 
+  $scope.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+  Highcharts.setOptions({
+    lang: {
+      thousandsSep: ','
+    }
+  });
+
   $rootScope.$on('drawMap', function(event, sdata) {
 
-    var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+    //var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
 
     var data = [];
 
     for (var i = 0; i < sdata.length; i++) {
 
-      var fnd = _.findWhere(mapData, {
+      var fnd = _.findWhere($scope.mapData, {
         name: sdata[i].Country
       })
 
@@ -23,7 +30,7 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
         }
         data.push(obj);
       } else {
-        console.log('Not Found: ' + sdata.Country);
+        console.log('Not Found: ' + sdata[i].Country);
       }
     }
 
@@ -33,8 +40,13 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
         this.code = 'GB';
       }
     });
-
+    
     $('#containerMap').highcharts('Map', {
+
+      lang: {
+          thousandsSep: ','
+      },
+
       chart: {
         borderWidth: 1
       },
@@ -73,7 +85,7 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
           duration: 1000
         },
         data: data,
-        mapData: mapData,
+        mapData: $scope.mapData,
         joinBy: ['iso-a2', 'code'],
         dataLabels: {
           enabled: true,
@@ -86,6 +98,7 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
         }
       }]
     });
+
   });
 }]);
 
@@ -93,15 +106,26 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
   function($scope, $rootScope, $timeout, $stateParams, uiGridConstants, $window) {
 
     $scope.envPath = envPath;
+    $scope.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+    Highcharts.setOptions({
+      lang: {
+        thousandsSep: ','
+      }
+    });
+
+    var height = $window.innerHeight - 200;
+    $scope.heightStyle = {height: height.toString() + 'px'};
 
     // In your controller
     var w = angular.element($window);
     $scope.$watch(
       function () {
-        return $window.innerWidth;
+        var height = $window.innerHeight - 200;
+        $scope.heightStyle = {height: height.toString() + 'px'};
+        return $window.innerHeight;
       },
       function (value) {
-        $scope.windowWidth = value;
+        $scope.windowHeight = value;
       },
       true
     );
@@ -217,6 +241,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.err = {};
 
     $scope.rptData = {};
+    $scope.rptData.showDesc = false;
     $scope.rptData.isCache = false;
     $scope.rptData.forceReload = false;
     $scope.rptData.disableExamYear = false;
@@ -627,6 +652,58 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       $scope.rptData.examYearList.push(obj);
     }
 
+    function addTotal(arrayObj, prop, key, value) {
+      var fnd = findInArray(arrayObj, prop, key);
+      if(!defined(fnd)) {
+        var obj = {};
+        obj[prop] = key;
+        obj.Total = value;
+        arrayObj.push(obj);
+      } else {
+        fnd.Total += value;
+      }
+    }
+
+    function findGrowthProp(obj) {
+      for(var propertyName in obj) {
+        if(propertyName.indexOf('%') > -1)
+          return propertyName;
+      }
+      return null;
+    }
+
+    function findOtherCountry(country) {
+
+      if (country == "-" || country == "&nbsp;" || country == "NULL") {
+        country = 'Other';
+        return country;
+      }
+
+      if(country.length == 2) {
+        var fnd = findDeep($scope.mapData, "properties", "iso-a2", country);
+        if(defined(fnd)) {
+          country = fnd.name;
+        } else {
+          var acron = country.split('').join('.') + '.';
+          var fnd = findDeep($scope.mapData, "properties", "country-abbrev", acron);
+          if(defined(fnd))
+            country = fnd.name;            
+        }
+      }
+      if(country.length == 3) {
+        var fnd = findDeep($scope.mapData, "properties", "iso-a3", country);
+        if(defined(fnd)) {
+          country = fnd.name;
+        } else {
+          var acron = country.split('').join('.') + '.';
+          var fnd = findDeep($scope.mapData, "properties", "country-abbrev", acron);  
+          if(defined(fnd))
+            country = fnd.name;            
+        }              
+      }
+      return country;
+    }
+
     function findIndexDeep(arry, subProp, prop, value) {
       for (var i = 0; i < arry.length; i++) {
         var obj = arry[i];
@@ -693,6 +770,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }
 
     $scope.selectOptions = function() {
+      var fndRpt = _.findWhere($scope.rptData.reportTypeList, {
+        reportId: $scope.rptData.currentReportType
+      });      
+      if(fndRpt.hasSite && $scope.rptData.currentCountryType == 'Exam Site')
+        $scope.rptData.currentMapType = 'Total';
       setIsCache();
     }
 
@@ -1247,6 +1329,56 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       return sortRank;
     }
 
+
+
+    function computeBarSortRank(label) {
+      var sortRank='';
+
+      if(label.toLowerCase().indexOf('erp') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('full') > -1 ) {
+           sortRank+='A'
+      } else if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
+        sortRank+='B'
+      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
+        sortRank+='C'
+      } else {
+        sortRank+='D'
+      }
+
+      if(label.toLowerCase().indexOf('nov') > -1) {
+        sortRank+='B';
+      } else {
+        sortRank+='A';
+      }
+
+      if(label.toLowerCase().indexOf('total') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('deferred out') > -1) {
+        sortRank+='A';
+      } else if(label.toLowerCase().indexOf('late') > -1) {
+        sortRank+='B';
+      } else if(label.toLowerCase().indexOf('standard') > -1) {
+        sortRank+='C';
+      } else if(label.toLowerCase().indexOf('early') > -1) {
+        sortRank+='D';
+      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
+        sortRank+='E';
+      } else {
+        sortRank+='F';
+      }
+
+      return sortRank;
+    }    
+
     function computeSortRank(label) {
       var sortRank='';
 
@@ -1296,12 +1428,19 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }    
 
     function addYearTotals(totals, country, year, value) {
+      var found = false;
       if(!defined(totals,country)) {
         totals[country] = {};
         totals[country][year] = value;
       } else {
-        totals[country][year] = value;
+        if(defined(totals,country + '.' + year)) {
+          found = true;
+          if(value != null)
+            totals[country][year] = value;
+        }
+        else totals[country][year] = value;
       }
+      return found;
     }
 
     function calcPercentGrowth(startVal, endVal) {
@@ -1330,26 +1469,24 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         _.each(sdata, function(row) {                
           var idx = row.Country.indexOf(",");
-           var country = row.Country;
+          var country = row.Country;
           if(idx > -1)
             country = country.slice(0,idx);
-          if(country == 'US')
-            country = 'United States';
-          if(country == 'UK')
-            country = 'United Kingdom';
+
+          country = findOtherCountry(country);
 
           var fnd = _.findWhere(mapData, {Country: country});
           if(fnd == null) {
             if($scope.rptData.currentMapType == 'Total') {
               mapData.push({Country: country, Total: row.Total});
             } else {
-              mapData.push({Country: country, Total: row['%Growth']});
+              mapData.push({Country: country, Total: row['%Growth Annual']});
             }
           } else {
             if($scope.rptData.currentMapType == 'Total') {
               fnd.Total += row.Total;
             } else {
-              fnd.Total += row['%Growth'];
+              fnd.Total += row['%Growth Annual'];
             }
           }
         });
@@ -1362,7 +1499,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         } else {
           var mapData = [];
           _.each(sdata, function(row) {
-            mapData.push({Country: row.Country, Total: row['%Growth']});
+            mapData.push({Country: row.Country, Total: row['%Growth Annual']});
           });
           $rootScope.$broadcast('drawMap', mapData);  
         }
@@ -1444,6 +1581,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if(defined(data,"groupingsDowns")) {
 
           var allSData = {};
+          var allSDataParts = {};
           var sdata = [];
           var colDefNumberDefaults = {
             type:'number',
@@ -1542,6 +1680,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
             var groupDown = data.groupingsDowns[year];
             var allsd = allSData[year] = [];
+            var allsdPart = allSDataParts[year] = [];
             var showInfo = false;
             if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
               showInfo = true;                          
@@ -1551,14 +1690,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               var group = groupDown.groupings[i];
               
               var country = group.label;
-              
-              if (country == "-" || country == "&nbsp;" || country == "NULL") {
-                country = 'Other';
-              }
-              
-              addYearTotals(yearTotals, country, year, null);
+
+              country = findOtherCountry(country);
+
+              var found = addYearTotals(yearTotals, country, year, null);
               //yearTotals[country + '~' + year] = null;
-              var yearTotal = null;
+              //var yearTotal = null;
               if(!combo) {
                 var parts = fndExam.value.split(',');
                 for(var j=0; j<parts.length; j++) {
@@ -1573,6 +1710,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     
                     if(showInfo) {
                       var val = 0;
+                      addTotal(allsd, 'Country', country, val);
+                      addTotal(allsdPart, 'Country', key, val);
+
                       var obj = _.findWhere(sdata, {Country: country});
                       if(obj == null) {
                         obj = {
@@ -1588,17 +1728,17 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       } 
 
                       var lastYear = parseInt(year)-1;
-                      var fnd = _.findWhere(allSData[lastYear], {Country: key});
+                      var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
                       if(fnd != null) {
                         if(fnd.Total > 0)
                           obj[yearDiffLable] = -100;
                         else obj[yearDiffLable] = 0;
-                        var allObj = {
-                          Country: key,
-                          Total: 0
-                        }
-                        yearTotal+=0;
-                        allsd.push(allObj);
+                        // var allObj = {
+                        //   Country: key,
+                        //   Total: 0
+                        // }
+                        // //yearTotal+=0;
+                        // allsd.push(allObj);
                       } else {
                         obj[yearDiffLable] = null;
                       }
@@ -1608,12 +1748,13 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
                     //var subgroup = group.groupings[j];
                     var val = data.factMaps[year][subgroup.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                    var allObj = {
-                      Country: key,
-                      Total: val
-                    }
-                    yearTotal+=val;
-                    allsd.push(allObj);
+                    addTotal(allsd, 'Country', country, val);
+                    addTotal(allsdPart, 'Country', key, val);
+                    // var allObj = {
+                    //   Country: key,
+                    //   Total: val
+                    // }
+                    // allsd.push(allObj);
 
                     if(showInfo) {
                       var obj = _.findWhere(sdata, {Country: country});
@@ -1626,21 +1767,24 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                         obj[yearTotalLable] = val;
                         sdata.push(obj);
                       } else {
-                        obj[yearTotalLable] = val;
+                        obj[yearTotalLable] += val;
                         obj.Total += val;
                       }
 
                       var lastYear = parseInt(year)-1;
-                      var fnd = _.findWhere(allSData[lastYear], {Country: key});
+                      var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
                       if(fnd != null) {
-                        obj[yearDiffLable] = calcPercentGrowth(val, fnd.Total);
+                        obj[yearDiffLable] = calcPercentGrowth(obj[yearTotalLable], fnd.Total);
                       } else {
                         obj[yearDiffLable] = null;
                       }
                     }
                   }
                 }
-                addYearTotals(yearTotals, country, year, yearTotal);
+                var fnd = _.findWhere(allsd, {Country: country});
+                if(defined(fnd))
+                  addYearTotals(yearTotals, country, year, fnd.Total);                
+                //addYearTotals(yearTotals, country, year, yearTotal);
                 //yearTotals[country + '~' + year] = yearTotal;
                 
               } else {
@@ -1649,6 +1793,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 var yearDiffLable = year + ' ' + fndExam.name + ' %Growth';
 
                 if(!defined(data,"factMaps." + year + "." + group.key + '!T')) {
+                  addTotal(allsd, 'Country', country, 0);
                   if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
                     var lastYear = parseInt(year)-1;
                     var fnd = _.findWhere(allSData[lastYear], {Country: country});
@@ -1656,12 +1801,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       if(fnd.Total > 0)
                         obj[yearDiffLable] = -100;
                       else obj[yearDiffLable] = 0;
-                      var allObj = {
-                        Country: country,
-                        Total: 0
-                      }
-                      yearTotal+=0;
-                      allsd.push(allObj);                      
+                      // var allObj = {
+                      //   Country: country,
+                      //   Total: 0
+                      // }
+                      // allsd.push(allObj);                      
                     } else {
                       obj[yearDiffLable] = null;
                     }
@@ -1669,12 +1813,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 } else {
 
                   var val = data.factMaps[year][group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                  var allObj = {
-                    Country: country,
-                    Total: val
-                  }
-                  allsd.push(allObj);
-                  yearTotal+=val;
+                  addTotal(allsd, 'Country', country, val);
+                  // var allObj = {
+                  //   Country: country,
+                  //   Total: val
+                  // }
+                  // allsd.push(allObj);
 
                   if(showInfo) {
                     var obj = _.findWhere(sdata, {Country: country});
@@ -1687,48 +1831,62 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       obj[yearTotalLable] = val;
                       sdata.push(obj);
                     } else {
-                      obj[yearTotalLable] = val;
+                      obj[yearTotalLable] += val;
                       obj.Total += val;
                     }
 
                     var lastYear = parseInt(year)-1;
                     var fnd = _.findWhere(allSData[lastYear], {Country: country});
                     if(fnd != null) {
-                      obj[yearDiffLable] = calcPercentGrowth(val, fnd.Total);
+                      obj[yearDiffLable] = calcPercentGrowth(obj[yearTotalLable], fnd.Total);
                     } else {
                       obj[yearDiffLable] = null;
                     }
                   }                
                 }
                 //yearTotals[country + '~' + year] = yearTotal;
-                addYearTotals(yearTotals, country, year, yearTotal);
+                var fnd = _.findWhere(allsd, {Country: country});
+                if(defined(fnd))
+                  addYearTotals(yearTotals, country, year, fnd.Total);
               }
             }
           }
           // compute %Growth total
           var startYear = parseInt($scope.rptData.currentStartExamYear);
           var endYear = parseInt($scope.rptData.currentEndExamYear);
-          var range = endYear - startYear;
-          for(var country in yearTotals) {
-            var startVal = 0;
-            if(defined(yearTotals,country+"."+startYear)) {
-              startVal=yearTotals[country][startYear];
+          if(startYear == endYear) {
+            for(var country in yearTotals) {
+              var fnd = _.findWhere(sdata, {Country: country});
+              if(defined(fnd)) {
+                var prop = findGrowthProp(fnd);
+                if(defined(prop))
+                  fnd['%Growth Annual'] = fnd[prop];
+              }
+            }     
+          } else {
+            var range = endYear - startYear;
+            for(var country in yearTotals) {
+              var startVal = 0;
+              if(defined(yearTotals,country+"."+startYear)) {
+                startVal=yearTotals[country][startYear];
+              }
+              var endValue = 0;
+              if(defined(yearTotals,country+"."+endYear)) {
+                endValue=yearTotals[country][endYear];
+              }
+              if(startVal != 0) {
+                var agr = calcAnnualPercentGrowth(startVal, endValue, range);
+                yearTotals[country].agr = agr;
+              }
             }
-            var endValue = 0;
-            if(defined(yearTotals,country+"."+endYear)) {
-              endValue=yearTotals[country][endYear];
-            }
-            if(startVal != 0) {
-              var agr = calcAnnualPercentGrowth(startVal, endValue, range);
-              yearTotals[country].agr = agr;
-            }
+            for(var country in yearTotals) {
+              var fnd = _.findWhere(sdata, {Country: country});
+              if(defined(fnd)) {
+                fnd['%Growth Annual'] = yearTotals[country].agr;
+              }
+            }            
           }
-          for(var country in yearTotals) {
-            var fnd = _.findWhere(sdata, {Country: country});
-            if(defined(fnd)) {
-              fnd['%Growth Annual'] = yearTotals[country].agr;
-            }
-          }          
+
         } else {
 
           var sdata = [];
@@ -1737,14 +1895,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             var val = data.factMap[group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
             var country = group.label;
 
-            if (country == "-" || country == "&nbsp;" || country == "NULL") {
-              country = 'Other';
-            }
+            country = findOtherCountry(country);
 
             var obj = {
               Country: country,
               Total: val
             }
+
+            var fnd = _.findWhere(sdata, {Country: country});
 
             if (defined(group, "groupings.length")) {
 
@@ -1762,13 +1920,20 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 if (defined(fndGroup)) {
                   var g = fndGroup;
                   var v = data.factMap[g.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                  obj[type] = v;
+                  if(defined(fnd)) {
+                    fnd[type] += v;
+                    fnd.Total += v;
+                  }
+                  else obj[type] = v;
+
                 } else {
-                  obj[type] = 0;
+                  if(!defined(fnd))
+                    obj[type] = 0;
                 }
               }
             }
-            sdata.push(obj);
+            if(!defined(fnd))
+              sdata.push(obj);
           }
         }
 
@@ -1783,7 +1948,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             $rootScope.$apply(function() {
               drawCountryTable(sdata);
             });
-          } if($scope.fndRpt.name == 'Exam Registrations By Country Year Over Year' && !async) {
+          } else if($scope.fndRpt.name == 'Exam Registrations By Country Year Over Year' && !async) {
             drawCountryTable(sdata);
           } else {
             if (async) {
@@ -1858,7 +2023,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         _.each(series, function(s) {
           var examType = (s.name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp';
-          var key = s.name.replace(/(May|Nov|Part 1|Part 2|Part I|Part II|\s)/g,'');
+          var key = s.name.replace(/(May|Nov|Part 1|Part 2|Part II|Part I|\s)/g,'');
           var fnd = _.findWhere(usedColor, {key: key})
           if(!defined(fnd)) {
             var obj = {
@@ -1888,7 +2053,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             colors = blueColors;
           }
           
-          var key = series[i].name.replace(/(May|Nov|Part 1|Part 2|Part I|Part II|\s)/g,'');
+          var key = series[i].name.replace(/(May|Nov|Part 1|Part 2|Part II|Part I|\s)/g,'');
           var fnd = _.findWhere(usedColor, {key: key})
           if(!defined(fnd,"color")) {
             if(examType == 'frm') {
@@ -2043,7 +2208,16 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         } else {
 
 
+          sdata = _.sortBy(sdata, function(row) { 
+            return computeSortRankReverse(row.year, row.name);
+          })
+          sdata =sdata.reverse();
+
           $('#container').highcharts({
+
+            lang: {
+                thousandsSep: ','
+            },
 
             exporting: {
               sourceWidth: 1200,
@@ -2059,8 +2233,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               spacingRight: 10,
 
               // Explicitly tell the width and height of a chart
-              width: null,
-              height: 900,
+              //width: null,
+              //height: 900,
             },
 
             title: {
@@ -2191,6 +2365,10 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         $('#container').highcharts({
 
+          lang: {
+              thousandsSep: ','
+          },
+
           exporting: {
             sourceWidth: 1200,
             sourceHeight: 800,
@@ -2253,7 +2431,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       if ($scope.fndRpt.reportType == 'stackedbar') {
 
         var labels = _.pluck(data.groupingsDown.groupings, "label");
-        var labels = _.sortBy(labels, function(row) { return computeSortRank(row) })
+
+        if($scope.fndRpt.name == 'Exam Registrations By Type By Year') {
+          var labels = _.sortBy(labels, function(row) { return computeSortRank(row) })
+        } else {
+          var labels = _.sortBy(labels, function(row) { return computeBarSortRank(row) })
+        }
         var sdata = [];
 
         _.each(labels, function(exam) {
@@ -2400,9 +2583,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
 
         _.each(sdata, function(sd) {
-          var rank = computeSortRank(sd.name);
+          var rank = computeBarSortRank(sd.name);
           sd.rank = rank;
-        })
+        });
 
         var sortedData = _.sortBy(sdata, function(row) { return row.rank })
         var reportName = $scope.fndRpt.name;
@@ -2410,6 +2593,10 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           reportName+= ' - Year To Date';
 
         $('#container').highcharts({
+
+          lang: {
+              thousandsSep: ','
+          },
 
           colors: colors,
           exporting: {

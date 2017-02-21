@@ -105,6 +105,32 @@
       return parseFloat(Math.round(amount * 100) / 100).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
+    findInArray = function(dataArray, findProp1, findValue) {
+      if(defined(dataArray,"length")) {
+        for(var i=0; i<dataArray.length; i++) {
+          var dat = dataArray[i];
+          if(defined(dat,findProp1) && dat[findProp1] == findValue) {
+            return dat;       
+          }
+        }
+      }
+      return null;
+    }
+
+    findDeep = function(dataArray, findProp1, findProp2, findValue) {
+      if(defined(dataArray,"length")) {
+        for(var i=0; i<dataArray.length; i++) {
+          var dat = dataArray[i];
+          if(defined(dat,findProp1+'.'+findProp2)) {
+            if(dat[findProp1][findProp2] == findValue)
+              return dat[findProp1];       
+          }
+        }
+      }
+      return null;
+    }
+
+
 
     function round(value, precision) {
         var multiplier = Math.pow(10, precision || 0);
@@ -270,7 +296,7 @@ angular.module('ErrorCatcher', [])
 
     myApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
-    var startPath = 'daily';
+    var startPath = 'exams';
 
     // For unmatched routes:
     if(defined(startPath)) {

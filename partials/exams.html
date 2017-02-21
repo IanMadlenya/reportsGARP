@@ -3,17 +3,15 @@
   ${demo.css}
 </style>
 <div id="mainspin"></div>
-<div class="container page-container">
-
-
+<div style="margin-left: 20px;margin-right: 20px;">
     <div class="row" style="background-color: #afc2d8;margin-bottom:10px;padding:10px">
       <div class="col-md-3">
-        <b>Report</b><br> 
+        <b>Report</b> <span ng-click="rptData.showDesc=!rptData.showDesc" class="glyphicon glyphicon-question-sign" aria-hidden="true"></span><br> 
         <select id="reportTypeSelect" data-ng-model="rptData.currentReportType" name="reportType" ng-change="selectType()">
           <option ng-repeat="reportType in rptData.reportTypeList" value="{{reportType.reportId}}">{{reportType.name}}</option>
         </select>
         <div ng-if="err['currentReportType']" class="form-err">{{err['currentReportType']}}</div>
-        <div>
+        <div ng-if="rptData.showDesc">
           {{getDescription()}}
         </div>
       </div>
@@ -35,7 +33,7 @@
               <b>Map Display</b><br>
               <select id="examMapSelect" data-ng-model="rptData.currentMapType" name="mapType" ng-change="selectOptions()">
                 <option selected="selected">Total</option>
-                <option>%Diff</option>
+                <option ng-if="rptData.currentCountryType=='Country'">%Annual Growth</option>
               </select>
               <div ng-if="err['hasSiteMap']" class="form-err">{{err['hasSiteMap']}}</div>
             </div>
@@ -126,9 +124,9 @@
   <div ng-if="fndRpt.reportType == 'table'">
     <div ui-grid="gridOptions1" class="myGrid" style="height:600px" ui-grid-cellNav ui-grid-auto-resize></div>
   </div>
-  <div class="row">
-    <div class="col-md-12">
-      <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 1000px; margin: 0 auto"></div>
+  <div class="row" ng-style="heightStyle">
+    <div class="col-md-12" style="height:100%">
+      <div id="container" ng-if="fndRpt.reportType != 'table'" style="min-width: 310px; height: 100%; margin: 0 auto"></div>
       <div class="row" ng-if="fndRpt.reportType == 'table'" >
         <div class="col-md-12" ng-controller="mapCtrl">
           <div id="containerMap" style="height: 600px; min-width: 800px; max-width: 800px; margin: 0 auto"></div>
