@@ -296,7 +296,9 @@ angular.module('ErrorCatcher', [])
 
     myApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
-    var startPath = 'exams';
+    var startPath = 'daily';
+    if(defined(startRoute))
+      startPath = startRoute;
 
     // For unmatched routes:
     if(defined(startPath)) {
