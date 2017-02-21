@@ -368,3 +368,10 @@ angular.module('ErrorCatcher', [])
 
       }
     ]);
+
+
+myApp.filter('numberToLocalFilter', function () {
+  return function (value) {
+    return value.toLocaleString();
+  };
+})

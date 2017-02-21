@@ -1585,12 +1585,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           var sdata = [];
           var colDefNumberDefaults = {
             type:'number',
+            cellFilter: 'numberToLocalFilter',
             sortingAlgorithm: $scope.sortingAlgorithm, 
             enableFiltering: false
           }
 
           var colDefPercentDefaults = {
             type:'number',
+            cellFilter: 'numberToLocalFilter',
             sortingAlgorithm: $scope.sortingAlgorithm, 
             enableFiltering: false,
             cellTemplate : '<span>{{COL_FIELD}}</span><span>%</span>'
