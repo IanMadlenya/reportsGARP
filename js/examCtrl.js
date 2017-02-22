@@ -1462,16 +1462,16 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }
 
     function calcPercentGrowth(startVal, endVal) {
-      var val = 0;
-      if(endVal != 0)
-        val = round(((startVal - endVal)/startVal)*100,1);
+      var val = null;
+      if(startVal != 0)
+        val = round(((endVal - startVal)/startVal)*100,1);
       return val;
       //return val.toString() + '%';
     }
 
     function calcAnnualPercentGrowth(startVal, endVal, range) {
-      var val = 0;
-      if(endVal != 0)
+      var val = null;
+      if(startVal != 0 && range != 0)
         val = round((Math.pow((endVal/startVal), (1/range)) - 1) * 100,1);
       return val;
       //return val.toString() + '%';
@@ -1613,7 +1613,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             cellFilter: 'numberToLocalFilter',
             sortingAlgorithm: $scope.sortingAlgorithm, 
             enableFiltering: false,
-            cellTemplate : '<span>{{COL_FIELD}}</span><span>%</span>'
+            cellTemplate : '<div style="padding:5px"><span>{{COL_FIELD}}</span><span>%</span></div>'
           }
 
           $scope.fndRpt.columnDefs = [];
@@ -1794,7 +1794,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                       var lastYear = parseInt(year)-1;
                       var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
                       if(fnd != null) {
-                        obj[yearDiffLable] = calcPercentGrowth(obj[yearTotalLable], fnd.Total);
+                        obj[yearDiffLable] = calcPercentGrowth(fnd.Total, obj[yearTotalLable]);
                       } else {
                         obj[yearDiffLable] = null;
                       }
@@ -1858,7 +1858,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                     var lastYear = parseInt(year)-1;
                     var fnd = _.findWhere(allSData[lastYear], {Country: country});
                     if(fnd != null) {
-                      obj[yearDiffLable] = calcPercentGrowth(obj[yearTotalLable], fnd.Total);
+                      obj[yearDiffLable] = calcPercentGrowth(fnd.Total, obj[yearTotalLable]);
                     } else {
                       obj[yearDiffLable] = null;
                     }

@@ -297,7 +297,7 @@ angular.module('ErrorCatcher', [])
     myApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
     var startPath = 'daily';
-    if(defined(startRoute))
+    if(typeof startRoute !== 'undefined')
       startPath = startRoute;
 
     // For unmatched routes:
