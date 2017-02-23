@@ -1,13 +1,10 @@
 var reportsGARPServices = angular.module('reportsGARP.services')  //gets
 
-reportsGARPServices.factory('stackedBarService', [
-  function(){
+reportsGARPServices.factory('stackedBarService', ['utilitiyService',
+  function(utilitiyService){
 
-  	var stackedBarService = {
-      searchType: null,
-      searchText: null,
-      industries: null
-    };
+  	var stackedBarService = {};
+  	var util = utilitiyService;
 
     stackedBarService.processData = function(reportData, aggregatesIndex) {
 
@@ -20,7 +17,7 @@ reportsGARPServices.factory('stackedBarService', [
 	    }
 
 	    _.each(reportData.groupingsDown.groupings, function(level1) {
-	      var value = getValueZero(reportData.factMap[level1.key + '!T'].aggregates[aggregatesIndex].value);
+	      var value = util.getValueZero(reportData.factMap[level1.key + '!T'].aggregates[aggregatesIndex].value);
 	      var dataObj = {
 	        name: level1.label,
 	        data: [],
@@ -29,9 +26,9 @@ reportsGARPServices.factory('stackedBarService', [
 	      sdata.push(dataObj);
 	      if(defined(level1,"groupings")) {
 	        _.each(level1.groupings, function(level2) {
-	          var value = getValueZero(reportData.factMap[level2.key + '!T'].aggregates[aggregatesIndex].value);
+	          var value = util.getValueZero(reportData.factMap[level2.key + '!T'].aggregates[aggregatesIndex].value);
 	          dataObj.data.push(value);
-	          addDistinct(labels, level2.label);
+	          util.addDistinct(labels, level2.label);
 	        });
 	      }
 	    });

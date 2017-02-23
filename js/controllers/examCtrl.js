@@ -1,109 +1,5 @@
-reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout, $location) {
-  $scope.envPath = envPath;
-
-  //$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
-
-  $scope.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
-  Highcharts.setOptions({
-    lang: {
-      thousandsSep: ','
-    }
-  });
-
-  $rootScope.$on('drawMap', function(event, sdata) {
-
-    //var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
-
-    var data = [];
-
-    for (var i = 0; i < sdata.length; i++) {
-
-      var fnd = _.findWhere($scope.mapData, {
-        name: sdata[i].Country
-      })
-
-      if (defined(fnd) && sdata[i].Total > 0) {
-        var obj = {
-          code: fnd.properties['iso-a2'],
-          name: sdata[i].Country,
-          value: sdata[i].Total
-        }
-        data.push(obj);
-      } else {
-        console.log('Not Found: ' + sdata[i].Country);
-      }
-    }
-
-    // Correct UK to GB in data
-    $.each(data, function() {
-      if (this.code === 'UK') {
-        this.code = 'GB';
-      }
-    });
-    
-    $('#containerMap').highcharts('Map', {
-
-      lang: {
-          thousandsSep: ','
-      },
-
-      chart: {
-        borderWidth: 1
-      },
-
-      title: {
-        text: 'Registrations By Country'
-      },
-
-      legend: {
-        layout: 'horizontal',
-        borderWidth: 0,
-        backgroundColor: 'rgba(255,255,255,0.85)',
-        floating: true,
-        verticalAlign: 'top',
-        y: 25
-      },
-
-      mapNavigation: {
-        enabled: true
-      },
-
-      colorAxis: {
-        min: 1,
-        type: 'logarithmic',
-        minColor: '#EEEEFF',
-        maxColor: '#000022',
-        stops: [
-          [0, '#EFEFFF'],
-          [0.67, '#4444FF'],
-          [1, '#000022']
-        ]
-      },
-
-      series: [{
-        animation: {
-          duration: 1000
-        },
-        data: data,
-        mapData: $scope.mapData,
-        joinBy: ['iso-a2', 'code'],
-        dataLabels: {
-          enabled: true,
-          color: 'white',
-          format: '{point.code}'
-        },
-        name: 'Registrations',
-        tooltip: {
-          pointFormat: '{point.name}: {point.value}'
-        }
-      }]
-    });
-
-  });
-}]);
-
-reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout', '$stateParams', 'uiGridConstants','$window','stackedBarService','graphService','utilitiyService',
-  function($scope, $rootScope, $timeout, $stateParams, uiGridConstants, $window, stackedBarService, graphService, utilitiyService) {
+reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout', '$stateParams', 'uiGridConstants','$window','stackedBarService','graphService','utilitiyService','gridService','stackedLineService',
+  function($scope, $rootScope, $timeout, $stateParams, uiGridConstants, $window, stackedBarService, graphService, utilitiyService, gridService, stackedLineService) {
 
     $scope.envPath = envPath;
     $scope.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
@@ -360,8 +256,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamYearRange: true,
       hasExport: true,
       colors: {
-        erp : [GREEN1, GREEN2, GREEN3],
-        frm : [BLUE1,  BLUE2,  BLUE3 ]
+        erp : [util.GREEN1, util.GREEN2, util.GREEN3],
+        frm : [util.BLUE1,  util.BLUE2,  util.BLUE3 ]
       }
     }, {
       name: "Exam Registrations By Type By Year",
@@ -444,7 +340,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     $scope.isCombined = function(reportId) {
       var fnd = _.findWhere($scope.rptData.reportTypeList, {reportId: reportId});
-      if(defined(fnd,'reportIdCombined'))
+      if(util.defined(fnd,'reportIdCombined'))
         return true;
       else return false;
     }
@@ -471,7 +367,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 $scope.rptData.includeUnPaid + "~" + 
                 $scope.rptData.yearToDate;
 
-      if (defined($scope.rptData[key])) {
+      if (util.defined($scope.rptData[key])) {
         $scope.rptData.isCache = true;
       } else {
         $scope.rptData.isCache = false;
@@ -556,7 +452,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       debugger;
 
       $scope.err = {};
-      if (defined($scope, "rptData.currentReportType")) {
+      if (util.defined($scope, "rptData.currentReportType")) {
 
         $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {
           reportId: $scope.rptData.currentReportType
@@ -614,7 +510,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                   $scope.rptData.includeUnPaid + "~" + 
                   $scope.rptData.yearToDate;
 
-        if (defined($scope.rptData[key]) && $scope.rptData.forceReload == false) {
+        if (util.defined($scope.rptData[key]) && $scope.rptData.forceReload == false) {
           drawGraph(false, exportData);
         } else {
           loadData(exportData);
@@ -637,7 +533,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           result: result
         };
         fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
-        if(defined(fnd,"value")) {
+        if(util.defined(fnd,"value")) {
           obj.year = fnd.value;
         }
         callback(null, obj);
@@ -687,7 +583,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if ($scope.rptData.currentExamMonth == 'Nov')
           var srtDate = '2015-05-01'
 
-        if (defined(meta, "reportMetadata.reportFilters.length")) {
+        if (util.defined(meta, "reportMetadata.reportFilters.length")) {
           for (var i = 0; i < meta.reportMetadata.reportFilters.length; i++) {
             var rf = meta.reportMetadata.reportFilters[i];
             switch (rf.column) {
@@ -824,14 +720,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var obj = $(selector)
         $scope.mainSpinner;
         if (obj !== null && typeof obj !== "undefined" && obj.length !== null && typeof obj.length !== "undefined") {
-          $scope.mainSpinner = new Spinner(spinnerOptions).spin(obj[0]);
+          $scope.mainSpinner = new Spinner(util.spinnerOptions).spin(obj[0]);
         }
 
         var fnd = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType})
-        if(defined(fnd,"name") && fnd.name == 'Exam Registrations By Day Of Year') {
+        if(util.defined(fnd,"name") && fnd.name == 'Exam Registrations By Day Of Year') {
 
           fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
-          if(defined(fnd,"value")) {
+          if(util.defined(fnd,"value")) {
 
             var yearArray = fnd.value.split(',');
             var options = [];
@@ -839,7 +735,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               var obj = jQuery.extend(true, {}, metadata);
               fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
-              if(defined(fnd,"value")) {
+              if(util.defined(fnd,"value")) {
                 fnd.value = yearArray[i].trim();
                 options.push(obj);
               }
@@ -893,17 +789,17 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             }
           });
 
-        } else if(defined(fnd,"name") && fnd.name == 'Exam Registrations By Country Year Over Year') {
+        } else if(util.defined(fnd,"name") && fnd.name == 'Exam Registrations By Country Year Over Year') {
 
           fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
-          if(defined(fnd,"value")) {
+          if(util.defined(fnd,"value")) {
 
             var yearArray = fnd.value.split(',');
             var options = [];
             for(var i=0; i<yearArray.length; i++) {
               var obj = jQuery.extend(true, {}, metadata);
               fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
-              if(defined(fnd,"value")) {
+              if(util.defined(fnd,"value")) {
                 fnd.value = yearArray[i].trim();
                 options.push(obj);
               }
@@ -1001,192 +897,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
 
       });
-
     }
-
-    function computeSortRankReverse(year, label) {
-      var sortRank=year;
-
-      if(label.toLowerCase().indexOf('erp') > -1) {
-        sortRank+='A';
-      } else {
-        sortRank+='B';
-      }
-
-      if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
-        sortRank+='A'
-      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
-        sortRank+='B'
-      } else {
-        sortRank+='C'
-      }
-
-      if(label.toLowerCase().indexOf('nov') > -1) {
-        sortRank+='A';
-      } else {
-        sortRank+='B';
-      }
-
-      if(label.toLowerCase().indexOf('total') > -1) {
-        sortRank+='B';
-      } else {
-        sortRank+='A';
-      }
-
-      if(label.toLowerCase().indexOf('early') > -1) {
-        sortRank+='G';
-      } else if(label.toLowerCase().indexOf('standard') > -1) {
-        sortRank+='F';
-      } else if(label.toLowerCase().indexOf('late') > -1) {
-        sortRank+='E';
-      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
-        sortRank+='D';
-      } else if(label.toLowerCase().indexOf('deferred out pending') > -1) {
-        sortRank+='B';
-      } else if(label.toLowerCase().indexOf('deferred out') > -1) {
-        sortRank+='C';
-      } else {
-        sortRank+='A';
-      }
-
-      return sortRank;
-    }
-
-
-
-    function computeSortRank(label) {
-      var sortRank='';
-
-      if(label.toLowerCase().indexOf('erp') > -1) {
-        sortRank+='A';
-      } else {
-        sortRank+='B';
-      }
-
-      if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
-        sortRank+='C'
-      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
-        sortRank+='B'
-      } else {
-        sortRank+='A'
-      }
-
-      if(label.toLowerCase().indexOf('nov') > -1) {
-        sortRank+='B';
-      } else {
-        sortRank+='A';
-      }
-
-      if(label.toLowerCase().indexOf('total') > -1) {
-        sortRank+='A';
-      } else {
-        sortRank+='B';
-      }
-
-      if(label.toLowerCase().indexOf('early') > -1) {
-        sortRank+='A';
-      } else if(label.toLowerCase().indexOf('standard') > -1) {
-        sortRank+='B';
-      } else if(label.toLowerCase().indexOf('late') > -1) {
-        sortRank+='C';
-      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
-        sortRank+='D';
-      } else if(label.toLowerCase().indexOf('deferred out pending') > -1) {
-        sortRank+='F';
-      } else if(label.toLowerCase().indexOf('deferred out') > -1) {
-        sortRank+='E';
-      } else {
-        sortRank+='G';
-      }
-
-      return sortRank;
-    }    
-
-    function addYearTotals(totals, country, year, value) {
-      var found = false;
-      if(!defined(totals,country)) {
-        totals[country] = {};
-        totals[country][year] = value;
-      } else {
-        if(defined(totals,country + '.' + year)) {
-          found = true;
-          if(value != null)
-            totals[country][year] = value;
-        }
-        else totals[country][year] = value;
-      }
-      return found;
-    }
-
-    function calcPercentGrowth(startVal, endVal) {
-      var val = null;
-      if(startVal != 0)
-        val = round(((endVal - startVal)/startVal)*100,1);
-      return val;
-      //return val.toString() + '%';
-    }
-
-    function calcAnnualPercentGrowth(startVal, endVal, range) {
-      var val = null;
-      if(startVal != 0 && range != 0)
-        val = round((Math.pow((endVal/startVal), (1/range)) - 1) * 100,1);
-      return val;
-      //return val.toString() + '%';
-    }
-
-    function drawCountryTable(sdata) {
-
-      $scope.myData = sdata;
-      $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
-      $scope.gridOptions1.data = sdata;
-      if($scope.rptData.currentCountryType == 'Exam Site') {
-        var mapData = [];
-
-        _.each(sdata, function(row) {                
-          var idx = row.Country.indexOf(",");
-          var country = row.Country;
-          if(idx > -1)
-            country = country.slice(0,idx);
-
-          country = findOtherCountry(country);
-
-          var fnd = _.findWhere(mapData, {Country: country});
-          if(fnd == null) {
-            if($scope.rptData.currentMapType == 'Total') {
-              mapData.push({Country: country, Total: row.Total});
-            } else {
-              mapData.push({Country: country, Total: row['%Growth Annual']});
-            }
-          } else {
-            if($scope.rptData.currentMapType == 'Total') {
-              fnd.Total += row.Total;
-            } else {
-              fnd.Total += row['%Growth Annual'];
-            }
-          }
-        });
-        $rootScope.$broadcast('drawMap', mapData);
-
-      } else {
-
-        if($scope.rptData.currentMapType == 'Total') {
-          $rootScope.$broadcast('drawMap', sdata);  
-        } else {
-          var mapData = [];
-          _.each(sdata, function(row) {
-            mapData.push({Country: row.Country, Total: row['%Growth Annual']});
-          });
-          $rootScope.$broadcast('drawMap', mapData);  
-        }
-
-      }      
-
-    }
-
 
     function drawGraph(async, exportData) {
 
-      if (!defined($scope, "rptData.currentReportType"))
+      if (!util.defined($scope, "rptData.currentReportType"))
         return;
 
       $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {
@@ -1215,7 +930,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 $scope.rptData.includeUnPaid + "~" + 
                 $scope.rptData.yearToDate;      
 
-      if (!defined($scope.rptData[key])) {
+      if (!util.defined($scope.rptData[key])) {
         alert("Data not found! Please reload page and try again.");
         return;
       }
@@ -1225,7 +940,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       console.log(data);
 
       //"groupingsDown"
-      if (!defined(data,"groupingsDowns")) {
+      if (!util.defined(data,"groupingsDowns")) {
         if(data.groupingsDown.groupings.length <= 0) {
           alert('No data found.');
           return;
@@ -1244,400 +959,55 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       }
 
       //var fndRpt = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.reportId});
-      if (!defined($scope.fndRpt)) {
+      if (!util.defined($scope.fndRpt)) {
         alert('Report not found!');
         return;
       }
 
       debugger;
-      var combo = $scope.rptData.combineExams;
       if ($scope.fndRpt.reportType == 'table') {
 
-        if(defined(data,"groupingsDowns")) {
+        if(util.defined(data,"groupingsDowns")) {
 
-          var allSData = {};
-          var allSDataParts = {};
-          var sdata = [];
-          var colDefNumberDefaults = {
-            type:'number',
-            cellFilter: 'numberToLocalFilter',
-            sortingAlgorithm:graphService.sortingAlgorithm, 
-            enableFiltering: false
-          }
-
-          var colDefPercentDefaults = {
-            type:'number',
-            cellFilter: 'numberToLocalFilter',
-            sortingAlgorithm:graphService.sortingAlgorithm, 
-            enableFiltering: false,
-            cellTemplate : '<div style="padding:5px"><span>{{COL_FIELD}}</span><span>%</span></div>'
-          }
-
-          $scope.fndRpt.columnDefs = [];
-          
-          var emptyTotals = {};
-
-          var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
-          var showTotals = ((parseInt($scope.rptData.currentEndExamYear) - parseInt($scope.rptData.currentStartExamYear)) || !combo);
-          var showAnnualGrowth = (parseInt($scope.rptData.currentEndExamYear) - parseInt($scope.rptData.currentStartExamYear));
-
-          if(!combo && fndExam != null) {
-
-            var first=true;            
-            for(var year in data.groupingsDowns) {
-              if(parseInt(year) < parseInt($scope.rptData.currentStartExamYear))
-                continue;
-
-              var parts = fndExam.value.split(',');
-              for(var i=0; i<parts.length; i++) {
-                var part = parts[i].trim();
-                var yearTotalLable = year + ' ' + part + ' Total';
-                var yearDiffLable = year  + ' ' + part + ' %Growth';
-                emptyTotals[yearTotalLable] = 0;
-                emptyTotals[yearDiffLable] = 0;
-                if(first) {
-                  first=false;
-                  var obj = {
-                    field: yearTotalLable,
-                    displayName: yearTotalLable,
-                    sort: {
-                      direction: uiGridConstants.DESC,
-                      priority: 1
-                    }, 
-                    enableFiltering: false
-                  }
-                  $scope.fndRpt.columnDefs.push(_.extend(obj,colDefNumberDefaults, {rank: computeSortRankReverse(year, yearTotalLable)}));
-                } else {
-                  $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable},colDefNumberDefaults, {rank: computeSortRankReverse(year, yearTotalLable)}));
-                }
-                $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable},colDefPercentDefaults, {rank: computeSortRankReverse(year, yearDiffLable)}));
-              }
-            }
-
-          } else {
-
-            var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
-
-            for(var propertyName in data.groupingsDowns) {
-              if(parseInt(propertyName) < parseInt($scope.rptData.currentStartExamYear))
-                continue;
-              var yearTotalLable = propertyName + ' ' + fndExam.name + ' Total';
-              var yearDiffLable = propertyName + ' ' + fndExam.name + ' %Growth';
-              emptyTotals[yearTotalLable] = 0;
-              emptyTotals[yearDiffLable] = 0;
-
-              var sortRank='A';
-              if(fndExam.name.indexOf('Part 1') > -1 || fndExam.name.indexOf('Part I') > -1)
-                sortRank='B'
-              $scope.fndRpt.columnDefs.push(_.extend({field: yearTotalLable, displayName: yearTotalLable, rank: propertyName + 'B' + sortRank},colDefNumberDefaults));
-              $scope.fndRpt.columnDefs.push(_.extend({field: yearDiffLable, displayName: yearDiffLable, rank: propertyName + 'A' + sortRank},colDefPercentDefaults));
-            }
-          }
-          $scope.fndRpt.columnDefs = _.sortBy($scope.fndRpt.columnDefs, function(row) { return row.rank })
-          $scope.fndRpt.columnDefs = $scope.fndRpt.columnDefs.reverse();
-
-          var obj = {
-            sort: {
-              direction: uiGridConstants.DESC,
-              priority: 1
-            }
-          }
-          $scope.fndRpt.columnDefs[1] = _.extend($scope.fndRpt.columnDefs[1], obj);
-
-
-          if(showTotals) {
-            $scope.fndRpt.columnDefs.push(_.extend({field: 'Total'},colDefNumberDefaults));
-            if(showAnnualGrowth)
-              $scope.fndRpt.columnDefs.push(_.extend({field: '%Growth Annual'},colDefPercentDefaults));                
-          }
-          $scope.fndRpt.columnDefs.unshift({ field: 'Country' });
-
-          var yearTotals = {};
-          for(var year in data.groupingsDowns) {
-
-            var groupDown = data.groupingsDowns[year];
-            var allsd = allSData[year] = [];
-            var allsdPart = allSDataParts[year] = [];
-            var showInfo = false;
-            if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
-              showInfo = true;                          
-            }
-
-            for (var i = 0; i < groupDown.groupings.length; i++) {
-              var group = groupDown.groupings[i];
-              
-              var country = group.label;
-
-              country = findOtherCountry(country);
-
-              var found = addYearTotals(yearTotals, country, year, null);
-              //yearTotals[country + '~' + year] = null;
-              //var yearTotal = null;
-              if(!combo) {
-                var parts = fndExam.value.split(',');
-                for(var j=0; j<parts.length; j++) {
-
-                  var part = parts[j].trim();
-                  var yearTotalLable = year + ' ' + part + ' Total';
-                  var yearDiffLable = year + ' ' + part + ' %Growth';
-                  var key = country+part;
-
-                  var subgroup = _.findWhere(group.groupings, {label: part});
-                  if(!defined(subgroup,"key")) {
-                    
-                    if(showInfo) {
-                      var val = 0;
-                      addTotal(allsd, 'Country', country, val);
-                      addTotal(allsdPart, 'Country', key, val);
-
-                      var obj = _.findWhere(sdata, {Country: country});
-                      if(obj == null) {
-                        obj = {
-                          Country: country,
-                          Total: val
-                        };                
-                        obj = _.extend(obj, emptyTotals);
-                        obj[yearTotalLable] = val;
-                        sdata.push(obj);
-                      } else {
-                        obj[yearTotalLable] = val;
-                        obj.Total += val;
-                      } 
-
-                      var lastYear = parseInt(year)-1;
-                      var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
-                      if(fnd != null) {
-                        if(fnd.Total > 0)
-                          obj[yearDiffLable] = -100;
-                        else obj[yearDiffLable] = 0;
-                        // var allObj = {
-                        //   Country: key,
-                        //   Total: 0
-                        // }
-                        // //yearTotal+=0;
-                        // allsd.push(allObj);
-                      } else {
-                        obj[yearDiffLable] = null;
-                      }
-                    }
-  
-                  } else {
-
-                    //var subgroup = group.groupings[j];
-                    var val = data.factMaps[year][subgroup.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                    addTotal(allsd, 'Country', country, val);
-                    addTotal(allsdPart, 'Country', key, val);
-                    // var allObj = {
-                    //   Country: key,
-                    //   Total: val
-                    // }
-                    // allsd.push(allObj);
-
-                    if(showInfo) {
-                      var obj = _.findWhere(sdata, {Country: country});
-                      if(obj == null) {
-                        obj = {
-                          Country: country,
-                          Total: val
-                        };                
-                        obj = _.extend(obj, emptyTotals);
-                        obj[yearTotalLable] = val;
-                        sdata.push(obj);
-                      } else {
-                        obj[yearTotalLable] += val;
-                        obj.Total += val;
-                      }
-
-                      var lastYear = parseInt(year)-1;
-                      var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
-                      if(fnd != null) {
-                        obj[yearDiffLable] = calcPercentGrowth(fnd.Total, obj[yearTotalLable]);
-                      } else {
-                        obj[yearDiffLable] = null;
-                      }
-                    }
-                  }
-                }
-                var fnd = _.findWhere(allsd, {Country: country});
-                if(defined(fnd))
-                  addYearTotals(yearTotals, country, year, fnd.Total);                
-                //addYearTotals(yearTotals, country, year, yearTotal);
-                //yearTotals[country + '~' + year] = yearTotal;
-                
-              } else {
-                var fndExam = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
-                var yearTotalLable = year + ' ' + fndExam.name + ' Total';
-                var yearDiffLable = year + ' ' + fndExam.name + ' %Growth';
-
-                if(!defined(data,"factMaps." + year + "." + group.key + '!T')) {
-                  addTotal(allsd, 'Country', country, 0);
-                  if(parseInt(year) >= parseInt($scope.rptData.currentStartExamYear)) {
-                    var lastYear = parseInt(year)-1;
-                    var fnd = _.findWhere(allSData[lastYear], {Country: country});
-                    if(fnd != null) {
-                      if(fnd.Total > 0)
-                        obj[yearDiffLable] = -100;
-                      else obj[yearDiffLable] = 0;
-                      // var allObj = {
-                      //   Country: country,
-                      //   Total: 0
-                      // }
-                      // allsd.push(allObj);                      
-                    } else {
-                      obj[yearDiffLable] = null;
-                    }
-                  }
-                } else {
-
-                  var val = data.factMaps[year][group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                  addTotal(allsd, 'Country', country, val);
-                  // var allObj = {
-                  //   Country: country,
-                  //   Total: val
-                  // }
-                  // allsd.push(allObj);
-
-                  if(showInfo) {
-                    var obj = _.findWhere(sdata, {Country: country});
-                    if(obj == null) {
-                      obj = {
-                        Country: country,
-                        Total: val
-                      };                
-                      obj = _.extend(obj, emptyTotals);
-                      obj[yearTotalLable] = val;
-                      sdata.push(obj);
-                    } else {
-                      obj[yearTotalLable] += val;
-                      obj.Total += val;
-                    }
-
-                    var lastYear = parseInt(year)-1;
-                    var fnd = _.findWhere(allSData[lastYear], {Country: country});
-                    if(fnd != null) {
-                      obj[yearDiffLable] = calcPercentGrowth(fnd.Total, obj[yearTotalLable]);
-                    } else {
-                      obj[yearDiffLable] = null;
-                    }
-                  }                
-                }
-                //yearTotals[country + '~' + year] = yearTotal;
-                var fnd = _.findWhere(allsd, {Country: country});
-                if(defined(fnd))
-                  addYearTotals(yearTotals, country, year, fnd.Total);
-              }
-            }
-          }
-          // compute %Growth total
-          var startYear = parseInt($scope.rptData.currentStartExamYear);
-          var endYear = parseInt($scope.rptData.currentEndExamYear);
-          if(startYear == endYear) {
-            for(var country in yearTotals) {
-              var fnd = _.findWhere(sdata, {Country: country});
-              if(defined(fnd)) {
-                var prop = findGrowthProp(fnd);
-                if(defined(prop))
-                  fnd['%Growth Annual'] = fnd[prop];
-              }
-            }     
-          } else {
-            var range = endYear - startYear;
-            for(var country in yearTotals) {
-              var startVal = 0;
-              if(defined(yearTotals,country+"."+startYear)) {
-                startVal=yearTotals[country][startYear];
-              }
-              var endValue = 0;
-              if(defined(yearTotals,country+"."+endYear)) {
-                endValue=yearTotals[country][endYear];
-              }
-              if(startVal != 0) {
-                var agr = calcAnnualPercentGrowth(startVal, endValue, range);
-                yearTotals[country].agr = agr;
-              }
-            }
-            for(var country in yearTotals) {
-              var fnd = _.findWhere(sdata, {Country: country});
-              if(defined(fnd)) {
-                fnd['%Growth Annual'] = yearTotals[country].agr;
-              }
-            }            
-          }
+          var sdata = gridService.processAsyncData(data, $scope.rptData.currentExamType, $scope.rptData.currentStartExamYear, $scope.rptData.currentEndExamYear, $scope.rptData.combineExams, $scope.rptData.aggregatesIndex);
 
         } else {
 
-          var sdata = [];
-          for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
-            var group = data.groupingsDown.groupings[i];
-            var val = data.factMap[group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-            var country = group.label;
+          var sdata = gridService.processData(data, $scope.fndRpt.columnDefs, $scope.rptData.aggregatesIndex);
 
-            country = findOtherCountry(country);
-
-            var obj = {
-              Country: country,
-              Total: val
-            }
-
-            var fnd = _.findWhere(sdata, {Country: country});
-
-            if (defined(group, "groupings.length")) {
-
-              var types = _.pluck($scope.fndRpt.columnDefs, "field");
-              types = _.reject(types, function(obj) {
-                return (obj == 'Country' || obj == 'Total');
-              });
-              //var types = ['Attended','Deferred','No-Show'];
-
-              for (var k = 0; k < types.length; k++) {
-                var type = types[k];
-                var fndGroup = _.findWhere(group.groupings, {
-                  label: type
-                });
-                if (defined(fndGroup)) {
-                  var g = fndGroup;
-                  var v = data.factMap[g.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-                  if(defined(fnd)) {
-                    fnd[type] += v;
-                    fnd.Total += v;
-                  }
-                  else obj[type] = v;
-
-                } else {
-                  if(!defined(fnd))
-                    obj[type] = 0;
-                }
-              }
-            }
-            if(!defined(fnd))
-              sdata.push(obj);
-          }
         }
 
         if (exportData) {
           var csv = util.JSON2CSV(sdata,true,true,$scope.fndRpt.columnDefs);
           var filename = 'export.csv';
-          exportToCSV(csv,filename);
+          util.exportToCSV(csv,filename);
           return;
 
         } else {
+
           if ($scope.fndRpt.name == 'Exam Registrations By Country Year Over Year' && async) {
             $rootScope.$apply(function() {
-              drawCountryTable(sdata);
+              $scope.myData = sdata;
+              $scope.gridOptions1.columnDefs = gridService.columnDefs;
+              $scope.gridOptions1.data = sdata;
+              gridService.drawCountryTable(sdata, gridService.columnDefs, $scope.rptData.currentCountryType, $scope.rptData.currentMapType);
             });
           } else if($scope.fndRpt.name == 'Exam Registrations By Country Year Over Year' && !async) {
-            drawCountryTable(sdata);
+            $scope.myData = sdata;
+            $scope.gridOptions1.columnDefs = gridService.columnDefs;
+            $scope.gridOptions1.data = sdata;
+            gridService.drawCountryTable(sdata, gridService.columnDefs, $scope.rptData.currentCountryType, $scope.rptData.currentMapType);
           } else {
             if (async) {
               $rootScope.$apply(function() {
                 $scope.myData = sdata;
-                $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
+                $scope.gridOptions1.columnDefs = gridService.columnDefs;
                 $scope.gridOptions1.data = sdata;
                 $rootScope.$broadcast('drawMap', sdata);
               });
             } else {
               $scope.myData = sdata;
-              $scope.gridOptions1.columnDefs = $scope.fndRpt.columnDefs;
+              $scope.gridOptions1.columnDefs = gridService.columnDefs;
               $scope.gridOptions1.data = sdata;
               $rootScope.$broadcast('drawMap', sdata);              
             }
@@ -1649,198 +1019,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       // Setup X and Y Axis, line does not require stackLabels data...
       if ($scope.fndRpt.reportType == 'stackedline') {
 
-        var sdata = [];
-        var labels = [];
-        var series = [];
-        for(var year in data.groupingsDowns) {
-          var groupings = data.groupingsDowns[year].groupings;
-          for (var i = 0; i < groupings.length; i++) {
-            for(j=0; j<groupings[i].groupings.length; j++) {
-              var lab = groupings[i].groupings[j].label;
-              var fnd = _.findWhere(series, {name: lab});
-              if(!defined(fnd)) {
-                var obj = {
-                  year: year,
-                  name: lab
-                }
-                series.push(obj);
-              }
-            }
-            var l = _.pluck(groupings, "label");
-            labels = _.union(labels, l);
-          }
-        }
-
-        var uniqueNames = [];
-        $.each(labels, function(i, el){
-            if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
-        });
-        labels = _.sortBy(uniqueNames, function(obj){ 
-          return moment(obj).unix();
-        });
-        // create labels by calendar
-        var currDate = moment(labels[0]);
-        var lastDate = moment(labels[labels.length-1]);
-        var done = false;
-        var newLables = [];
-        while(!done) {
-          var dt = currDate.format("M/D/YYYY");
-          newLables.push(dt);
-          if(currDate.diff(lastDate) == 0) {
-            done = true;
-          } else {
-            currDate.add(1,'days');
-          }
-        }
-        labels = newLables;
-
-        var erpSeriesLength=0;
-        var frmSeriesLength=0;
-        var usedColor = [];
-
-        _.each(series, function(s) {
-          var examType = (s.name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp';
-          var key = s.name.replace(/(May|Nov|Part 1|Part 2|Part II|Part I|\s)/g,'');
-          var fnd = _.findWhere(usedColor, {key: key})
-          if(!defined(fnd)) {
-            var obj = {
-              key: key
-            }
-            usedColor.push(obj);
-
-            if(examType == 'frm')
-              frmSeriesLength++;
-            else erpSeriesLength++;
-          }         
-        });
-
-        var erpCount=0;
-        var frmCount=0;
-        for (var i = 0; i < series.length; i++) {
-          var examType = (series[i].name.toUpperCase().indexOf('FRM') > -1) ? 'frm' : 'erp';
-          var colors;
-          var color;
-          var counter;
-          var lengthNum;
-          if(examType == 'erp') {
-            lengthNum = erpSeriesLength;
-            colors = greenColors;
-          } else {
-            lengthNum = frmSeriesLength;
-            colors = blueColors;
-          }
-          
-          var key = series[i].name.replace(/(May|Nov|Part 1|Part 2|Part II|Part I|\s)/g,'');
-          var fnd = _.findWhere(usedColor, {key: key})
-          if(!defined(fnd,"color")) {
-            if(examType == 'frm') {
-              frmCount++;
-              counter = frmCount;
-            } else {
-              erpCount++;
-              counter = erpCount;
-            }
-            var inc = Math.floor(colors.length/lengthNum);
-            var start = colors.length - (inc * lengthNum);
-            var index = (counter * inc) + start;
-            color = colors[index-1];
-            fnd.color = color;
-          } else {
-            color = fnd.color;
-          }
-            
-          var obj = {
-            name: series[i].name,
-            data: [],
-            last: null,
-            lineWidth: 4,
-            marker: {
-              radius: 4
-            },
-            year: series[i].year,
-            color: color
-          }
-          sdata.push(obj);
-        }
-
-        $scope.deferred = [];
-
-        // clear last
-        _.each(sdata, function(sd) {
-          if(defined(sd,"last"))
-            sd.last=null;
-        });
-
-        _.each(data.groupingsDowns, function(gd) {
-            _.each(gd.groupings, function(gdg) {
-                _.each(gdg.groupings, function(g) {
-                   g.used=null; 
-                });
-            });
-        });
-
-
-        // for each sdata
-        for (var i = 0; i < sdata.length; i++) {
-          var sd = sdata[i];
-          var year = sd.year;
-          var groupingsDown = data.groupingsDowns[year].groupings;
-
-          // var grps = _.pluck(groupingsDown, 'groupings')
-          // grps = _.flatten(grps);
-          //var lastGrp = findIndexDeep(groupingsDown, 'groupings', 'label', sd.name);
-
-          // for each label
-          var lastFound = false;
-          for(var j=0; j<labels.length; j++) {
-            var label = labels[j];
-            var fndGrouping = _.findWhere(groupingsDown, {label: label});
-            if(defined(fndGrouping)) {
-              var lastFndGRp = _.findIndex(fndGrouping.groupings, {label: sd.name});
-              var fndGroupingByName = _.findWhere(fndGrouping.groupings, {label: sd.name});
-              if(defined(fndGroupingByName)) {
-                fndGroupingByName.used = true;
-                var key = fndGroupingByName.key;
-                var val = data.factMaps[year][key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-
-                if ($scope.fndRpt.cumlative == true) {
-                  if(sd.last != null)
-                    val = sd.last + val;
-                  sd.last = val;
-                  sd.data.push(val);
-                } else {
-                  sd.data.push(val);
-                }
-
-              } else {
-                if(lastFound == true)
-                  continue;
-
-                var fnd = findIndexDeep(groupingsDown, 'groupings', 'label', sd.name);
-                if(fnd == false) {
-                    lastFound == true;
-                } else {                  
-                  if(sd.last != null)
-                    sd.data.push(sd.last);
-                  else sd.data.push(null);
-                }
-              }
-            } else {
-              if(lastFound == true)
-                continue;
-
-              var fnd = findIndexDeep(groupingsDown, 'groupings', 'label', sd.name);
-              if(fnd == false) {
-                  lastFound == true;
-              } else {
-                if(sd.last != null)
-                  sd.data.push(sd.last);
-                else sd.data.push(null);                
-              }
-            }
-          }
-
-        }
+        var retData = stackedLineService.processData(data, $scope.fndRpt.cumlative, $scope.rptData.aggregatesIndex);
+        var sdata = retData.sdata;
+        var labels = retData.labels;
 
         var displaylabels = [];
         for(var i=0; i<labels.length; i++) {
@@ -1850,7 +1031,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         labels = displaylabels;
 
         if (exportData) {
-
 
           var expotData = [];
           var exportLabels = {};
@@ -1879,231 +1059,21 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
           var csv = util.JSON2CSV(expotData,false,true);          
           var filename = 'export.csv';
-          exportToCSV(csv,filename);
+          util.exportToCSV(csv,filename);
           return;
 
         } else {
 
 
           sdata = _.sortBy(sdata, function(row) { 
-            return computeSortRankReverse(row.year, row.name);
+            return graphService.computeSortRankReverse(row.year, row.name);
           })
           sdata =sdata.reverse();
 
-          $('#container').highcharts({
+          stackedLineService.drawGraph(sdata, $scope.fndRpt.name, labels, $scope.fndRpt.xaxisLabel, $scope.fndRpt.yaxisLabel);
 
-            lang: {
-                thousandsSep: ','
-            },
-
-            exporting: {
-              sourceWidth: 1200,
-              sourceHeight: 800,
-              scale: 1
-            },
-
-            // Edit chart spacing
-            chart: {
-              spacingBottom: 15,
-              spacingTop: 10,
-              spacingLeft: 10,
-              spacingRight: 10,
-
-              // Explicitly tell the width and height of a chart
-              //width: null,
-              //height: 900,
-            },
-
-            title: {
-              text: $scope.fndRpt.name
-            },
-
-            subtitle: {
-              text: ''
-            },
-
-            xAxis: {
-              tickInterval: 7, // one week
-              tickWidth: 0,
-              gridLineWidth: 1,
-              labels: {
-                align: 'left',
-                x: 3,
-                y: -3,
-                enabled: true
-              },
-              title: {
-                  text: $scope.fndRpt.xaxisLabel
-              },
-              categories: labels
-            },
-
-            yAxis: [{ // left y axis
-              title: {
-                text: $scope.fndRpt.yaxisLabel
-              },
-              labels: {
-                align: 'left',
-                x: 3,
-                y: 16,
-                format: '{value:.,0f}'
-              },
-              showFirstLabel: false
-            }, { // right y axis
-              linkedTo: 0,
-              gridLineWidth: 0,
-              opposite: true,
-              title: {
-                text: null
-              },
-              labels: {
-                align: 'right',
-                x: -3,
-                y: 16,
-                format: '{value:.,0f}'
-              },
-              showFirstLabel: false
-            }],
-
-            legend: {
-              align: 'left',
-              verticalAlign: 'top',
-              y: 20,
-              floating: true,
-              borderWidth: 0
-            },
-
-            tooltip: {
-              shared: true,
-              crosshairs: true
-            },
-
-            plotOptions: {
-              series: {
-                cursor: 'pointer',
-                point: {
-                  events: {
-                    click: function(e) {
-                      hs.htmlExpand(null, {
-                        pageOrigin: {
-                          x: e.pageX || e.clientX,
-                          y: e.pageY || e.clientY
-                        },
-                        headingText: this.series.name,
-                        maincontentText: this.series.data[this.x].category + ':<br/> ' +
-                          this.y + ' Registrations',
-                        width: 200
-                      });
-                    }
-                  }
-                },
-                marker: {
-                  enabled: false,
-                  lineWidth: 1
-                }
-              }
-            },
-            series: sdata
-          });
         }
       }
-
-      if ($scope.fndRpt.reportType == 'bar') {
-
-        var labels = _.pluck(data.groupingsDown.groupings, "label");
-        var sdata = {
-          name: 'Bar',
-          data: [],
-          dataLabels: {
-            enabled: true,
-            color: '#FFFFFF',
-            align: 'right',
-            format: '{point.y:.1f}', // one decimal
-            y: 10, // 10 pixels down from the top
-            style: {
-              fontSize: '13px',
-              fontFamily: 'Verdana, sans-serif'
-            }
-          }
-        };
-
-        for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
-          var group = data.groupingsDown.groupings[i];
-          var da = data.factMap[group.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-
-          var obj = [];
-          obj.push(group.label);
-          obj.push(da);
-
-          sdata.data.push(obj);
-        }
-
-        var stuff = sdata.data;
-
-        $('#container').highcharts({
-
-          lang: {
-              thousandsSep: ','
-          },
-
-          exporting: {
-            sourceWidth: 1200,
-            sourceHeight: 800,
-            scale: 1
-          },
-
-          chart: {
-            type: 'column'
-          },
-          title: {
-            text: $scope.fndRpt.Name
-          },
-          subtitle: {
-            text: ''
-          },
-          xAxis: {
-            type: 'category',
-            labels: {
-              rotation: -45,
-              style: {
-                fontSize: '13px',
-                fontFamily: 'Verdana, sans-serif'
-              }
-            },
-            title: {
-              text: 'Year'
-            }
-          },
-          yAxis: {
-            min: 0,
-            title: {
-              text: 'Registrations'
-            }
-          },
-          legend: {
-            enabled: false
-          },
-          tooltip: {
-            pointFormat: 'Registrations for a give year'
-          },
-          series: [{
-            name: 'Population',
-            data: stuff,
-            dataLabels: {
-              enabled: true,
-              color: '#FFFFFF',
-              align: 'right',
-              format: '{point.y:.1f}', // one decimal
-              y: 10, // 10 pixels down from the top
-              style: {
-                fontSize: '13px',
-                fontFamily: 'Verdana, sans-serif'
-              }
-            }
-          }]
-        });
-
-      } // Bar
 
       if ($scope.fndRpt.reportType == 'stackedbar') {
 
@@ -2117,7 +1087,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel);
           var csv = util.JSON2CSV(expData,false,true);
           var filename = 'export.csv';
-          exportToCSV(csv,filename);
+          util.exportToCSV(csv,filename);
           return;
         }
 

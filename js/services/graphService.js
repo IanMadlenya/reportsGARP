@@ -1,9 +1,42 @@
 var reportsGARPServices = angular.module('reportsGARP.services')  //gets
-reportsGARPServices.factory('graphService', [
-  function(){
+reportsGARPServices.factory('graphService', ['utilitiyService',
+  function(utilitiyService){
 
   	var graphService = {};
+    graphService.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+    var util = utilitiyService;
 
+    graphService.findOtherCountry = function(country) {
+
+      if (country == "-" || country == "&nbsp;" || country == "NULL") {
+        country = 'Other';
+        return country;
+      }
+
+      if(country.length == 2) {
+        var fnd = util.findDeep(this.mapData, "properties", "iso-a2", country);
+        if(defined(fnd)) {
+          country = fnd.name;
+        } else {
+          var acron = country.split('').join('.') + '.';
+          var fnd = util.findDeep(this.mapData, "properties", "country-abbrev", acron);
+          if(defined(fnd))
+            country = fnd.name;            
+        }
+      }
+      if(country.length == 3) {
+        var fnd = util.findDeep(this.mapData, "properties", "iso-a3", country);
+        if(defined(fnd)) {
+          country = fnd.name;
+        } else {
+          var acron = country.split('').join('.') + '.';
+          var fnd = util.findDeep(this.mapData, "properties", "country-abbrev", acron);  
+          if(defined(fnd))
+            country = fnd.name;            
+        }              
+      }
+      return country;
+    }
 
   	graphService.exportDataProcessing = function(sdata, labels, exportLabel) {
 			var expData = [];
@@ -77,66 +110,164 @@ reportsGARPServices.factory('graphService', [
       return _.sortBy(sdata, function(row) { return row.rank })	  
     }
 
+    graphService.computeSortRankReverse = function(year, label) {
+      var sortRank=year;
+
+      if(label.toLowerCase().indexOf('erp') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
+        sortRank+='A'
+      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
+        sortRank+='B'
+      } else {
+        sortRank+='C'
+      }
+
+      if(label.toLowerCase().indexOf('nov') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('total') > -1) {
+        sortRank+='B';
+      } else {
+        sortRank+='A';
+      }
+
+      if(label.toLowerCase().indexOf('early') > -1) {
+        sortRank+='G';
+      } else if(label.toLowerCase().indexOf('standard') > -1) {
+        sortRank+='F';
+      } else if(label.toLowerCase().indexOf('late') > -1) {
+        sortRank+='E';
+      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
+        sortRank+='D';
+      } else if(label.toLowerCase().indexOf('deferred out pending') > -1) {
+        sortRank+='B';
+      } else if(label.toLowerCase().indexOf('deferred out') > -1) {
+        sortRank+='C';
+      } else {
+        sortRank+='A';
+      }
+
+      return sortRank;
+    }
+
+    graphService.computeSortRank = function(label) {
+      var sortRank='';
+
+      if(label.toLowerCase().indexOf('erp') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
+        sortRank+='C'
+      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
+        sortRank+='B'
+      } else {
+        sortRank+='A'
+      }
+
+      if(label.toLowerCase().indexOf('nov') > -1) {
+        sortRank+='B';
+      } else {
+        sortRank+='A';
+      }
+
+      if(label.toLowerCase().indexOf('total') > -1) {
+        sortRank+='A';
+      } else {
+        sortRank+='B';
+      }
+
+      if(label.toLowerCase().indexOf('early') > -1) {
+        sortRank+='A';
+      } else if(label.toLowerCase().indexOf('standard') > -1) {
+        sortRank+='B';
+      } else if(label.toLowerCase().indexOf('late') > -1) {
+        sortRank+='C';
+      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
+        sortRank+='D';
+      } else if(label.toLowerCase().indexOf('deferred out pending') > -1) {
+        sortRank+='F';
+      } else if(label.toLowerCase().indexOf('deferred out') > -1) {
+        sortRank+='E';
+      } else {
+        sortRank+='G';
+      }
+
+      return sortRank;
+    }    
+
+
+
   	graphService.examFullTypeList = [{
       name: "ERP",
       value: "ERP",
       type: "ERP",
       number: "Full",
       label: "ERP Exam Part Full",
-      color: GREEN1
+      color: util.GREEN1
     }, {
       name: "ERP I",
       value: "ERP Exam Part I",
       type: "ERP",
       number: "I",
       label: "ERP Exam Part I",
-      color: GREEN2
+      color: util.GREEN2
     }, {
       name: "ERP II",
       value: "ERP Exam Part II",
       type: "ERP",
       number: "II",
       label: "ERP Exam Part II",
-      color: GREEN3       
+      color: util.GREEN3       
     }, {
       name: "ERP All",
       value: "ERP, ERP Exam Part I, ERP Exam Part II",
       type: "ERP",
       number: "Full,I,II",
-      color: GREEN1          
+      color: util.GREEN1          
     }, {
       name: "FRM",
       value: "FRM",
       type: "FRM",
       number: "Full",
       label: "FRM Exam Part Full",
-      color: BLUE1
+      color: util.BLUE1
     }, {
       name: "FRM I",
       value: "FRM Part 1",
       type: "FRM",
       number: "I",
       label: "FRM Exam Part I",
-      color: BLUE2
+      color: util.BLUE2
     }, {
       name: "FRM II",
       value: "FRM Part 2",
       type: "FRM",
       number: "II",
       label: "FRM Exam Part II",
-      color: BLUE3
+      color: util.BLUE3
     }, {
       name: "FRM All",
       value: "FRM Part 1,FRM Part 2",
       type: "FRM",
       number: "Full,I,II",
-      color: BLUE1
+      color: util.BLUE1
     }, {
       name: "All",
       value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II",
       type: "FRM,ERP",
       number: "Full,I,II",
-      color: BLUE1
+      color: util.BLUE1
     }];    
 
     graphService.examMonthList = [{

@@ -51,7 +51,7 @@ reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeo
 
 }]);
 
-reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout, utilitiyService) {
 
   var SHIP = 'SHIP';     
   var TAX = 'SLSTX';   
@@ -253,6 +253,7 @@ var mergeProds = [
   
   $scope.shippingProductId = null;
   $scope.envPath = envPath;
+  $scope.util = utilitiyService;
 
   var td = moment().add(-1, 'days').format("M/D/YYYY");
   var yd = moment().add(-1, 'days').format("M/D/YYYY");
@@ -931,7 +932,7 @@ $scope.getProductAmount = function(opp, prod) {
           "state":getValueIfDefinedEmpty(opp,"Shipping_State__c"),
           "examSite":getValueIfDefinedEmpty(opp,"Deferred_Exam_Registration__r.Exam_Site__r.Site__r.Name"),
           "method":getValueIfDefinedEmpty(opp,"trans.ChargentSFA__Payment_Method__c"),
-          "paidDate":getValueIfDefinedEmpty(formatDate(opp.closeDate, "MM-DD-YYYY")),
+          "paidDate":getValueIfDefinedEmpty(util.formatDate(opp.closeDate, "MM-DD-YYYY")),
           "payPalId":getValueIfDefinedEmpty(opp,"trans.ChargentSFA__Gateway_ID__c")
         };
 
