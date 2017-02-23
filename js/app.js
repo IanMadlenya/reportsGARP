@@ -88,6 +88,18 @@
         return true;
     }
 
+    addDistinct = function(array, value) {
+      var fnd = _.indexOf(array, value);
+      if(fnd == -1)
+        array.push(value);
+    }
+
+    getValueZero = function(value) {
+      if(defined(value))
+        return value;
+      else return 0;
+    }
+
     formatDate = function(epoch, format) {
       if(epoch !== null && typeof epoch !== "undefined") {
         //var mdate = moment.tz(epoch,'GMT');
@@ -157,88 +169,77 @@
 
     }
     
-    function JSON2CSV(objArray, labels, quotes, colDefs) {
-        var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-    
-        var str = '';
-        var line = '';
-    
-        if (labels) {
-            var head = array[0];
-            if (quotes) {
 
-                if(this.defined(colDefs)) {
-                  _.each(colDefs, function(col) {
-                    var value = col.field + "";
-                    line += '"' + value.replace(/"/g, '""') + '",';
-                  });
-                } else {
-                  for (var index in array[0]) {
-                      var value = index + "";
-                      line += '"' + value.replace(/"/g, '""') + '",';
-                  }                  
-                }
+    function addTotal(arrayObj, prop, key, value) {
+      var fnd = findInArray(arrayObj, prop, key);
+      if(!defined(fnd)) {
+        var obj = {};
+        obj[prop] = key;
+        obj.Total = value;
+        arrayObj.push(obj);
+      } else {
+        fnd.Total += value;
+      }
+    }
 
-            } else {
-              if(this.defined(colDefs)) {
-                _.each(colDefs, function(col) {
-                  line += array[0][col.field] + ',';
-                });
-              } else {
-                for (var index in array[0]) {
-                    line += index + ',';
-                }                
-              }
-            }
-    
-            line = line.slice(0, -1);
-            str += line + '\r\n';
+    function findGrowthProp(obj) {
+      for(var propertyName in obj) {
+        if(propertyName.indexOf('%') > -1)
+          return propertyName;
+      }
+      return null;
+    }
+
+    function findOtherCountry(country) {
+
+      if (country == "-" || country == "&nbsp;" || country == "NULL") {
+        country = 'Other';
+        return country;
+      }
+
+      if(country.length == 2) {
+        var fnd = findDeep($scope.mapData, "properties", "iso-a2", country);
+        if(defined(fnd)) {
+          country = fnd.name;
+        } else {
+          var acron = country.split('').join('.') + '.';
+          var fnd = findDeep($scope.mapData, "properties", "country-abbrev", acron);
+          if(defined(fnd))
+            country = fnd.name;            
         }
-    
-        for (var i = 0; i < array.length; i++) {
-            var line = '';
-    
-            if (quotes) {
-              if(this.defined(colDefs)) {
-                _.each(colDefs, function(col) {
-                  var value = array[i][col.field] + "";
-                  value = value.replace('null', '');
-                  line += '"' + value.replace(/"/g, '""') + '",';
-                });                
-              } else {
-                for (var index in array[i]) {
-                    var value = array[i][index] + "";
-                    value = value.replace('null', '');
-                    line += '"' + value.replace(/"/g, '""') + '",';
-                }
-              }
-            } else {
-              if(this.defined(colDefs)) {
-                _.each(colDefs, function(col) {
-                  var value = array[i][col.field];
-                  value = value.replace('null', '');
-                  line += value + ',';
-                });                
-              } else {
-                for (var index in array[i]) {
-                  var value = array[i][index];
-                  value = value.replace('null', '');
-                  line += value + ',';
-                }                
-              }
-            }
-    
-            line = line.slice(0, -1);
-            str += line + '\r\n';
+      }
+      if(country.length == 3) {
+        var fnd = findDeep($scope.mapData, "properties", "iso-a3", country);
+        if(defined(fnd)) {
+          country = fnd.name;
+        } else {
+          var acron = country.split('').join('.') + '.';
+          var fnd = findDeep($scope.mapData, "properties", "country-abbrev", acron);  
+          if(defined(fnd))
+            country = fnd.name;            
+        }              
+      }
+      return country;
+    }
+
+    function findIndexDeep(arry, subProp, prop, value) {
+      for (var i = 0; i < arry.length; i++) {
+        var obj = arry[i];
+        if(defined(obj,subProp)) {
+          for(var j=0; j < obj[subProp].length; j++) {
+            var subObj = obj[subProp][j];
+            if(subObj[prop] == value && !defined(subObj,"used"))
+              return true;
+          }          
         }
-        return str;
-        
+      }
+      return false;
     }
         
     
     //var myApp = angular.module('reportsGARP', ['reportsGARPControllers']);    
 
-    var myApp = angular.module('reportsGARP', ['reportsGARPControllers','ui.router','ui.grid','mwl.calendar', 'ui.bootstrap']);
+    var myApp = angular.module('reportsGARP', ['reportsGARPControllers','reportsGARP.services','ui.router','ui.grid','mwl.calendar', 'ui.bootstrap']);
 
 angular.module('ErrorCatcher', [])
     .factory('$exceptionHandler', ['$injector', function ($injector) {

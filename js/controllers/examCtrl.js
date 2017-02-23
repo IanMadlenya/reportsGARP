@@ -102,16 +102,26 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
   });
 }]);
 
-reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout', '$stateParams', 'uiGridConstants','$window',
-  function($scope, $rootScope, $timeout, $stateParams, uiGridConstants, $window) {
+reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeout', '$stateParams', 'uiGridConstants','$window','stackedBarService','graphService','utilitiyService',
+  function($scope, $rootScope, $timeout, $stateParams, uiGridConstants, $window, stackedBarService, graphService, utilitiyService) {
 
     $scope.envPath = envPath;
     $scope.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
+    var util = utilitiyService;
+
     Highcharts.setOptions({
       lang: {
         thousandsSep: ','
       }
     });
+    $scope.gridOptions1 = {
+      enableSorting: true,
+      enableFiltering: true,
+      filterOptions: {
+        filterColumn: "Country",
+      },
+      data: null
+    };
 
     var height = $window.innerHeight - 200;
     $scope.heightStyle = {height: height.toString() + 'px'};
@@ -129,117 +139,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       },
       true
     );
-
     w.bind('resize', function(){
       $scope.$apply();
     });
 
-
-    $scope.sortingAlgorithmString = function(a, b) {
-      if(a==null) {
-        a = -99999;
-      } else {
-        if(a.indexOf('%') > -1) 
-          a = parseInt(a.replace('%',''));
-        else parseInt(a);
-      }
-        
-      if(b==null) {
-        b = -999999;
-      } else {
-       if(b.indexOf('%') > -1) 
-          b = parseInt(b.replace('%',''));
-        else parseInt(b); 
-      }
-        
-
-      if (a > b)
-        return 1;
-      else if (a < b)
-        return -1;
-      else return 0;
-    }
-
-    $scope.sortingAlgorithm = function(a, b) {
-
-      if(a==null)
-        a = -99999;
-      if(b==null)
-        b = -999999;
-
-      if (a > b)
-        return 1;
-      else if (a < b)
-        return -1;
-      else return 0;
-    }
-
-    $scope.gridOptions1 = {
-      enableSorting: true,
-      enableFiltering: true,
-      filterOptions: {
-        filterColumn: "Country",
-      },
-      data: null
-    };
-
-    $scope.examDatesMay = [{
-      datetext: '12/1/2009',
-      key: 'May 2010',
-      done: false
-    }, {
-      datetext: '12/1/2010',
-      key: 'May 2011',
-      done: false
-    }, {
-      datetext: '12/1/2011',
-      key: 'May 2012',
-      done: false
-    }, {
-      datetext: '12/1/2012',
-      key: 'May 2013',
-      done: false
-    }, {
-      datetext: '12/1/2013',
-      key: 'May 2014',
-      done: false
-    }, {
-      datetext: '12/1/2014',
-      key: 'May 2015',
-      done: false
-    }]
-
-    $scope.examDatesNov = [{
-      datetext: '12/1/2010',
-      key: 'Nov 2010',
-      done: false
-    }, {
-      datetext: '11/19/2011',
-      key: 'Nov 2011',
-      done: false
-    }, {
-      datetext: '11/17/2012',
-      key: 'Nov 2012',
-      done: false
-    }, {
-      datetext: '11/16/2013',
-      key: 'Nov 2010',
-      done: false
-    }, {
-      datetext: '11/15/2014',
-      key: 'Nov 2014',
-      done: false
-    }, {
-      datetext: '11/21/2015',
-      key: 'Nov 2015',
-      done: false
-    }]
-
-    //if(defined(localStorage,"rptData"))
-    //  $scope.rptData = JSON.parse(localStorage.rptData);
-    //else $scope.rptData = {};
     $scope.err = {};
-
     $scope.rptData = {};
     $scope.rptData.showDesc = false;
     $scope.rptData.isCache = false;
@@ -277,7 +181,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 1
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false,
         type:'number',
         cellFilter: 'numberToLocalFilter'        
@@ -288,7 +192,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false,
         type:'number',
         cellFilter: 'numberToLocalFilter'
@@ -299,7 +203,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 3
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false,
         type:'number',
         cellFilter: 'numberToLocalFilter'
@@ -310,7 +214,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 4
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false,
         type:'number',
         cellFilter: 'numberToLocalFilter'
@@ -340,7 +244,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 1
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false
       }, {
         field: 'Closed',
@@ -348,7 +252,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false
       }, {
         field: 'Closed Lost',
@@ -356,7 +260,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 3
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false
       }, {
         field: 'New Lead',
@@ -364,7 +268,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 4
         },
-        sortingAlgorithm: $scope.sortingAlgorithm, 
+        sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false
       }],
       hasUnpaid: true,
@@ -391,7 +295,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 1
         },
-        sortingAlgorithm: $scope.sortingAlgorithm,
+        sortingAlgorithm:graphService.sortingAlgorithm,
         type:'number',
         cellFilter: 'numberToLocalFilter'
       }, {
@@ -400,7 +304,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm,
+        sortingAlgorithm:graphService.sortingAlgorithm,
         type:'number',
         cellFilter: 'numberToLocalFilter'
       }, {
@@ -409,7 +313,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 3
         },
-        sortingAlgorithm: $scope.sortingAlgorithm,
+        sortingAlgorithm:graphService.sortingAlgorithm,
         type:'number',
         cellFilter: 'numberToLocalFilter'
       }, {
@@ -418,7 +322,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 2
         },
-        sortingAlgorithm: $scope.sortingAlgorithm,
+        sortingAlgorithm:graphService.sortingAlgorithm,
         type:'number',
         cellFilter: 'numberToLocalFilter'
       }, {
@@ -427,7 +331,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           direction: uiGridConstants.DESC,
           priority: 4
         },
-        sortingAlgorithm: $scope.sortingAlgorithm,
+        sortingAlgorithm:graphService.sortingAlgorithm,
         type:'number',
         cellFilter: 'numberToLocalFilter'
       }],
@@ -514,7 +418,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Year All Time",
       description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004Tu8O",
+      reportId: "00O40000004La5J",
       reportIdCombined: "00O40000004Tu9g",
       reportType: 'stackedbar',
       exportLabel: 'Exam Year',
@@ -532,209 +436,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       isAllTime: true
     }];
 
-    $scope.rptData.examTypeList = [{
-      name: "ERP",
-      value: "ERP"
-    }, {
-      name: "ERP I",
-      value: "ERP Exam Part I"
-    }, {
-      name: "ERP II",
-      value: "ERP Exam Part II"
-    }, {
-      name: "ERP All",
-      value: "ERP,ERP Exam Part I,ERP Exam Part II"
-    }, {
-      name: "FRM I",
-      value: "FRM Part 1"
-    }, {
-      name: "FRM II",
-      value: "FRM Part 2"
-    }, {
-      name: "FRM All",
-      value: "FRM Part 1,FRM Part 2"
-    }, {
-      name: "All",
-      value: "FRM Part 1,FRM Part 2,ERP,ERP Exam Part I,ERP Exam Part II"
-    }];
-
-    $scope.rptData.examFullTypeList = [{
-      name: "ERP",
-      value: "ERP",
-      type: "ERP",
-      number: "Full",
-      label: "ERP Exam Part Full",
-      color: GREEN1
-    }, {
-      name: "ERP I",
-      value: "ERP Exam Part I",
-      type: "ERP",
-      number: "I",
-      label: "ERP Exam Part I",
-      color: GREEN2
-    }, {
-      name: "ERP II",
-      value: "ERP Exam Part II",
-      type: "ERP",
-      number: "II",
-      label: "ERP Exam Part II",
-      color: GREEN3       
-    }, {
-      name: "ERP All",
-      value: "ERP, ERP Exam Part I, ERP Exam Part II",
-      type: "ERP",
-      number: "Full,I,II",
-      color: GREEN1          
-    }, {
-      name: "FRM",
-      value: "FRM",
-      type: "FRM",
-      number: "Full",
-      label: "FRM Exam Part Full",
-      color: BLUE1
-    }, {
-      name: "FRM I",
-      value: "FRM Part 1",
-      type: "FRM",
-      number: "I",
-      label: "FRM Exam Part I",
-      color: BLUE2
-    }, {
-      name: "FRM II",
-      value: "FRM Part 2",
-      type: "FRM",
-      number: "II",
-      label: "FRM Exam Part II",
-      color: BLUE3
-    }, {
-      name: "FRM All",
-      value: "FRM Part 1,FRM Part 2",
-      type: "FRM",
-      number: "Full,I,II",
-      color: BLUE1
-    }, {
-      name: "All",
-      value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II",
-      type: "FRM,ERP",
-      number: "Full,I,II",
-      color: BLUE1
-    }];    
-
-    $scope.rptData.examMonthList = [{
-      name: "May",
-      value: "May"
-    }, {
-      name: "November",
-      value: "Nov"
-    }, {
-      name: "Both",
-      value: "May,Nov"
-    }];
-
-    $scope.rptData.examRegType = [
-    {
-      name: "Deferred In",
-      color: '#EDC1B6'
-    }, {
-      name: "Deferred Out",
-      color: '#BACECE'
-    }, {
-      name: "Deferred Out Pending",
-      color: '#BACECE'
-    }, {
-      name: "Early Registration",
-      color: '#DE6E6A'
-    }, {
-      name: "Late Registration",
-      color: '#BDB76B'
-    }, {
-      name: "Standard Registration",
-      color: '#D8BFD8'
-    }];
-
-    $scope.rptData.examYearAllTimeList = [];
-    for (var i = 1997; i <= 2017; i++) {
-      var obj = {
-        name: i.toString(),
-        value: i
-      }
-      $scope.rptData.examYearAllTimeList.push(obj);
-    }
-
-    $scope.rptData.examYearList = [];
-    for (var i = 2010; i <= 2017; i++) {
-      var obj = {
-        name: i,
-        value: i
-      }
-      $scope.rptData.examYearList.push(obj);
-    }
-
-    function addTotal(arrayObj, prop, key, value) {
-      var fnd = findInArray(arrayObj, prop, key);
-      if(!defined(fnd)) {
-        var obj = {};
-        obj[prop] = key;
-        obj.Total = value;
-        arrayObj.push(obj);
-      } else {
-        fnd.Total += value;
-      }
-    }
-
-    function findGrowthProp(obj) {
-      for(var propertyName in obj) {
-        if(propertyName.indexOf('%') > -1)
-          return propertyName;
-      }
-      return null;
-    }
-
-    function findOtherCountry(country) {
-
-      if (country == "-" || country == "&nbsp;" || country == "NULL") {
-        country = 'Other';
-        return country;
-      }
-
-      if(country.length == 2) {
-        var fnd = findDeep($scope.mapData, "properties", "iso-a2", country);
-        if(defined(fnd)) {
-          country = fnd.name;
-        } else {
-          var acron = country.split('').join('.') + '.';
-          var fnd = findDeep($scope.mapData, "properties", "country-abbrev", acron);
-          if(defined(fnd))
-            country = fnd.name;            
-        }
-      }
-      if(country.length == 3) {
-        var fnd = findDeep($scope.mapData, "properties", "iso-a3", country);
-        if(defined(fnd)) {
-          country = fnd.name;
-        } else {
-          var acron = country.split('').join('.') + '.';
-          var fnd = findDeep($scope.mapData, "properties", "country-abbrev", acron);  
-          if(defined(fnd))
-            country = fnd.name;            
-        }              
-      }
-      return country;
-    }
-
-    function findIndexDeep(arry, subProp, prop, value) {
-      for (var i = 0; i < arry.length; i++) {
-        var obj = arry[i];
-        if(defined(obj,subProp)) {
-          for(var j=0; j < obj[subProp].length; j++) {
-            var subObj = obj[subProp][j];
-            if(subObj[prop] == value && !defined(subObj,"used"))
-              return true;
-          }          
-        }
-      }
-      return false;
-    }
+    $scope.rptData.examFullTypeList = graphService.examFullTypeList;
+    $scope.rptData.examMonthList = graphService.examMonthList;
+    $scope.rptData.examRegType = graphService.examRegType;
+    $scope.rptData.examYearAllTimeList = graphService.examYearAllTimeList;
+    $scope.rptData.examYearList = graphService.examYearList;
 
     $scope.isCombined = function(reportId) {
       var fnd = _.findWhere($scope.rptData.reportTypeList, {reportId: reportId});
@@ -750,7 +456,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       if (fndRpt != null) {
         return fndRpt.description;
       }
-
     }
 
     function setIsCache() {
@@ -784,7 +489,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       } else if (fndRpt.name == 'Exam Registrations By Year All Time' && !$scope.rptData.includeUnPaid) {
         $scope.rptData.aggregatesIndex = 1;
       }
-      setIsCache();
+      setIsCache($scope);
     }
 
     $scope.selectOptions = function() {
@@ -793,7 +498,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       });      
       if(fndRpt.hasSite && $scope.rptData.currentCountryType == 'Exam Site')
         $scope.rptData.currentMapType = 'Total';
-      setIsCache();
+      setIsCache($scope);
     }
 
     $scope.selectType = function() {
@@ -827,7 +532,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         $scope.rptData.currentMapType = 'Total';
       }
 
-      setIsCache();
+      setIsCache($scope);
       
     }
 
@@ -1349,54 +1054,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
 
 
-    function computeBarSortRank(label) {
-      var sortRank='';
-
-      if(label.toLowerCase().indexOf('erp') > -1) {
-        sortRank+='A';
-      } else {
-        sortRank+='B';
-      }
-
-      if(label.toLowerCase().indexOf('full') > -1 ) {
-           sortRank+='A'
-      } else if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
-        sortRank+='B'
-      } else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
-        sortRank+='C'
-      } else {
-        sortRank+='D'
-      }
-
-      if(label.toLowerCase().indexOf('nov') > -1) {
-        sortRank+='B';
-      } else {
-        sortRank+='A';
-      }
-
-      if(label.toLowerCase().indexOf('total') > -1) {
-        sortRank+='A';
-      } else {
-        sortRank+='B';
-      }
-
-      if(label.toLowerCase().indexOf('deferred out') > -1) {
-        sortRank+='A';
-      } else if(label.toLowerCase().indexOf('late') > -1) {
-        sortRank+='B';
-      } else if(label.toLowerCase().indexOf('standard') > -1) {
-        sortRank+='C';
-      } else if(label.toLowerCase().indexOf('early') > -1) {
-        sortRank+='D';
-      } else if(label.toLowerCase().indexOf('deferred in') > -1) {
-        sortRank+='E';
-      } else {
-        sortRank+='F';
-      }
-
-      return sortRank;
-    }    
-
     function computeSortRank(label) {
       var sortRank='';
 
@@ -1604,14 +1261,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           var colDefNumberDefaults = {
             type:'number',
             cellFilter: 'numberToLocalFilter',
-            sortingAlgorithm: $scope.sortingAlgorithm, 
+            sortingAlgorithm:graphService.sortingAlgorithm, 
             enableFiltering: false
           }
 
           var colDefPercentDefaults = {
             type:'number',
             cellFilter: 'numberToLocalFilter',
-            sortingAlgorithm: $scope.sortingAlgorithm, 
+            sortingAlgorithm:graphService.sortingAlgorithm, 
             enableFiltering: false,
             cellTemplate : '<div style="padding:5px"><span>{{COL_FIELD}}</span><span>%</span></div>'
           }
@@ -1958,7 +1615,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
 
         if (exportData) {
-          var csv = JSON2CSV(sdata,true,true,$scope.fndRpt.columnDefs);
+          var csv = util.JSON2CSV(sdata,true,true,$scope.fndRpt.columnDefs);
           var filename = 'export.csv';
           exportToCSV(csv,filename);
           return;
@@ -2220,7 +1877,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             expotData.push(dataObj);
           }
 
-          var csv = JSON2CSV(expotData,false,true);          
+          var csv = util.JSON2CSV(expotData,false,true);          
           var filename = 'export.csv';
           exportToCSV(csv,filename);
           return;
@@ -2450,122 +2107,15 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
       if ($scope.fndRpt.reportType == 'stackedbar') {
 
-        var labels = _.pluck(data.groupingsDown.groupings, "label");
+        debugger;
 
-        if($scope.fndRpt.name == 'Exam Registrations By Type By Year') {
-          var labels = _.sortBy(labels, function(row) { return computeSortRank(row) })
-        } else {
-          var labels = _.sortBy(labels, function(row) { return computeBarSortRank(row) })
-        }
-        var sdata = [];
-
-        _.each(labels, function(exam) {
-          var group = _.findWhere(data.groupingsDown.groupings, {label: exam});
-          if(defined(group,"groupings")) {
-            _.each(group.groupings, function(part) {
-              var sd = _.findWhere(sdata, {
-                name: part.label
-              });
-              if (sd == null) {
-                var obj = {
-                  name: part.label,
-                  data: []
-                }
-                sdata.push(obj);
-              }
-            })
-          }
-        });
-
-        _.each(labels, function(exam) {
-          // May 2010 FRM Part I
-          $scope.group = _.findWhere(data.groupingsDown.groupings, {label: exam});
-          _.each(sdata, function(part) {
-            // Deferred In
-            var fnd = _.findWhere($scope.group.groupings, {label: part.name});
-            if(defined(fnd)) {
-              var da = data.factMap[fnd.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-              if (da == null) {
-                part.data.push(0);
-              } else {
-                part.data.push(da);
-              }
-            } else {
-              part.data.push(0);
-            }
-          });
-        });
-
-        
-
-        // for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
-        //   var group = data.groupingsDown.groupings[i];
-        //   for (var j = 0; j < group.groupings.length; j++) {
-        //     var g = group.groupings[j];
-        //     var sd = _.findWhere(sdata, {
-        //       name: g.label
-        //     });
-        //     if (sd == null) {
-        //       var obj = {
-        //         name: g.label,
-        //         data: []
-        //       }
-        //       sdata.push(obj);
-        //     }
-        //   }
-        // }
-
-        // for (var i = 0; i < data.groupingsDown.groupings.length; i++) {
-        //   var group = data.groupingsDown.groupings[i];
-        //   //for(var j=0; j<group.groupings.length; j++) {
-        //   //var g = group.groupings[j];
-        //   for (var j = 0; j < sdata.length; j++) {
-        //     var sd = sdata[j];
-        //     var g = _.findWhere(group.groupings, {
-        //       label: sd.name
-        //     });
-
-        //     if (g == null) {
-        //       sd.data.push(0);
-        //     } else {
-        //       var da = data.factMap[g.key + '!T'].aggregates[$scope.rptData.aggregatesIndex].value;
-        //       if (da == null) {
-        //         sd.data.push(0);
-        //       } else {
-        //         sd.data.push(da);
-        //       }
-        //     }
-        //   }
-        // }
+        var returnData = stackedBarService.processData(data, $scope.rptData.aggregatesIndex);
+        var labels = returnData.labels;
+        var sdata = returnData.sdata;
 
         if (exportData) {
-          var expData = [];
-          var cols = _.pluck(sdata, "name");
-          cols.unshift($scope.fndRpt.exportLabel);
-
-          var obj = {};
-          for (var j = 0; j < cols.length; j++) {
-            var col = cols[j];
-            obj[col] = col;
-          }
-          expData.push(obj);
-
-          for (var i = 0; i < labels.length; i++) {
-            var label = labels[i];
-            var obj = {};
-            for (var j = 0; j < cols.length; j++) {
-              var col = cols[j];
-
-              if (j == 0) {
-                obj[col] = label;
-              } else {
-                obj[col] = sdata[j - 1].data[i];
-              }
-            }
-            expData.push(obj);
-          }
-
-          var csv = JSON2CSV(expData,false,true);
+          var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel);
+          var csv = util.JSON2CSV(expData,false,true);
           var filename = 'export.csv';
           exportToCSV(csv,filename);
           return;
@@ -2575,201 +2125,19 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if(sdata.length > 1)
           showSubTotals = true;
 
+        var colors = graphService.getColors(sdata);
+        sdata = graphService.prepDataForGraphing(sdata);
+        var sortedData = graphService.sortData(sdata, stackedBarService.computeBarSortRank);
 
-        var colors = [];
-        _.each(sdata, function(sd) {
-          var fnd = _.findWhere($scope.rptData.examFullTypeList, {label: sd.name});
-          if(!defined(fnd)) {
-            fnd = _.findWhere($scope.rptData.examFullTypeList, {name: sd.name});
-          }
-          if(!defined(fnd)) {
-            fnd = _.findWhere($scope.rptData.examFullTypeList, {value: sd.name});
-          }
-          if(!defined(fnd)) {
-            fnd = _.findWhere($scope.rptData.examRegType, {name: sd.name});
-          }
-          if(defined(fnd,'color')) {
-            colors.push(fnd.color);
-          } else {
-            colors.push('#1CE7D8');
-          }
-        });
-
-        for(var i=0; i<sdata.length; i++) {
-          for(var j=0; j<sdata[i].data.length; j++) {
-            if(sdata[i].data[j] == 0)
-              sdata[i].data[j] = null;
-          }
-        }
-
-        _.each(sdata, function(sd) {
-          var rank = computeBarSortRank(sd.name);
-          sd.rank = rank;
-        });
-
-        var sortedData = _.sortBy(sdata, function(row) { return row.rank })
         var reportName = $scope.fndRpt.name;
         if($scope.rptData.yearToDate)
           reportName+= ' - Year To Date';
 
-        $('#container').highcharts({
-
-          lang: {
-              thousandsSep: ','
-          },
-
-          colors: colors,
-          exporting: {
-            sourceWidth: 1200,
-            sourceHeight: 800,
-            scale: 1
-          },
-
-          chart: {
-            type: 'column'
-          },
-          title: {
-            align: 'left',
-            x: 30,
-            text: reportName
-          },
-          xAxis: {
-            categories: labels,
-            title: {
-              text: $scope.fndRpt.xaxisLabel
-            }
-          },
-          yAxis: {
-            min: 0,
-            title: {
-              text: $scope.fndRpt.yaxisLabel
-            },
-            stackLabels: {
-              enabled: true,
-              style: {
-                fontWeight: 'bold',
-                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
-              }
-            }
-          },
-          legend: {
-            align: 'right',
-            x: -30,
-            verticalAlign: 'top',
-            y: 0,
-            floating: true,
-            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-            borderColor: '#CCC',
-            borderWidth: 1,
-            shadow: false
-          },
-          tooltip: {
-            formatter: function() {
-              return '<b>' + this.x + '</b><br/>' +
-                this.series.name + ': ' + this.y + '<br/>' +
-                'Total: ' + this.point.stackTotal;
-            }
-          },
-          plotOptions: {
-            column: {
-              stacking: 'normal',
-              dataLabels: {
-                enabled: showSubTotals,
-                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'black',
-              }
-            }
-          },
-          series: sortedData
-        });
-
+        stackedBarService.drawGraph(sortedData, colors, labels, reportName, $scope.fndRpt.xaxisLabel, $scope.fndRpt.yaxisLabel, showSubTotals);      
 
       } // Stacked Bar
-
-
-
     }
     //}); -- Query Data
-    drawGraph();
-
-    $scope.export = function(expData) {
-
-      var json = [{
-        "company": "Company",
-        "type": "Type",
-        "total": "Total",
-        "invoiceNumber": "Invoice #",
-        "garpId": "GARP ID",
-        "firstName": "First Name",
-        "lastName": "Last Name",
-        "county": "Country",
-        "state": "State",
-        "method": "Payment Method",
-        "paidDate": "Paid Date",
-        "payPalId": "PayPal Trans ID"
-      }];
-      for (var i = 0; i < $scope.prods.length; i++) {
-        var prod = $scope.prods[i];
-        var func = $scope.criteriaMatch();
-        if (func(prod)) {
-          json[0][prod.Product2.ProductCode + '~' + prod.Product2.GL_Code__c] = prod.Name + '-' + prod.Product2.ProductCode + ':' + prod.Product2.GL_Code__c;
-        }
-      }
-      for (var i = 0; i < $scope.prods.length; i++) {
-        var func = $scope.criteriaMatchShip();
-        var prod = $scope.prods[i];
-        if (func(prod)) {
-          var prod = $scope.prods[i];
-          json[0][prod.Product2.ProductCode + '~' + prod.Product2.GL_Code__c + "Shipping"] = prod.Name + '-' + prod.Product2.ProductCode + ':' + prod.Product2.GL_Code__c + "Shipping";
-        }
-      }
-      json[0].endTotal = "Total";
-
-      for (var j = 0; j < $scope.opps.length; j++) {
-        var opp = $scope.opps[j];
-
-        var func = $scope.filterMatch();
-        if (func(opp)) {
-          var obj = {
-            "company": formatDefined(opp.Company__c),
-            "type": formatDefined(opp.trans.ChargentSFA__Type__c),
-            "total": formatAmountExport($scope.getRowTotal(opp)),
-            "invoiceNumber": formatDefined(opp.Display_Invoice_Number__c),
-            "garpId": formatDefined(opp.GARP_Member_ID__c),
-            "firstName": formatDefined(opp.Member_First_Name__c),
-            "lastName": formatDefined(opp.Member_Last_Name__c),
-            "county": formatDefined(opp.Shipping_Country__c),
-            "state": formatDefined(opp.Shipping_State__c),
-            "method": formatDefined(opp.trans.ChargentSFA__Payment_Method__c),
-            "paidDate": formatDefined(formatDate(opp.closeDate, "MM-DD-YYYY")),
-            "payPalId": formatDefined(opp.trans.ChargentSFA__Gateway_ID__c)
-          };
-
-          for (var i = 0; i < $scope.prods.length; i++) {
-            var prod = $scope.prods[i];
-            var func = $scope.criteriaMatch();
-            if (func(prod)) {
-              obj[prod.Product2.ProductCode + '~' + prod.Product2.GL_Code__c] = formatAmountExport($scope.getProductAmount(opp, prod));
-            }
-          }
-          for (var i = 0; i < $scope.prods.length; i++) {
-            var func = $scope.criteriaMatchShip();
-            var prod = $scope.prods[i];
-            if (func(prod)) {
-              var prod = $scope.prods[i];
-              obj[prod.Product2.ProductCode + '~' + prod.Product2.GL_Code__c + "Shipping"] = formatAmountExport($scope.getProductAmountShipping(opp, prod));
-            }
-          }
-          obj.endTotal = formatAmountExport($scope.getRowTotal(opp));
-
-
-          json.push(obj);
-        }
-      }
-
-      var csv = JSON2CSV(json,true,true);
-      var filename = 'export.csv';
-      exportToCSV(csv,filename);
-    }
-
+    //drawGraph();
   }
 ]);
