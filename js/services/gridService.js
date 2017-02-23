@@ -175,8 +175,7 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
           country = graphService.findOtherCountry(country);
 
           var found = util.addYearTotals(yearTotals, country, year, null);
-          //yearTotals[country + '~' + year] = null;
-          //var yearTotal = null;
+
           if(!combo) {
             var parts = fndExam.value.split(',');
             for(var j=0; j<parts.length; j++) {
@@ -186,153 +185,90 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
               var yearDiffLable = year + ' ' + part + ' %Growth';
               var key = country+part;
 
-              var subgroup = _.findWhere(group.groupings, {label: part});
-              if(!util.defined(subgroup,"key")) {
-                
-                if(showInfo) {
-                  var val = 0;
-                  util.addTotal(allsd, 'Country', country, val);
-                  util.addTotal(allsdPart, 'Country', key, val);
-
-                  var obj = _.findWhere(sdata, {Country: country});
-                  if(obj == null) {
-                    obj = {
-                      Country: country,
-                      Total: val
-                    };                
-                    obj = _.extend(obj, emptyTotals);
-                    obj[yearTotalLable] = val;
-                    sdata.push(obj);
-                  } else {
-                    obj[yearTotalLable] = val;
-                    obj.Total += val;
-                  } 
-
-                  var lastYear = parseInt(year)-1;
-                  var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
-                  if(fnd != null) {
-                    if(fnd.Total > 0)
-                      obj[yearDiffLable] = -100;
-                    else obj[yearDiffLable] = 0;
-                    // var allObj = {
-                    //   Country: key,
-                    //   Total: 0
-                    // }
-                    // //yearTotal+=0;
-                    // allsd.push(allObj);
-                  } else {
-                    obj[yearDiffLable] = null;
-                  }
-                }
-
-              } else {
-
-                //var subgroup = group.groupings[j];
+              var subgroup = _.findWhere(group.groupings, {
+                label: part
+              });
+              var val = 0;
+              if (util.defined(subgroup, "key")) {
                 var val = data.factMaps[year][subgroup.key + '!T'].aggregates[aggregatesIndex].value;
-                util.addTotal(allsd, 'Country', country, val);
-                util.addTotal(allsdPart, 'Country', key, val);
-                // var allObj = {
-                //   Country: key,
-                //   Total: val
-                // }
-                // allsd.push(allObj);
+              }
+              util.addTotal(allsd, 'Country', country, val);
+              util.addTotal(allsdPart, 'Country', key, val);
 
-                if(showInfo) {
-                  var obj = _.findWhere(sdata, {Country: country});
-                  if(obj == null) {
-                    obj = {
-                      Country: country,
-                      Total: val
-                    };                
-                    obj = _.extend(obj, emptyTotals);
-                    obj[yearTotalLable] = val;
-                    sdata.push(obj);
+              if (showInfo) {
+
+                var sDataObj = graphService.addsData(sdata, country, val, emptyTotals, yearTotalLable);
+
+                var lastYear = parseInt(year) - 1;
+                var fnd = _.findWhere(allSDataParts[lastYear], {
+                  Country: key
+                });
+                if (util.defined(subgroup, "key")) {
+
+                  if (fnd != null) {
+                    sDataObj[yearDiffLable] = util.calcPercentGrowth(fnd.Total, sDataObj[yearTotalLable]);
                   } else {
-                    obj[yearTotalLable] += val;
-                    obj.Total += val;
+                    sDataObj[yearDiffLable] = null;
                   }
 
-                  var lastYear = parseInt(year)-1;
-                  var fnd = _.findWhere(allSDataParts[lastYear], {Country: key});
-                  if(fnd != null) {
-                    obj[yearDiffLable] = util.calcPercentGrowth(fnd.Total, obj[yearTotalLable]);
+                } else {
+
+                  if (fnd != null) {
+                    if (fnd.Total > 0)
+                      sDataObj[yearDiffLable] = -100;
+                    else sDataObj[yearDiffLable] = 0;
                   } else {
-                    obj[yearDiffLable] = null;
+                    sDataObj[yearDiffLable] = null;
                   }
+
                 }
               }
             }
             var fnd = _.findWhere(allsd, {Country: country});
             if(util.defined(fnd))
               util.addYearTotals(yearTotals, country, year, fnd.Total);                
-            //addYearTotals(yearTotals, country, year, yearTotal);
-            //yearTotals[country + '~' + year] = yearTotal;
             
           } else {
             var fndExam = _.findWhere(graphService.examFullTypeList, {value: currentExamType});
             var yearTotalLable = year + ' ' + fndExam.name + ' Total';
             var yearDiffLable = year + ' ' + fndExam.name + ' %Growth';
 
-            if(!util.defined(data,"factMaps." + year + "." + group.key + '!T')) {
-              util.addTotal(allsd, 'Country', country, 0);
-              if(parseInt(year) >= parseInt(currentStartExamYear)) {
-                var lastYear = parseInt(year)-1;
-                var fnd = _.findWhere(allSData[lastYear], {Country: country});
+            var val = 0;
+            if(util.defined(data,"factMaps." + year + "." + group.key + '!T')) {
+              val = data.factMaps[year][group.key + '!T'].aggregates[aggregatesIndex].value;
+            }
+            util.addTotal(allsd, 'Country', country, val);
+
+            if(showInfo) {
+              var sDataObj = graphService.addsData(sdata, country, val, emptyTotals, yearTotalLable);
+
+              var lastYear = parseInt(year)-1;
+              var fnd = _.findWhere(allSData[lastYear], {Country: country});
+
+              if(util.defined(data,"factMaps." + year + "." + group.key + '!T')) {
                 if(fnd != null) {
                   if(fnd.Total > 0)
-                    obj[yearDiffLable] = -100;
-                  else obj[yearDiffLable] = 0;
-                  // var allObj = {
-                  //   Country: country,
-                  //   Total: 0
-                  // }
-                  // allsd.push(allObj);                      
+                    sDataObj[yearDiffLable] = -100;
+                  else sDataObj[yearDiffLable] = 0;
+
                 } else {
-                  obj[yearDiffLable] = null;
+                  sDataObj[yearDiffLable] = null;
                 }
-              }
-            } else {
-
-              var val = data.factMaps[year][group.key + '!T'].aggregates[aggregatesIndex].value;
-              util.addTotal(allsd, 'Country', country, val);
-              // var allObj = {
-              //   Country: country,
-              //   Total: val
-              // }
-              // allsd.push(allObj);
-
-              if(showInfo) {
-                var obj = _.findWhere(sdata, {Country: country});
-                if(obj == null) {
-                  obj = {
-                    Country: country,
-                    Total: val
-                  };                
-                  obj = _.extend(obj, emptyTotals);
-                  obj[yearTotalLable] = val;
-                  sdata.push(obj);
-                } else {
-                  obj[yearTotalLable] += val;
-                  obj.Total += val;
-                }
-
-                var lastYear = parseInt(year)-1;
-                var fnd = _.findWhere(allSData[lastYear], {Country: country});
+              } else {
                 if(fnd != null) {
-                  obj[yearDiffLable] = util.calcPercentGrowth(fnd.Total, obj[yearTotalLable]);
+                  sDataObj[yearDiffLable] = util.calcPercentGrowth(fnd.Total, sDataObj[yearTotalLable]);
                 } else {
-                  obj[yearDiffLable] = null;
-                }
-              }                
+                  sDataObj[yearDiffLable] = null;
+                }                
+              }
             }
-            //yearTotals[country + '~' + year] = yearTotal;
             var fnd = _.findWhere(allsd, {Country: country});
             if(util.defined(fnd))
               util.addYearTotals(yearTotals, country, year, fnd.Total);
           }
         }
       }
-      // compute %Growth total
+      // compute Annual % Growth 
       var startYear = parseInt(currentStartExamYear);
       var endYear = parseInt(currentEndExamYear);
       if(startYear == endYear) {
@@ -367,7 +303,6 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
           }
         }            
       }
-
       return sdata;
     }
 

@@ -6,6 +6,26 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
     graphService.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
     var util = utilitiyService;
 
+
+    graphService.addsData = function(sdata, country, val, emptyTotals, yearTotalLable) {
+      var obj = _.findWhere(sdata, {
+        Country: country
+      });
+      if (obj == null) {
+        obj = {
+        Country: country,
+        Total: val
+        };
+        obj = _.extend(obj, emptyTotals);
+        obj[yearTotalLable] = val;
+        sdata.push(obj);
+      } else {
+        obj[yearTotalLable] += val;
+        obj.Total += val;
+      }
+      return obj;
+    }
+
     graphService.findOtherCountry = function(country) {
 
       if (country == "-" || country == "&nbsp;" || country == "NULL") {
