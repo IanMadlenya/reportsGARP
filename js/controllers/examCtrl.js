@@ -5,11 +5,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
     var util = utilitiyService;
 
-    Highcharts.setOptions({
-      lang: {
-        thousandsSep: ','
-      }
-    });
     $scope.gridOptions1 = {
       enableSorting: true,
       enableFiltering: true,
@@ -1095,12 +1090,23 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if(sdata.length > 1)
           showSubTotals = true;
 
-        var colors = graphService.getColors(sdata);
         sdata = graphService.prepDataForGraphing(sdata);
         var sortedData = graphService.sortData(sdata, stackedBarService.computeBarSortRank);
+        var colors = graphService.getColors(sortedData);
 
         var reportName = $scope.fndRpt.name;
-        if($scope.rptData.yearToDate)
+        if(util.defined($scope,"rptData.currentExamMonth") && $scope.rptData.currentExamMonth.indexOf(',') == -1) {
+          var fnd = _.findWhere(graphService.examMonthList, {value: $scope.rptData.currentExamMonth});
+          if(util.defined(fnd)) {
+            reportName+= ' - ' + fnd.name;  
+          }
+        }
+        if(util.defined($scope,"rptData.includeUnPaid") && $scope.rptData.includeUnPaid) {
+          reportName+= ' - All Registrations';
+        } else if(util.defined($scope,"rptData.includeUnPaid")) {
+          reportName+= ' - Paid Registrations';
+        }
+        if(util.defined($scope,"rptData.yearToDate") && $scope.rptData.yearToDate)
           reportName+= ' - Year To Date';
 
         stackedBarService.drawGraph(sortedData, colors, labels, reportName, $scope.fndRpt.xaxisLabel, $scope.fndRpt.yaxisLabel, showSubTotals);      
