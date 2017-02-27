@@ -314,7 +314,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Year All Time",
       description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004La5J",
+      reportId: "00O40000004Tu8O",
       reportIdCombined: "00O40000004Tu9g",
       reportType: 'stackedbar',
       exportLabel: 'Exam Year',
@@ -1079,7 +1079,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         debugger;
 
-        var returnData = stackedBarService.processData(data, $scope.rptData.aggregatesIndex);
+        var returnData = stackedBarService.processDataInverted(data, $scope.rptData.aggregatesIndex, $scope.fndRpt.name);
         var labels = returnData.labels;
         var sdata = returnData.sdata;
 
