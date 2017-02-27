@@ -2576,8 +2576,21 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           showSubTotals = true;
 
 
-        var colors = [];
+        for(var i=0; i<sdata.length; i++) {
+          for(var j=0; j<sdata[i].data.length; j++) {
+            if(sdata[i].data[j] == 0)
+              sdata[i].data[j] = null;
+          }
+        }
+
         _.each(sdata, function(sd) {
+          var rank = computeBarSortRank(sd.name);
+          sd.rank = rank;
+        });
+
+        var sortedData = _.sortBy(sdata, function(row) { return row.rank })
+        var colors = [];
+        _.each(sortedData, function(sd) {
           var fnd = _.findWhere($scope.rptData.examFullTypeList, {label: sd.name});
           if(!defined(fnd)) {
             fnd = _.findWhere($scope.rptData.examFullTypeList, {name: sd.name});
@@ -2595,19 +2608,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           }
         });
 
-        for(var i=0; i<sdata.length; i++) {
-          for(var j=0; j<sdata[i].data.length; j++) {
-            if(sdata[i].data[j] == 0)
-              sdata[i].data[j] = null;
-          }
-        }
-
-        _.each(sdata, function(sd) {
-          var rank = computeBarSortRank(sd.name);
-          sd.rank = rank;
-        });
-
-        var sortedData = _.sortBy(sdata, function(row) { return row.rank })
+        
         var reportName = $scope.fndRpt.name;
         if($scope.rptData.yearToDate)
           reportName+= ' - Year To Date';
