@@ -263,6 +263,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       exportLabel: 'Date',
       xaxisLabel: 'Exams',
       yaxisLabel: 'Exam Registrations',
+      toolTipFormatter : graphService.stackedBarToolTipFormatter,
+      subTotalFormatter: graphService.stackedBarSubTotalPercentFormatter,      
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -280,6 +282,10 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       exportLabel: 'Exam Year',
       xaxisLabel: 'Exam Year',
       yaxisLabel: 'Exam Registrations',
+      totalFormatter: graphService.stackedBarTotalFormatter,
+      totalFormatterYOffset: -20,
+      toolTipFormatter : graphService.stackedBarToolTipFormatter,
+      subTotalFormatter: graphService.stackedBarSubTotalFormatter,      
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -297,6 +303,10 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       exportLabel: 'Exam Year',
       xaxisLabel: 'Exam Year',
       yaxisLabel: 'Exam Registrations',      
+      totalFormatter: graphService.stackedBarTotalFormatter,
+      totalFormatterYOffset: -20,
+      toolTipFormatter : graphService.stackedBarToolTipFormatter,
+      subTotalFormatter: graphService.stackedBarSubTotalFormatter,      
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -314,7 +324,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       reportType: 'stackedbar',
       exportLabel: 'Exam Year',
       xaxisLabel: 'Exam Year',
-      yaxisLabel: 'Exam Registrations',      
+      yaxisLabel: 'Exam Registrations', 
+      totalFormatter: graphService.stackedBarTotalFormatter,
+      totalFormatterYOffset: -20,
+      toolTipFormatter : graphService.stackedBarToolTipFormatter,
+      subTotalFormatter: graphService.stackedBarSubTotalFormatter,
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -1078,22 +1092,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var labels = returnData.labels;
         var sdata = returnData.sdata;
 
-        if (exportData) {
-          var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel);
-          var csv = util.JSON2CSV(expData,false,true);
-          var filename = 'export.csv';
-          util.exportToCSV(csv,filename);
-          return;
-        }
-
-        var showSubTotals = false;
-        if(sdata.length > 1)
-          showSubTotals = true;
-
-        sdata = graphService.prepDataForGraphing(sdata);
-        var sortedData = graphService.sortData(sdata, stackedBarService.computeBarSortRank);
-        var colors = graphService.getColors(sortedData);
-
         var reportName = $scope.fndRpt.name;
         if(util.defined($scope,"rptData.currentExamMonth") && $scope.rptData.currentExamMonth.indexOf(',') == -1) {
           var fnd = _.findWhere(graphService.examMonthList, {value: $scope.rptData.currentExamMonth});
@@ -1109,7 +1107,23 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if(util.defined($scope,"rptData.yearToDate") && $scope.rptData.yearToDate)
           reportName+= ' - Year To Date';
 
-        stackedBarService.drawGraph(sortedData, colors, labels, reportName, $scope.fndRpt.xaxisLabel, $scope.fndRpt.yaxisLabel, showSubTotals);      
+        if (exportData) {
+          var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel, reportName);
+          var csv = util.JSON2CSV(expData,false,true);
+          var filename = 'export.csv';
+          util.exportToCSV(csv,filename);
+          return;
+        }
+
+        var showSubTotals = false;
+        if(sdata.length > 1)
+          showSubTotals = true;
+
+        sdata = graphService.prepDataForGraphing(sdata);
+        var sortedData = graphService.sortData(sdata, stackedBarService.computeBarSortRank);
+        var colors = graphService.getColors(sortedData);
+
+        stackedBarService.drawGraph(sortedData, colors, labels, reportName, $scope.fndRpt, showSubTotals);      
 
       } // Stacked Bar
     }

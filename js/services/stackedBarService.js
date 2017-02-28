@@ -72,24 +72,23 @@ reportsGARPServices.factory('stackedBarService', ['utilitiyService',
 			});
 
 			_.each(labels, function(exam) {
-          // May 2010 FRM Part I
-          var group = _.findWhere(reportData.groupingsDown.groupings, {label: exam});
-          _.each(sdata, function(part) {
-            // Deferred In
-            var fnd = _.findWhere(group.groupings, {label: part.name});
-          	var obj = {
-          		y: 0,
-          		myData : 0
-          	}            
-            if(defined(fnd)) {
-            	var da = reportData.factMap[fnd.key + '!T'].aggregates[aggregatesIndex].value;
-            	if (da != null) {
-            		obj.y = da;
-            	}
-            }
-            part.data.push(obj);
-          });
+        // May 2010 FRM Part I
+        var group = _.findWhere(reportData.groupingsDown.groupings, {label: exam});
+        _.each(sdata, function(part) {
+          // Deferred In
+          var fnd = _.findWhere(group.groupings, {label: part.name});
+          if(defined(fnd)) {
+          	var da = reportData.factMap[fnd.key + '!T'].aggregates[aggregatesIndex].value;
+          	if (da == null) {
+          		part.data.push(0);
+          	} else {
+          		part.data.push(da);
+          	}
+          } else {
+          	part.data.push(0);
+          }
         });
+      });
 
 
 	    // _.each(reportData.groupingsDown.groupings, function(level1) {
@@ -165,15 +164,19 @@ stackedBarService.computeBarSortRank = function(label) {
 }    
 
 
-stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, xaxisLabel, yaxisLabel, showSubTotals) {
+stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, fndRpt, showSubTotals) {
 
-  Highcharts.setOptions({
-    lang: {
-      thousandsSep: ','
-    }
-  });
 
-	$('#container').highcharts({
+	var xaxisLabel = fndRpt.xaxisLabel; 
+	var yaxisLabel = fndRpt.yaxisLabel;
+	
+	Highcharts.setOptions({
+		lang: {
+			thousandsSep: ','
+		}
+	});
+
+	var options = {
 		colors: colors,
 		exporting: {
 			sourceWidth: 1200,
@@ -186,7 +189,8 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, x
 		title: {
 			align: 'left',
 			x: 30,
-			text: reportName
+			text: reportName,
+			y: 20
 		},
 		xAxis: {
 			categories: labels,
@@ -205,50 +209,21 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, x
 				style: {
 					color: (Highcharts.theme && Highcharts.theme.textColor) || 'black',
 					textOutline: false
-				},
-				y: -20,
-	      formatter: function() {
-	      	var total = this.total;
-	      	if(this.x > 0) {
-	      		var lastTotal = 0;
-	      		var x = this.x;
-	      		_.each(this.options.qTotals, function(dat) {
-	      			lastTotal+=dat.data[x-1].y;
-	      		});
-	      		var growth = ((total - lastTotal)/lastTotal)*100;
-	      		var multiplier = Math.pow(10, 1 || 0);
-        		var perc = Math.round(growth * multiplier) / multiplier;
-        		if(perc < 0) {
-        			total = total.toLocaleString() + '<br><span style="color:red"> ('+ perc.toLocaleString() + '%)</span>';
-        		} else {
-        			total = total.toLocaleString() + '<br> ('+ perc.toLocaleString() + '%)';	
-        		}
-	      		
-	      	}
-	        return  total;
-	      }
+				}
 			}
 		},
 		legend: {
 			align: 'right',
 			x: -30,
 			verticalAlign: 'top',
-			y: 20,
 			floating: true,
 			backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
 			borderColor: '#CCC',
 			borderWidth: 1,
-			textOutline: false
+			textOutline: false,
+			y: -10
 		},
 		tooltip: {
-			formatter: function() {
-	  		var part = (this.y/this.total)*100;
-	  		var multiplier = Math.pow(10, 1 || 0);
-	  		var perc = Math.round(part * multiplier) / multiplier;
-				return '<b>' + this.x.toLocaleString() + '</b><br/>' +
-				this.series.name + ': ' + this.y.toLocaleString() + ' (' + perc.toLocaleString() + '%)<br/>' +
-				'Total: ' + this.point.stackTotal;
-			}
 		},
 		plotOptions: {
 			column: {
@@ -259,16 +234,26 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, x
 						color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'black',
 						textOutline: false
 					},
-					formatter: function() {
-						if(this.y > 0 && this.y != this.total)
-	        		return this.y.toLocaleString()
-	        	else return null;
-	      	}
 				}
 			}
 		},
 		series: sortedData
-	});
+	};
+
+	if(util.defined(fndRpt,"totalFormatter")) {
+		options.yAxis.stackLabels.formatter = fndRpt.totalFormatter;
+	}
+	if(util.defined(fndRpt,"totalFormatterYOffset")) {
+		options.yAxis.stackLabels.y = fndRpt.totalFormatterYOffset;
+	}
+	if(util.defined(fndRpt,"toolTipFormatter")) {
+		options.tooltip.formatter = fndRpt.toolTipFormatter;
+	}
+	if(util.defined(fndRpt,"subTotalFormatter")) {
+		options.plotOptions.column.dataLabels.formatter = fndRpt.subTotalFormatter;
+	}
+
+	$('#container').highcharts(options);
 }
 
 

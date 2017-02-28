@@ -58,8 +58,24 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       return country;
     }
 
-  	graphService.exportDataProcessing = function(sdata, labels, exportLabel) {
+  	graphService.exportDataProcessing = function(sdata, labels, exportLabel, reportName) {
 			var expData = [];
+
+      // Add Report Name
+      var cols = [
+        reportName,
+        "",
+        ""
+      ];
+      var obj = {};
+      for (var j = 0; j < cols.length; j++) {
+        var col = cols[j];
+        obj[col] = col;
+      }
+      expData.push(obj);
+
+
+      // Add Headers
       var cols = _.pluck(sdata, "name");
       cols.unshift(exportLabel);
 
@@ -227,6 +243,51 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
     }    
 
 
+    graphService.stackedBarTotalFormatter = function() {
+      var total = this.total;
+      if(this.x > 0) {
+        var lastTotal = 0;
+        var x = this.x;
+        _.each(this.options.qTotals, function(dat) {
+          lastTotal+=dat.data[x-1];
+        });
+        var growth = ((total - lastTotal)/lastTotal)*100;
+        var multiplier = Math.pow(10, 1 || 0);
+        var perc = Math.round(growth * multiplier) / multiplier;
+        if(perc < 0) {
+          total = total.toLocaleString() + '<br><span style="color:red"> ('+ perc.toLocaleString() + '%)</span>';
+        } else {
+          total = total.toLocaleString() + '<br> ('+ perc.toLocaleString() + '%)';  
+        }
+
+      }
+      return  total;
+    }
+
+    graphService.stackedBarToolTipFormatter = function() {
+      var part = (this.y/this.total)*100;
+      var multiplier = Math.pow(10, 1 || 0);
+      var perc = Math.round(part * multiplier) / multiplier;
+      return '<b>' + this.x.toLocaleString() + '</b><br/>' +
+      this.series.name + ': ' + this.y.toLocaleString() + ' (' + perc.toLocaleString() + '%)<br/>' +
+      'Total: ' + this.point.stackTotal;
+    }
+
+    graphService.stackedBarSubTotalFormatter = function() {
+      if(this.y > 0 && this.y != this.total)
+        return this.y.toLocaleString()
+      else return null;
+    }
+
+    graphService.stackedBarSubTotalPercentFormatter = function() {
+      if(this.y > 0 && this.y != this.total) {
+        var part = (this.y/this.total)*100;
+        var multiplier = Math.pow(10, 1 || 0);
+        var perc = Math.round(part * multiplier) / multiplier;
+        return this.y.toLocaleString() + '<br>(' + perc.toLocaleString() + '%)';
+      }
+      else return null;
+    }
 
   	graphService.examFullTypeList = [{
       name: "ERP",

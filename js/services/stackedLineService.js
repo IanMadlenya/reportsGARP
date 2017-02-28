@@ -288,9 +288,32 @@ reportsGARPServices.factory('stackedLineService', ['utilitiyService',
 
         tooltip: {
           shared: true,
-          crosshairs: true
+          crosshairs: true,
+          seriesData: sdata,
+          formatter: function(info, index) {
+            var tip = "";
+            tip += this.x + '<br>';
+            for(var i=0; i<this.points.length; i++) {
+              var point = this.points[i];
+              tip += '<tspan style="fill:' + point.color + '" x="8" dy="15">●</tspan> <span>'+ point.series.name +' : <b>'+ point.y.toLocaleString() + '</b>';
+              var seriesData = _.findWhere(info.options.seriesData, {name: point.series.name});
+              if(seriesData != null && point.point.index > 0) {
+                var lastPoint = seriesData.data[point.point.index-1];
+                var growth = ((point.y - lastPoint)/lastPoint)*100;
+                var multiplier = Math.pow(10, 1 || 0);
+                var perc = Math.round(growth * multiplier) / multiplier;
+                if(perc < 0) {
+                  tip += ' <span color:red>(' + perc.toLocaleString() + '%)</span>';
+                } else {
+                  tip += ' (' + perc.toLocaleString() + '%)';
+                }
+                
+              }              
+              tip +='<span><br>';
+            }
+            return tip;                  
+          }
         },
-
         plotOptions: {
           series: {
             cursor: 'pointer',

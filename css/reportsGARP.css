@@ -23,6 +23,18 @@ th, td {
     text-align: right;
 }
 
+
+.circle
+{
+    height: 100px;
+    width: 100px;
+
+    display: block;
+    border: 1px solid black;
+
+    border-radius: 100px;
+}
+
 .ui-grid-cell-contents {
 	white-space: normal !important;
 
