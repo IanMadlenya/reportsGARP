@@ -60,7 +60,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.reportTypeList = [{
       name: "Exam Registrations By Country",
       description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004LWK5",
+      reportId: "00O40000004LbPF",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -121,9 +121,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     {
       name: "Exam Registrations By Country Year Over Year",
       description: "Table and Map of where people registered for exams over years. Choose an Location, Map Type, Exam Type, Month and Years. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004TuVm",
-      reportSiteId: "00O40000004TuW1",
-      reportIdCombined: "00O40000004TuVm",
+      reportId: "00O40000004LbQ3",
+      reportSiteId: "00O40000004LbQ3",
+      reportIdCombined: "00O40000004LbQ3",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -974,20 +974,26 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       }
 
       debugger;
+      if($(".highslide-wrapper").length > 0) {
+        var container = $(".highslide-wrapper");
+        for (var i = 0; i < hs.expanders.length; i++) {
+            var exp = hs.expanders[i];
+            if (exp) exp.close();
+        }
+      }
+        
       if ($scope.fndRpt.reportType == 'table') {
 
         if(util.defined(data,"groupingsDowns")) {
-
-          var sdata = gridService.processAsyncData(data, $scope.rptData.currentExamType, $scope.rptData.currentStartExamYear, $scope.rptData.currentEndExamYear, $scope.rptData.combineExams, $scope.rptData.aggregatesIndex);
-
+          var sdata = gridService.processAsyncData(data, $scope.rptData);
         } else {
-
           var sdata = gridService.processData(data, $scope.fndRpt.columnDefs, $scope.rptData.aggregatesIndex);
-
         }
 
+        var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);
+
         if (exportData) {
-          var csv = util.JSON2CSV(sdata,true,true,gridService.columnDefs);
+          var csv = util.JSON2CSV(sdata,true,true,gridService.columnDefs,reportName);
           var filename = 'export.csv';
           util.exportToCSV(csv,filename);
           return;
@@ -1012,16 +1018,15 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 $scope.myData = sdata;
                 $scope.gridOptions1.columnDefs = gridService.columnDefs;
                 $scope.gridOptions1.data = sdata;
-                $rootScope.$broadcast('drawMap', sdata);
+                $rootScope.$broadcast('drawMap', sdata, $scope.rptData.currentCountryType, $scope.rptData.currentMapType);
               });
             } else {
               $scope.myData = sdata;
               $scope.gridOptions1.columnDefs = gridService.columnDefs;
               $scope.gridOptions1.data = sdata;
-              $rootScope.$broadcast('drawMap', sdata);              
+              $rootScope.$broadcast('drawMap', sdata, $scope.rptData.currentCountryType, $scope.rptData.currentMapType);              
             }
           }
-
         }
       }
 
@@ -1038,6 +1043,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           displaylabels.push(newLab);
         }
         labels = displaylabels;
+
+        var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);
 
         if (exportData) {
 
@@ -1066,7 +1073,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             expotData.push(dataObj);
           }
 
-          var csv = util.JSON2CSV(expotData,false,true);          
+          var csv = util.JSON2CSV(expotData,false,true,null,reportName);          
           var filename = 'export.csv';
           util.exportToCSV(csv,filename);
           return;
@@ -1092,24 +1099,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var labels = returnData.labels;
         var sdata = returnData.sdata;
 
-        var reportName = $scope.fndRpt.name;
-        if(util.defined($scope,"rptData.currentExamMonth") && $scope.rptData.currentExamMonth.indexOf(',') == -1) {
-          var fnd = _.findWhere(graphService.examMonthList, {value: $scope.rptData.currentExamMonth});
-          if(util.defined(fnd)) {
-            reportName+= ' - ' + fnd.name;  
-          }
-        }
-        if(util.defined($scope,"rptData.includeUnPaid") && $scope.rptData.includeUnPaid) {
-          reportName+= ' - All Registrations';
-        } else if(util.defined($scope,"rptData.includeUnPaid")) {
-          reportName+= ' - Paid Registrations';
-        }
-        if(util.defined($scope,"rptData.yearToDate") && $scope.rptData.yearToDate)
-          reportName+= ' - Year To Date';
+       var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);
 
         if (exportData) {
-          var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel, reportName);
-          var csv = util.JSON2CSV(expData,false,true);
+          var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel);
+          var csv = util.JSON2CSV(expData,false,true,null,reportName);
           var filename = 'export.csv';
           util.exportToCSV(csv,filename);
           return;

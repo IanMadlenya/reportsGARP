@@ -58,7 +58,13 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
       return sdata;
     }
 
-    gridService.processAsyncData = function(data, currentExamType, currentStartExamYear, currentEndExamYear, combo, aggregatesIndex) {
+    gridService.processAsyncData = function(data, rptData) {
+
+      var currentExamType = rptData.currentExamType;
+      var currentStartExamYear = rptData.currentStartExamYear;
+      var currentEndExamYear = rptData.currentEndExamYear;
+      var combo = rptData.combineExams;
+      var aggregatesIndex = rptData.aggregatesIndex;
 
       var allSData = {};
       var allSDataParts = {};
@@ -172,7 +178,8 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
           
           var country = group.label;
 
-          country = graphService.findOtherCountry(country);
+          if(!util.defined(rptData,"currentCountryType") || rptData.currentCountryType != 'Exam Site')
+            country = graphService.findOtherCountry(country);
 
           var found = util.addYearTotals(yearTotals, country, year, null);
 
@@ -313,12 +320,8 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
         var mapData = [];
 
         _.each(sdata, function(row) {                
-          var idx = row.Country.indexOf(",");
-          var country = row.Country;
-          if(idx > -1)
-            country = country.slice(0,idx);
 
-          country = findOtherCountry(country);
+          var country = graphService.findOtherCountry(row.Country);
 
           var fnd = _.findWhere(mapData, {Country: country});
           if(fnd == null) {
@@ -335,18 +338,18 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
             }
           }
         });
-        $rootScope.$broadcast('drawMap', mapData);
+        $rootScope.$broadcast('drawMap', mapData, currentCountryType, currentMapType);
 
       } else {
 
         if(currentMapType == 'Total') {
-          $rootScope.$broadcast('drawMap', sdata);  
+          $rootScope.$broadcast('drawMap', sdata, currentCountryType, currentMapType);  
         } else {
           var mapData = [];
           _.each(sdata, function(row) {
             mapData.push({Country: row.Country, Total: row['%Growth Annual']});
           });
-          $rootScope.$broadcast('drawMap', mapData);  
+          $rootScope.$broadcast('drawMap', mapData, currentCountryType, currentMapType);  
         }
 
       }      

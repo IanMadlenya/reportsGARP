@@ -318,20 +318,20 @@ reportsGARPServices.factory('stackedLineService', ['utilitiyService',
           series: {
             cursor: 'pointer',
             point: {
-              events: {
-                click: function(e) {
-                  hs.htmlExpand(null, {
-                    pageOrigin: {
-                      x: e.pageX || e.clientX,
-                      y: e.pageY || e.clientY
-                    },
-                    headingText: this.series.name,
-                    maincontentText: this.series.data[this.x].category + ':<br/> ' +
-                      this.y + ' Registrations',
-                    width: 200
-                  });
-                }
-              }
+                events: {
+                    click: function (e) {
+                        hs.htmlExpand(null, {
+                            pageOrigin: {
+                                x: e.pageX || e.clientX,
+                                y: e.pageY || e.clientY
+                            },
+                            headingText: '<a href="javascript:parent.window.hs.close();" style="color:black">' + this.series.name + '</a>',
+                            maincontentText: this.category + ':<br/> ' +
+                                this.y + ' Registrations',
+                            width: 200
+                        });
+                    }
+                }              
             },
             marker: {
               enabled: false,

@@ -33,6 +33,14 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
         return country;
       }
 
+      country = country.replace(/(November|May|2009|2010|2011|2012|2013|2014|2015|ADA|RAD|\/|\-)/g,'');
+
+      var idx = country.indexOf(",");
+      var country = country;
+      if(idx > -1)
+        country = country.slice(0,idx);
+      country = country.trim();
+
       if(country.length == 2) {
         var fnd = util.findDeep(this.mapData, "properties", "iso-a2", country);
         if(defined(fnd)) {
@@ -58,22 +66,26 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       return country;
     }
 
-  	graphService.exportDataProcessing = function(sdata, labels, exportLabel, reportName) {
-			var expData = [];
-
-      // Add Report Name
-      var cols = [
-        reportName,
-        "",
-        ""
-      ];
-      var obj = {};
-      for (var j = 0; j < cols.length; j++) {
-        var col = cols[j];
-        obj[col] = col;
+    graphService.computeReportName = function(fndRpt, rptData) {
+      var reportName = fndRpt.name;
+      if(util.defined(rptData,"currentExamMonth") && rptData.currentExamMonth.indexOf(',') == -1) {
+        var fnd = _.findWhere(graphService.examMonthList, {value: rptData.currentExamMonth});
+        if(util.defined(fnd)) {
+          reportName+= ' - ' + fnd.name;  
+        }
       }
-      expData.push(obj);
+      if(util.defined(rptData,"includeUnPaid") && rptData.includeUnPaid) {
+        reportName+= ' - All Registrations';
+      } else if(util.defined(rptData,"includeUnPaid")) {
+        reportName+= ' - Paid Registrations';
+      }
+      if(util.defined(rptData,"yearToDate") && rptData.yearToDate)
+        reportName+= ' - Year To Date';  
+      return reportName;            
+    }
 
+  	graphService.exportDataProcessing = function(sdata, labels, exportLabel) {
+			var expData = [];
 
       // Add Headers
       var cols = _.pluck(sdata, "name");
@@ -95,7 +107,7 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
           if (j == 0) {
             obj[col] = label;
           } else {
-            obj[col] = sdata[j - 1].data[i];
+            obj[col] = sdata[j - 1].data[i].y;
           }
         }
         expData.push(obj);
@@ -131,8 +143,8 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
 		graphService.prepDataForGraphing = function(sdata) {
 	    for(var i=0; i<sdata.length; i++) {
 	      for(var j=0; j<sdata[i].data.length; j++) {
-	        if(sdata[i].data[j] == 0)
-	          sdata[i].data[j] = null;
+	        if(sdata[i].data[j].y == 0)
+	          sdata[i].data[j].y = null;
 	      }
 	    }
 	    return sdata;
@@ -248,8 +260,8 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       if(this.x > 0) {
         var lastTotal = 0;
         var x = this.x;
-        _.each(this.options.qTotals, function(dat) {
-          lastTotal+=dat.data[x-1];
+        _.each(this.options.seriesData, function(dat) {
+          lastTotal+=dat.data[x-1].y;
         });
         var growth = ((total - lastTotal)/lastTotal)*100;
         var multiplier = Math.pow(10, 1 || 0);

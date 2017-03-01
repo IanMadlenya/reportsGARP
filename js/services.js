@@ -243,19 +243,24 @@ reportsGARPServices.factory('utilitiyService', [
       return false;
     }
 
-    utilitiyService.JSON2CSV = function(objArray, labels, quotes, colDefs) {
+    utilitiyService.JSON2CSV = function(objArray, labels, quotes, colDefs, reportName) {
         var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
     
         var str = '';
         var line = '';
     
+        if(this.defined(reportName)) {
+          str += reportName + '\r\n';
+        }
+
         if (labels) {
             var head = array[0];
             if (quotes) {
-
                 if(this.defined(colDefs)) {
                   _.each(colDefs, function(col) {
                     var value = col.field + "";
+                    if(this.defined(col,"name"))
+                      var value = col.name + "";
                     line += '"' + value.replace(/"/g, '""') + '",';
                   });
                 } else {

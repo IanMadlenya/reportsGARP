@@ -72,22 +72,31 @@ reportsGARPServices.factory('stackedBarService', ['utilitiyService',
 			});
 
 			_.each(labels, function(exam) {
-        // May 2010 FRM Part I
         var group = _.findWhere(reportData.groupingsDown.groupings, {label: exam});
-        _.each(sdata, function(part) {
-          // Deferred In
+        var lastSmall = false;
+        var yOffSet = 0;
+        for(var i=0; i<sdata.length; i++) {
+        	var part = sdata[i];
           var fnd = _.findWhere(group.groupings, {label: part.name});
+					var obj = {
+          	y: 0
+          }          
           if(defined(fnd)) {
           	var da = reportData.factMap[fnd.key + '!T'].aggregates[aggregatesIndex].value;
-          	if (da == null) {
-          		part.data.push(0);
-          	} else {
-          		part.data.push(da);
+          	if (da != null) {
+          		obj.y = da;
+	          	if(da < 1000) {
+	          		if(lastSmall)
+	          			yOffSet-=5;
+	          		//obj.dataLabels = { x: 32, y: yOffSet } -- Try to move to right if small - off for now
+	          		lastSmall = true;
+	          	} else {
+	          		lastSmall = false;
+	          	}
           	}
-          } else {
-          	part.data.push(0);
           }
-        });
+          part.data.push(obj);
+        }
       });
 
 
@@ -204,7 +213,7 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, f
 				text: yaxisLabel
 			},
 			stackLabels: {
-				qTotals: sortedData,
+				seriesData: sortedData,
 				enabled: true,
 				style: {
 					color: (Highcharts.theme && Highcharts.theme.textColor) || 'black',
@@ -229,6 +238,7 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, f
 			column: {
 				stacking: 'normal',
 				dataLabels: {
+					allowOverlap: false, // TO allow small subtotal - off for now
 					enabled: showSubTotals,
 					style: {
 						color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'black',

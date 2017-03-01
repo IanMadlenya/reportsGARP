@@ -1,4 +1,5 @@
-reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout', function($scope, $rootScope, $timeout, $location) {
+reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout', 'utilitiyService', 
+function($scope, $rootScope, $timeout, utilitiyService) {
   $scope.envPath = envPath;
 
   //$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=world-population.json&callback=?', function (data) {
@@ -9,8 +10,9 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
       thousandsSep: ','
     }
   });
+  var util = utilitiyService;
 
-  $rootScope.$on('drawMap', function(event, sdata) {
+  $rootScope.$on('drawMap', function(event, sdata, currentCountryType, currentMapType) {
 
     //var mapData = Highcharts.geojson(Highcharts.maps['custom/world']);
 
@@ -41,6 +43,11 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
       }
     });
     
+    var heading = 'Total Registrations By Country';
+    if(util.defined(currentMapType) && currentMapType != 'Total') {
+      heading = '% Growth Registrations By Country';
+    }
+      
     $('#containerMap').highcharts('Map', {
 
       lang: {
@@ -52,7 +59,7 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
       },
 
       title: {
-        text: 'Registrations By Country'
+        text: heading
       },
 
       legend: {
@@ -92,7 +99,7 @@ reportsGARPControllers.controller('mapCtrl', ['$scope', '$rootScope', '$timeout'
           color: 'white',
           format: '{point.code}'
         },
-        name: 'Registrations',
+        name: heading,
         tooltip: {
           pointFormat: '{point.name}: {point.value}'
         }
