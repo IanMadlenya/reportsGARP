@@ -122,7 +122,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       name: "Exam Registrations By Country Year Over Year",
       description: "Table and Map of where people registered for exams over years. Choose an Location, Map Type, Exam Type, Month and Years. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
       reportId: "00O40000004LbQ3",
-      reportSiteId: "00O40000004LbQ3",
+      reportSiteId: "00O40000004TuW1",
       reportIdCombined: "00O40000004LbQ3",
       reportType: 'table',
       cumlative: false,
@@ -174,7 +174,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Attendance By Country",
       description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004LVJV",
+      reportId: "00O40000004Lbn7",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -489,8 +489,21 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         if($scope.fndRpt.hasExamYearRange == true && ($scope.rptData.currentStartExamYear == null || $scope.rptData.currentEndExamYear == null)) {
           $scope.err['hasExamYearRange'] = 'Start and End Year are required';
-        } else if(parseInt($scope.rptData.currentStartExamYear) > parseInt($scope.rptData.currentEndExamYear)) {
-          $scope.err['hasExamYearRange'] = 'Start Year must be less than End Year';
+        } else {
+          if(parseInt($scope.rptData.currentStartExamYear) > parseInt($scope.rptData.currentEndExamYear)) {
+            $scope.err['hasExamYearRange'] = 'Start Year must be less than End Year';
+          } else {
+            var year = new Date().getFullYear();
+            var month = new Date().getMonth()+1;
+            if((parseInt($scope.rptData.currentStartExamYear) == year || parseInt($scope.rptData.currentEndExamYear) == year) && 
+              $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'Nov' &&  month < 11) {
+                $scope.err['hasExamYearRange'] = 'No data for Nov yet.';
+            }
+            if((parseInt($scope.rptData.currentStartExamYear) > year || parseInt($scope.rptData.currentEndExamYear) > year) && 
+              $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'May' &&  month < 5) {
+                $scope.err['hasExamYearRange'] = 'No data for May yet.';
+            }
+          }
         }
 
 
@@ -500,6 +513,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         if($scope.fndRpt.hasSite == true && $scope.rptData.currentMapType == null) {
           $scope.err['hasSiteMap'] = 'Map Display is required.';
         }
+
         var foundErr = false;
         _.each($scope.err, function(err) {
           foundErr = true;

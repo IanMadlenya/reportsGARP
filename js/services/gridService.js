@@ -253,17 +253,18 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
               var fnd = _.findWhere(allSData[lastYear], {Country: country});
 
               if(util.defined(data,"factMaps." + year + "." + group.key + '!T')) {
+
+                if(fnd != null) {
+                  sDataObj[yearDiffLable] = util.calcPercentGrowth(fnd.Total, sDataObj[yearTotalLable]);
+                } else {
+                  sDataObj[yearDiffLable] = null;
+                }    
+              } else {
                 if(fnd != null) {
                   if(fnd.Total > 0)
                     sDataObj[yearDiffLable] = -100;
                   else sDataObj[yearDiffLable] = 0;
 
-                } else {
-                  sDataObj[yearDiffLable] = null;
-                }
-              } else {
-                if(fnd != null) {
-                  sDataObj[yearDiffLable] = util.calcPercentGrowth(fnd.Total, sDataObj[yearTotalLable]);
                 } else {
                   sDataObj[yearDiffLable] = null;
                 }                

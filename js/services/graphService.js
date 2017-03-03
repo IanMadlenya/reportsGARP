@@ -28,12 +28,13 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
 
     graphService.findOtherCountry = function(country) {
 
-      if (country == "-" || country == "&nbsp;" || country == "NULL") {
+      country = country.replace(/(November|May|2009|2010|2011|2012|2013|2014|2015|ADA|RAD|\/|\-)/g,'').trim();
+
+      if (country == "-" || country == "&nbsp;" || country == "NULL"  || country == "") {
         country = 'Other';
         return country;
       }
 
-      country = country.replace(/(November|May|2009|2010|2011|2012|2013|2014|2015|ADA|RAD|\/|\-)/g,'');
 
       var idx = country.indexOf(",");
       var country = country;
@@ -255,28 +256,34 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
     }    
 
 
-    graphService.stackedBarTotalFormatter = function() {
+    graphService.stackedBarTotalFormatter = function(options) {
       var total = this.total;
       if(this.x > 0) {
-        var lastTotal = 0;
+        var lastTotal = null;
         var x = this.x;
         _.each(this.options.seriesData, function(dat) {
-          lastTotal+=dat.data[x-1].y;
+          if(dat.visible == null || dat.visible == true) {
+            if(dat.data[x-1].y != null)
+              lastTotal+=dat.data[x-1].y;
+          }            
         });
-        var growth = ((total - lastTotal)/lastTotal)*100;
-        var multiplier = Math.pow(10, 1 || 0);
-        var perc = Math.round(growth * multiplier) / multiplier;
-        if(perc < 0) {
-          total = total.toLocaleString() + '<br><span style="color:red"> ('+ perc.toLocaleString() + '%)</span>';
+        if(lastTotal == null) {
+          total = total.toLocaleString();
         } else {
-          total = total.toLocaleString() + '<br> ('+ perc.toLocaleString() + '%)';  
+          var growth = ((total - lastTotal)/lastTotal)*100;
+          var multiplier = Math.pow(10, 1 || 0);
+          var perc = Math.round(growth * multiplier) / multiplier;
+          if(perc < 0) {
+            total = total.toLocaleString() + '<br><span style="color:red"> ('+ perc.toLocaleString() + '%)</span>';
+          } else {
+            total = total.toLocaleString() + '<br> ('+ perc.toLocaleString() + '%)';  
+          }          
         }
-
       }
       return  total;
     }
 
-    graphService.stackedBarToolTipFormatter = function() {
+    graphService.stackedBarToolTipFormatter = function(options) {
       var part = (this.y/this.total)*100;
       var multiplier = Math.pow(10, 1 || 0);
       var perc = Math.round(part * multiplier) / multiplier;
@@ -285,13 +292,13 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       'Total: ' + this.point.stackTotal;
     }
 
-    graphService.stackedBarSubTotalFormatter = function() {
+    graphService.stackedBarSubTotalFormatter = function(options) {
       if(this.y > 0 && this.y != this.total)
         return this.y.toLocaleString()
       else return null;
     }
 
-    graphService.stackedBarSubTotalPercentFormatter = function() {
+    graphService.stackedBarSubTotalPercentFormatter = function(options) {
       if(this.y > 0 && this.y != this.total) {
         var part = (this.y/this.total)*100;
         var multiplier = Math.pow(10, 1 || 0);
