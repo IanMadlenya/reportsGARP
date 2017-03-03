@@ -110,7 +110,8 @@ var mergeProds = [
       company: 'GRA',
       prodCodes : [
         'FCBR',
-        'FBRNM'
+        'FBRNM',
+        'FBRA'
       ],
       mergedCode : 'FFR',
       mergedGL : '4000MERGE',
