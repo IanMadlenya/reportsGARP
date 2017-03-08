@@ -279,6 +279,8 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
             total = total.toLocaleString() + '<br> ('+ perc.toLocaleString() + '%)';  
           }          
         }
+      } else {
+        total = total.toLocaleString();
       }
       return  total;
     }
@@ -303,7 +305,9 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
         var part = (this.y/this.total)*100;
         var multiplier = Math.pow(10, 1 || 0);
         var perc = Math.round(part * multiplier) / multiplier;
-        return this.y.toLocaleString() + '<br>(' + perc.toLocaleString() + '%)';
+        if(perc < 10)
+          return this.y.toLocaleString() + ' (' + perc.toLocaleString() + '%)';
+        else return this.y.toLocaleString() + '<br>(' + perc.toLocaleString() + '%)';
       }
       else return null;
     }

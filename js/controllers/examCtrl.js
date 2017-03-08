@@ -236,8 +236,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004To1R",
-      reportIdCombined: "00O40000004TpDi",
+      reportId: "00O4D000000SFKu",
+      reportIdCombined: "00O4D000000SFL9",
       reportType: 'stackedline',
       xaxisLabel: 'Days',
       yaxisLabel: 'Exam Registrations',
@@ -249,6 +249,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: false,
       hasExamYearRange: true,
+      yearRangeField: "Reporting_Snapshot_Exam__c.Year__c",
       hasExport: true,
       colors: {
         erp : [util.GREEN1, util.GREEN2, util.GREEN3],
@@ -257,14 +258,15 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Type By Year",
       description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004LY8z",
-      reportIdCombined: "00O40000004LUNW",
+      reportId: "00O4D000000SFKL",
+      reportIdCombined: "00O4D000000SFKp",
       reportType: 'stackedbar',
       exportLabel: 'Date',
       xaxisLabel: 'Exams',
       yaxisLabel: 'Exam Registrations',
       toolTipFormatter : graphService.stackedBarToolTipFormatter,
-      subTotalFormatter: graphService.stackedBarSubTotalPercentFormatter,      
+      subTotalFormatter: graphService.stackedBarSubTotalPercentFormatter,   
+      totalFormatterYOffset: -20,   
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -275,30 +277,9 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamYearRange: true,
       hasExport: true
     }, {
-      name: "ERP Exam Registrations By Year",
-      description: "Bar graph of ERP exam registrations by year. Broken out by Exam (ERP, ERP Part I and ERP Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004TpDx",
-      reportType: 'stackedbar',
-      exportLabel: 'Exam Year',
-      xaxisLabel: 'Exam Year',
-      yaxisLabel: 'Exam Registrations',
-      totalFormatter: graphService.stackedBarTotalFormatter,
-      totalFormatterYOffset: -20,
-      toolTipFormatter : graphService.stackedBarToolTipFormatter,
-      subTotalFormatter: graphService.stackedBarSubTotalFormatter,      
-      hasUnpaid: true,
-      cumlative: false,
-      applyFilters: true,
-      hasYearToDate: true,
-      hasExamType: false,
-      hasExamMonth: true,
-      hasExamYear: false,
-      hasExamYearRange: true,
-      hasExport: true
-    }, {
-      name: "FRM Exam Registrations By Year",
-      description: "Bar graph of FRM exam registrations by year. Broken out by Exam (FRM Part I, FRM Part II). Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004TtwS",
+      name: "Exam Registrations By Year",
+      description: "Bar graph of exam registrations by year. Broken out by Exam and Part. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
+      reportId: "00O4D000000SFK6",
       reportType: 'stackedbar',
       exportLabel: 'Exam Year',
       xaxisLabel: 'Exam Year',
@@ -311,7 +292,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       cumlative: false,
       applyFilters: true,
       hasYearToDate: true,
-      hasExamType: false,
+      hasExamType: true,
       hasExamMonth: true,
       hasExamYear: false,
       hasExamYearRange: true,
@@ -548,14 +529,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
     function execReport(options, callback) {
       var metadata = options;
-      var report = conn.analytics.report($scope.reportId);
+      var report = conn.analytics.report($scope.reportId);      
       report.execute({
         metadata: metadata
       }, function(err, result) {
         var obj = {
           result: result
         };
-        fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
+        fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: $scope.fndRpt.yearRangeField});
         if(util.defined(fnd,"value")) {
           obj.year = fnd.value;
         }
@@ -565,7 +546,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
 
     function loadData(exportData) {
-
 
       $scope.fndRpt = _.findWhere($scope.rptData.reportTypeList, {
         reportId: $scope.rptData.currentReportType
@@ -632,6 +612,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Stat__c.Exam_Type__c':
+              case 'Reporting_Snapshot_Exam__c.Exam_Type__c':
                 if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType) {
                   var fnd = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
                   if(fnd != null) {
@@ -642,6 +623,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Stat__c.Exam_Number__c':
+              case 'Reporting_Snapshot_Exam__c.Exam_Number__c':
                 if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamType) {
                   var fnd = _.findWhere($scope.rptData.examFullTypeList, {value: $scope.rptData.currentExamType});
                   if(fnd != null) {
@@ -652,6 +634,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Attempt__c.RPT_Exam_Month__c':
+              case 'Reporting_Snapshot_Exam__c.Month__c':
                 if ($scope.fndRpt.applyFilters && $scope.fndRpt.hasExamMonth) {
                   if($scope.rptData.currentExamMonth == null) {
                     var fnd = _.findWhere($scope.rptData.examMonthList, {name: 'Both'});
@@ -667,6 +650,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
               case 'Exam_Stat__c.Year__c':
               case 'Exam_Attempt__c.RPT_Exam_Year__c':
+              case 'Reporting_Snapshot_Exam__c.Year__c':
                 if ($scope.fndRpt.applyFilters) {
                   if($scope.fndRpt.hasExamYearRange && $scope.rptData.currentStartExamYear != null && $scope.rptData.currentEndExamYear != null) {
                     var startYear=null;
@@ -713,6 +697,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
                 break;
 
               case 'Exam_Attempt__c.Days_Since_Dec_Cal_Date__c':
+              case 'Reporting_Snapshot_Exam__c.Day_of_Year__c':
               if ($scope.rptData.yearToDate && $scope.fndRpt.hasYearToDate) {
                 var mnow = moment();
                 if(mnow.month() == 11) {
@@ -749,7 +734,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var fnd = _.findWhere($scope.rptData.reportTypeList, {reportId: $scope.rptData.currentReportType})
         if(util.defined(fnd,"name") && fnd.name == 'Exam Registrations By Day Of Year') {
 
-          fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
+          fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: $scope.fndRpt.yearRangeField});
           if(util.defined(fnd,"value")) {
 
             var yearArray = fnd.value.split(',');
@@ -757,7 +742,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             for(var i=0; i<yearArray.length; i++) {
 
               var obj = jQuery.extend(true, {}, metadata);
-              fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
+              fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: $scope.fndRpt.yearRangeField});
               if(util.defined(fnd,"value")) {
                 fnd.value = yearArray[i].trim();
                 options.push(obj);
@@ -814,14 +799,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         } else if(util.defined(fnd,"name") && fnd.name == 'Exam Registrations By Country Year Over Year') {
 
-          fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
+          fnd = _.findWhere(metadata.reportMetadata.reportFilters, {column: $scope.fndRpt.yearRangeField});
           if(util.defined(fnd,"value")) {
 
             var yearArray = fnd.value.split(',');
             var options = [];
             for(var i=0; i<yearArray.length; i++) {
               var obj = jQuery.extend(true, {}, metadata);
-              fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: "Exam_Attempt__c.RPT_Exam_Year__c"});
+              fnd = _.findWhere(obj.reportMetadata.reportFilters, {column: $scope.fndRpt.yearRangeField});
               if(util.defined(fnd,"value")) {
                 fnd.value = yearArray[i].trim();
                 options.push(obj);
@@ -1109,7 +1094,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
 
         debugger;
 
-        var returnData = stackedBarService.processDataInverted(data, $scope.rptData.aggregatesIndex, $scope.fndRpt.name);
+        var aggregatesIndex = $scope.rptData.aggregatesIndex;
+        if($scope.fndRpt.hasUnpaid && $scope.rptData.includeUnPaid == true)
+          aggregatesIndex = 1;
+
+        var returnData = stackedBarService.processDataInverted(data, aggregatesIndex, $scope.fndRpt.name);
         var labels = returnData.labels;
         var sdata = returnData.sdata;
 
