@@ -348,27 +348,27 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       color: util.BLUE1
     }, {
       name: "FRM I",
-      value: "FRM Part 1",
+      value: "FRM Exam Part I",
       type: "FRM",
       number: "I",
       label: "FRM Exam Part I",
       color: util.BLUE2
     }, {
       name: "FRM II",
-      value: "FRM Part 2",
+      value: "FRM Exam Part II",
       type: "FRM",
       number: "II",
       label: "FRM Exam Part II",
       color: util.BLUE3
     }, {
       name: "FRM All",
-      value: "FRM Part 1,FRM Part 2",
+      value: "FRM Exam Part I,FRM Exam Part II",
       type: "FRM",
       number: "Full,I,II",
       color: util.BLUE1
     }, {
       name: "All",
-      value: "FRM Part 1,FRM Part 2,ERP, ERP Exam Part I, ERP Exam Part II",
+      value: "FRM Exam Part I,FRM Exam Part II,ERP, ERP Exam Part I, ERP Exam Part II",
       type: "FRM,ERP",
       number: "Full,I,II",
       color: util.BLUE1

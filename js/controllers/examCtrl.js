@@ -60,7 +60,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.reportTypeList = [{
       name: "Exam Registrations By Country",
       description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004LbPF",
+      reportId: "00O4D000000SFRM",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -75,7 +75,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false,
         type:'number',
-        cellFilter: 'numberToLocalFilter'        
+        cellFilter: 'numberToLocalFilter',
+        aggregatesIndex: 0        
       }, {
         name: 'Paid',
         field: 'Closed',
@@ -86,29 +87,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         sortingAlgorithm:graphService.sortingAlgorithm, 
         enableFiltering: false,
         type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }, {
-        name: 'Cancelled',
-        field: 'Closed Lost',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 3
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm, 
-        enableFiltering: false,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }, {
-        name: 'Unpiad',
-        field: 'New Lead',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 4
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm, 
-        enableFiltering: false,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
+        cellFilter: 'numberToLocalFilter',
+        aggregatesIndex: 1
       }],
       hasUnpaid: false,
       hasYearToDate: false,
@@ -121,9 +101,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     {
       name: "Exam Registrations By Country Year Over Year",
       description: "Table and Map of where people registered for exams over years. Choose an Location, Map Type, Exam Type, Month and Years. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004LbQ3",
-      reportSiteId: "00O40000004TuW1",
-      reportIdCombined: "00O40000004LbQ3",
+      reportId: "00O4D000000SFRl",
+      reportIdCombined: "00O4D000000SFRl",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -168,71 +147,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: false,
       hasExamYearRange: true,
+      yearRangeField: "Reporting_Snapshot_Exam__c.Year__c",      
       hasExport: true,
       hasDiff: true,
-      hasSite: true
-    }, {
-      name: "Exam Attendance By Country",
-      description: "Table and Map of where people registered for exams. Broken out by Exam Attendance (Atteneded, Deferred, No-Show). Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O40000004Lbn7",
-      reportType: 'table',
-      cumlative: false,
-      applyFilters: true,
-      columnDefs: [{
-        field: 'Country'
-      }, {
-        field: 'Total',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 1
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }, {
-        field: 'Will Attend',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 2
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }, {
-        field: 'Deferred',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 3
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }, {
-        field: 'Attended',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 2
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }, {
-        field: 'No-Show',
-        sort: {
-          direction: uiGridConstants.DESC,
-          priority: 4
-        },
-        sortingAlgorithm:graphService.sortingAlgorithm,
-        type:'number',
-        cellFilter: 'numberToLocalFilter'
-      }],
-      hasUnpaid: true,
-      hasYearToDate: false,
-      hasExamType: true,
-      hasExamMonth: true,
-      hasExamYear: true,
-      hasExamYearRange: false,
-      hasExport: true
+      hasSite: false,
+      hasMapGrowth: true
     }, {
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -266,7 +185,6 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       yaxisLabel: 'Exam Registrations',
       toolTipFormatter : graphService.stackedBarToolTipFormatter,
       subTotalFormatter: graphService.stackedBarSubTotalPercentFormatter,   
-      totalFormatterYOffset: -20,   
       hasUnpaid: true,
       cumlative: false,
       applyFilters: true,
@@ -984,9 +902,12 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       if ($scope.fndRpt.reportType == 'table') {
 
         if(util.defined(data,"groupingsDowns")) {
-          var sdata = gridService.processAsyncData(data, $scope.rptData);
+          var sdata = gridService.processAsyncData(data, $scope.rptData, $scope.fndRpt);
         } else {
-          var sdata = gridService.processData(data, $scope.fndRpt.columnDefs, $scope.rptData.aggregatesIndex);
+          var aggregatesIndex = $scope.rptData.aggregatesIndex;
+          if($scope.fndRpt.hasUnpaid && $scope.rptData.includeUnPaid == true)
+            aggregatesIndex = 1;          
+          var sdata = gridService.processData(data, $scope.fndRpt.columnDefs, aggregatesIndex);
         }
 
         var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);

@@ -37,19 +37,23 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
             var fndGroup = _.findWhere(group.groupings, {
               label: type
             });
+
+            var fndCol = _.findWhere(columnDefs, {field: type});
+            var v = 0;
             if (util.defined(fndGroup)) {
               var g = fndGroup;
-              var v = data.factMap[g.key + '!T'].aggregates[aggregatesIndex].value;
-              if(util.defined(fnd)) {
-                fnd[type] += v;
-                fnd.Total += v;
-              }
-              else obj[type] = v;
-
-            } else {
-              if(!util.defined(fnd))
-                obj[type] = 0;
+              v = data.factMap[g.key + '!T'].aggregates[aggregatesIndex].value;
+            } else if(util.defined(fndCol,"aggregatesIndex")) {
+              var aggIdx = fndCol.aggregatesIndex;
+              v = data.factMap[group.key + '!T'].aggregates[aggIdx].value;
             }
+
+            if(util.defined(fnd)) {
+              fnd[type] += v;
+              fnd.Total += v;
+            }
+            else obj[type] = v;
+
           }
         }
         if(!util.defined(fnd))
@@ -58,13 +62,16 @@ reportsGARPServices.factory('gridService', ['$rootScope','graphService','uiGridC
       return sdata;
     }
 
-    gridService.processAsyncData = function(data, rptData) {
+    gridService.processAsyncData = function(data, rptData, fndRpt) {
 
       var currentExamType = rptData.currentExamType;
       var currentStartExamYear = rptData.currentStartExamYear;
       var currentEndExamYear = rptData.currentEndExamYear;
       var combo = rptData.combineExams;
+
       var aggregatesIndex = rptData.aggregatesIndex;
+      if(fndRpt.hasUnpaid && rptData.includeUnPaid == true)
+        aggregatesIndex = 1;
 
       var allSData = {};
       var allSDataParts = {};
