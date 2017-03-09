@@ -203,6 +203,7 @@ reportsGARPServices.factory('utilitiyService', [
 
     utilitiyService.exportToCSV = function(data, filename) {
       var blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+      filename = 'export' + moment().format("YYYYMMDDHHMMSS") + '.csv';
       if (navigator.msSaveBlob) { // IE 10+
           navigator.msSaveBlob(blob, filename);
       } else {

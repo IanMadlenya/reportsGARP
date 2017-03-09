@@ -485,6 +485,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
         if($scope.fndRpt.hasExamYear == true && $scope.rptData.currentExamYear == null) {
           $scope.err['hasExamYear'] = 'Exam Year is required';
+        } else if($scope.fndRpt.hasExamYear == true) {
+          var year = new Date().getFullYear();
+          var month = new Date().getMonth()+1;
+          if(parseInt($scope.rptData.currentExamYear) == year && $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'Nov' &&  month < 11) {
+              $scope.err['hasExamYear'] = 'No data for Nov yet.';
+          } else if(parseInt($scope.rptData.currentExamYear) > year && $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'May' &&  month < 5) {
+              $scope.err['hasExamYear'] = 'No data for May yet.';
+          }          
         }
 
         if($scope.fndRpt.hasExamYearRange == true && ($scope.rptData.currentStartExamYear == null || $scope.rptData.currentEndExamYear == null)) {
@@ -498,8 +506,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             if((parseInt($scope.rptData.currentStartExamYear) == year || parseInt($scope.rptData.currentEndExamYear) == year) && 
               $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'Nov' &&  month < 11) {
                 $scope.err['hasExamYearRange'] = 'No data for Nov yet.';
-            }
-            if((parseInt($scope.rptData.currentStartExamYear) > year || parseInt($scope.rptData.currentEndExamYear) > year) && 
+            } else if((parseInt($scope.rptData.currentStartExamYear) > year || parseInt($scope.rptData.currentEndExamYear) > year) && 
               $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'May' &&  month < 5) {
                 $scope.err['hasExamYearRange'] = 'No data for May yet.';
             }
