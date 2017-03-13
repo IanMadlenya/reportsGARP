@@ -75,7 +75,7 @@
             {{opp.trans.ChargentSFA__Type__c}}
           </td>
           <td>
-            <b>${{formatAmountDisplay(getRowTotal(opp))}}</b>
+            <b>${{util.formatAmountDisplay(getRowTotal(opp))}}</b>
           </td>
           <td>
             {{opp.Display_Invoice_Number__c}}
@@ -102,28 +102,28 @@
             {{opp.trans.ChargentSFA__Payment_Method__c}}
           </td>
           <td>
-            {{formatDate(opp.closeDate, "MM-DD-YYYY")}}
+            {{util.formatDate(opp.closeDate, "MM-DD-YYYY")}}
           </td>          
           <td>
             {{opp.trans.ChargentSFA__Gateway_ID__c}}
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
             <div ng-if="getProductAmount(opp, prod)">
-              ${{formatAmountDisplay(getProductAmount(opp, prod))}}
+              ${{util.formatAmountDisplay(getProductAmount(opp, prod))}}
             </div>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
             <div ng-if="getProductAmountShipping(opp, prod)">
-              ${{formatAmountDisplay(getProductAmountShipping(opp, prod))}}
+              ${{util.formatAmountDisplay(getProductAmountShipping(opp, prod))}}
             </div>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatchTax()">
             <div ng-if="getProductAmount(opp, prod)">
-              ${{formatAmountDisplay(getProductAmount(opp, prod))}}
+              ${{util.formatAmountDisplay(getProductAmount(opp, prod))}}
             </div>
           </td>
           <td>
-            <b>${{formatAmountDisplay(getRowTotal(opp))}}</b>
+            <b>${{util.formatAmountDisplay(getRowTotal(opp))}}</b>
           </td>          
         </tr>
         <tr>
@@ -133,7 +133,7 @@
              <b>Totals</b>
           </td>
           <td>
-              <b>${{formatAmountDisplay(getOppTotals())}}</b>
+              <b>${{util.formatAmountDisplay(getOppTotals())}}</b>
           </td>
           <td>
           </td>
@@ -154,7 +154,7 @@
           <td>
           </td>
           <td ng-repeat="prod in prods | filter:criteriaMatch()">
-            <b>${{formatAmountDisplay(getProdTotals(prod.Id))}}</b>    
+            <b>${{util.formatAmountDisplay(getProdTotals(prod.Id))}}</b>    
           </td>
 
           <td ng-repeat="prod in prods | filter:criteriaMatchShip()">
@@ -162,10 +162,10 @@
             </div>
           </td>          
           <td ng-repeat="prod in prods | filter:criteriaMatchTax()">
-            <b>${{formatAmountDisplay(getProdTotalsTax(prod.Id))}}</b>    
+            <b>${{util.formatAmountDisplay(getProdTotalsTax(prod.Id))}}</b>    
           </td>
           <td>
-            <b>${{formatAmountDisplay(getOppTotals())}}</b>
+            <b>${{util.formatAmountDisplay(getOppTotals())}}</b>
           </td>
         </tr>
 
