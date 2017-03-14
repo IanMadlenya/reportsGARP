@@ -41,7 +41,7 @@ reportsGARPServices.factory('stackedBarService', ['utilitiyService',
 			var sdata = [];
 			var labels = _.pluck(reportData.groupingsDown.groupings, "label");
 
-			var computeBarSortRank = this.computeBarSortRank;
+			var computeBarSortRank = this.sortLabels;
 			if(reportName == 'Exam Registrations By Type By Year') {
 				var labels = _.sortBy(labels, function(row, computeBarSortRank) { 
 					return this(row) 
@@ -123,6 +123,58 @@ var returnObj = {
 return returnObj;
 }
 
+stackedBarService.sortLabels = function(label) {
+	var sortRank='';
+	var match = label.match(/(2009|2010|2011|2012|2013|2014|2015|2016|2017)/g);
+	if(util.defined(match,"length") && match.length > 0) {
+		sortRank = match[0];
+	}
+
+	if(label.toLowerCase().indexOf('frm') > -1) {
+		sortRank+='A';
+	} else {
+		sortRank+='B';
+	}
+
+	if(label.toLowerCase().indexOf('full') > -1 ) {
+		sortRank+='A'
+	} else if(label.toLowerCase().indexOf('part 2') > -1 || label.toLowerCase().indexOf('part ii') > -1) {
+		sortRank+='C'
+	} else if(label.toLowerCase().indexOf('part 1') > -1 || label.toLowerCase().indexOf('part i') > -1) {
+		sortRank+='B'
+	} else {
+		sortRank+='D'
+	}
+
+	if(label.toLowerCase().indexOf('nov') > -1) {
+		sortRank+='B';
+	} else {
+		sortRank+='A';
+	}
+
+	if(label.toLowerCase().indexOf('total') > -1) {
+		sortRank+='A';
+	} else {
+		sortRank+='B';
+	}
+
+	if(label.toLowerCase().indexOf('deferred out') > -1) {
+		sortRank+='A';
+	} else if(label.toLowerCase().indexOf('late') > -1) {
+		sortRank+='B';
+	} else if(label.toLowerCase().indexOf('standard') > -1) {
+		sortRank+='C';
+	} else if(label.toLowerCase().indexOf('early') > -1) {
+		sortRank+='D';
+	} else if(label.toLowerCase().indexOf('deferred in') > -1) {
+		sortRank+='E';
+	} else {
+		sortRank+='F';
+	}
+
+	return sortRank;
+
+}
 
 stackedBarService.computeBarSortRank = function(label) {
 	var sortRank='';
