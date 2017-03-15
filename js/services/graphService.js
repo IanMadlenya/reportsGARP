@@ -313,7 +313,7 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
     }
 
   	graphService.examFullTypeList = [{
-      name: "ERP",
+      name: "ERP Full",
       value: "ERP",
       type: "ERP",
       number: "Full",
@@ -340,7 +340,7 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       number: "Full,I,II",
       color: util.GREEN1          
     }, {
-      name: "FRM",
+      name: "FRM Full",
       value: "FRM",
       type: "FRM",
       number: "Full",
