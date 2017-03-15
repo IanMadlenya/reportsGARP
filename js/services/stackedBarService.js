@@ -125,7 +125,7 @@ return returnObj;
 
 stackedBarService.sortLabels = function(label) {
 	var sortRank='';
-	var match = label.match(/(2009|2010|2011|2012|2013|2014|2015|2016|2017)/g);
+	var match = label.match(/(1997|1998|1999|2000|2001|2002|2003|2004|2005|2006|2007|2008|2009|2010|2011|2012|2013|2014|2015|2016|2017)/g);
 	if(util.defined(match,"length") && match.length > 0) {
 		sortRank = match[0];
 	}
