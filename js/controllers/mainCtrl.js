@@ -51,10 +51,11 @@ reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeo
 
 }]);
 
-reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout, utilitiyService) {
+reportsGARPControllers.controller('dataCtrl', ['$scope', '$rootScope', '$timeout','utilitiyService', function ($scope, $rootScope, $timeout, utilitiyService) {
 
   var SHIP = 'SHIP';     
   var TAX = 'SLSTX';   
+  var util = utilitiyService;
 
 var mergeProds = [
       {
@@ -287,7 +288,7 @@ var mergeProds = [
     var selector = '#spin';
     var obj = $(selector)
     if(defined(obj,"length") && obj.length > 0) {
-      $scope.spinner = new Spinner(spinnerOptions).spin(obj[0]);
+      $scope.spinner = new Spinner(util.spinnerOptions).spin(obj[0]);
     }   
   }
   $scope.$on('allRendered', doneAddingToDom);
