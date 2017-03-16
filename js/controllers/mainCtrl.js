@@ -967,7 +967,7 @@ $scope.getProductAmount = function(opp, prod) {
       }
     }
 
-    var csv = JSON2CSV(json);
+    var csv = util.JSON2CSV(json);
     var fileName = 'data'
     var uri = 'data:text/csv;charset=utf-8,' + escape(csv);
     var link = document.createElement("a");    
