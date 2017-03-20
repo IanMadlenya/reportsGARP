@@ -16,6 +16,14 @@
         </div>
       </div>
       <div class="col-md-2">
+        <div ng-if="fndRpt.hasCountry">
+           <b>Country</b><br>
+          <select id="examCountrySelect" data-ng-model="rptData.currentExamCountry" name="examCountrySelect" ng-change="selectOptions()">
+            <!-- option ng-if="!fndRpt.isAllTime" ng-repeat="examType in rptData.examTypeList" value="{{examType.value}}">{{examType.name}}</option -->
+            <option ng-repeat="country in countries" value="{{country.name}}">{{country.name}}</option>
+          </select>
+        </div>
+
         <div ng-if="fndRpt.hasSite">
           <div class="row pad-bottom">
             <div class="col-md-12">

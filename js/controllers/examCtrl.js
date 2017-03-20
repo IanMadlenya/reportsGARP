@@ -214,7 +214,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       hasExamMonth: true,
       hasExamYear: false,
       hasExamYearRange: true,
-      hasExport: true
+      hasExport: true,
+      hasCountry: true
     }, {
       name: "Exam Registrations By Year All Time",
       description: "Bar graph of FRM and/or ERP exam registrations by year. Choose Exam Types you want to report on. Select a 'Start Year' and 'End Year' if you want to select a range. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
@@ -354,6 +355,25 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     if ($stateParams.cumlative != null && $stateParams.cumlative != '') {
       $scope.cumlative = $stateParams.cumlative;
     }
+
+    reportsGARPServices.getExamSites(function(err, data) {
+      var countries = [];
+      _.each(data.result, function(item) {
+        if(util.defined(item,"Site__r.Name") && item.Site__r.Name != "") {
+          var country = graphService.findOtherCountry(item.Site__r.Name);
+          var fnd = _.findWhere(countries, {name: country});
+          if(!util.defined(fnd) && country != "") {
+            countries.push({
+              name: country
+            });
+          }          
+        }
+      });
+      $scope.countries = _.sortBy(countries, function(row) { 
+        return row.name;
+      })
+      debugger;      
+    });
 
     $scope.refresh = function(reload, exportData) {
 
@@ -629,7 +649,14 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
               } else {
                 rf.value = '3030-01-01';  
               }
-              break;                
+              break;       
+
+              case 'Reporting_Snapshot_Exam__c.Country__c':
+              if ($scope.rptData.currentExamCountry && $scope.fndRpt.hasCountry) {
+                rf.operator = 'equals';
+                rf.value = $scope.rptData.currentExamCountry;
+              }
+              break;         
 
             }
           }
