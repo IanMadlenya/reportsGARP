@@ -75,6 +75,9 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
           reportName+= ' - ' + fnd.name;  
         }
       }
+      if(util.defined(rptData,"currentExamCountry") && rptData.currentExamCountry != '') {
+        reportName = rptData.currentExamCountry + ' ' + reportName;
+      }
       if(util.defined(rptData,"includeUnPaid") && rptData.includeUnPaid) {
         reportName+= ' - All Registrations';
       } else if(util.defined(rptData,"includeUnPaid")) {

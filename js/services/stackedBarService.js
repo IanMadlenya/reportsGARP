@@ -198,13 +198,14 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, f
 			scale: 1
 		},
 		chart: {
-			type: 'column'
+			type: 'column',
+			marginTop:70
 		},
 		title: {
 			align: 'left',
 			x: 30,
 			text: reportName,
-			y: 20
+			y: 10
 		},
 		xAxis: {
 			categories: labels,
@@ -227,15 +228,15 @@ stackedBarService.drawGraph = function(sortedData, colors, labels, reportName, f
 			}
 		},
 		legend: {
-			align: 'right',
-			x: -30,
+			align: 'left',
+			x: 30,
 			verticalAlign: 'top',
 			floating: true,
 			backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
 			borderColor: '#CCC',
 			borderWidth: 1,
 			textOutline: false,
-			y: -10
+			y: 20
 		},
 		tooltip: {
 		},
