@@ -7,6 +7,56 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
     var util = utilitiyService;
 
 
+
+    graphService.processCountries = function(data) {    
+      var countries = [];
+      _.each(data.result, function(item) {
+        if(util.defined(item,"Country__c") && item.Country__c != "") {
+          //var country = graphService.findOtherCountry(item.Site__r.Name);          
+          var country = item.Country__c;
+
+          //country = country.replace(/(November|Nov|May|2009|2010|2011|2012|2013|2014|2015|2016|2017|ADA|RAD|\/|\-)/g,'').trim();
+
+          if (country == "-" || country == "&nbsp;" || country == "NULL" || country == "" || country == "Unknown") {
+            country = 'Other';
+          } else {
+            var idx = country.indexOf(",");
+            var country = country;
+            if(idx > -1)
+            country = country.slice(0,idx);
+            country = country.trim();            
+          }
+
+          var value = country;
+          if(country == 'UK') {
+            value = 'UK';
+            country = 'United Kingdom'
+          } else if(country == 'USA') {
+            value = 'USA';
+            country = 'United States of America';
+          } else if(country == 'UAE') {
+            value = 'UAE';
+            country = 'United Arab Emirates';
+          }
+
+          var fnd = _.findWhere(countries, {name: country});
+          if(!util.defined(fnd) && country != "") {
+            countries.push({
+              name: country,
+              value: value
+            });
+          }          
+        }
+      });
+      countries = _.sortBy(countries, function(row) { 
+        return row.name;
+      })
+      countries.unshift({name: 'All'});
+
+      return countries;
+    }
+
+
     graphService.addsData = function(sdata, country, val, emptyTotals, yearTotalLable) {
       var obj = _.findWhere(sdata, {
         Country: country
@@ -28,13 +78,12 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
 
     graphService.findOtherCountry = function(country) {
 
-      country = country.replace(/(November|May|2009|2010|2011|2012|2013|2014|2015|ADA|RAD|\/|\-)/g,'').trim();
+      country = country.replace(/(Nov|November|May|2009|2010|2011|2012|2013|2014|2015|2016|2017|ADA|RAD|\/|\-)/g,'').trim();
 
       if (country == "-" || country == "&nbsp;" || country == "NULL"  || country == "") {
         country = 'Other';
         return country;
       }
-
 
       var idx = country.indexOf(",");
       var country = country;
@@ -67,7 +116,7 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
       return country;
     }
 
-    graphService.computeReportName = function(fndRpt, rptData) {
+    graphService.computeReportName = function(fndRpt, rptData, countries) {
       var reportName = fndRpt.name;
       if(util.defined(rptData,"currentExamMonth") && rptData.currentExamMonth.indexOf(',') == -1) {
         var fnd = _.findWhere(graphService.examMonthList, {value: rptData.currentExamMonth});
@@ -76,7 +125,11 @@ reportsGARPServices.factory('graphService', ['utilitiyService',
         }
       }
       if(util.defined(rptData,"currentExamCountry") && rptData.currentExamCountry != '') {
-        reportName = rptData.currentExamCountry + ' ' + reportName;
+
+        var fnd = _.findWhere(countries, {value: rptData.currentExamCountry});
+        if(util.defined(fnd)) {
+          reportName = fnd.name + ' ' + reportName;
+        }
       }
       if(util.defined(rptData,"includeUnPaid") && rptData.includeUnPaid) {
         reportName+= ' - All Registrations';

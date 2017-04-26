@@ -60,7 +60,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     $scope.rptData.reportTypeList = [{
       name: "Exam Registrations By Country",
       description: "Table and Map of where people registered for exams. Choose an Exam Type, Month and Year. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4D000000SFRM",
+      reportId: "00O40000004Loy3",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -101,8 +101,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     {
       name: "Exam Registrations By Country Year Over Year",
       description: "Table and Map of where people registered for exams over years. Choose an Location, Map Type, Exam Type, Month and Years. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4D000000SFRl",
-      reportIdCombined: "00O4D000000SFRl",
+      reportId: "00O40000004LozL",
+      reportIdCombined: "00O40000004LozL",
       reportType: 'table',
       cumlative: false,
       applyFilters: true,
@@ -155,8 +155,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Day Of Year",
       description: "Cumulative line graph of what time of year people register for the Exam. Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4D000000SFKu",
-      reportIdCombined: "00O4D000000SFL9",
+      reportId: "00O40000004Lolo",
+      reportIdCombined: "00O40000004Loln",
       reportType: 'stackedline',
       xaxisLabel: 'Days',
       yaxisLabel: 'Exam Registrations',
@@ -178,8 +178,8 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Type By Year",
       description: "Bar graph of exam registrations by year. Broken out by Type (Deferred In, Deferred Out, Early, Late, Standard). Choose an Exam Type and Month. Choose 'Combine Exams' to combine FRM or ERP Exam Part I and II. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4D000000SFKL",
-      reportIdCombined: "00O4D000000SFKp",
+      reportId: "00O40000004Lolq",
+      reportIdCombined: "00O40000004Lolp",
       reportType: 'stackedbar',
       exportLabel: 'Date',
       xaxisLabel: 'Exams',
@@ -199,7 +199,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }, {
       name: "Exam Registrations By Year",
       description: "Bar graph of exam registrations by year. Broken out by Exam and Part. Choose 'Include Unpaid' to see all Registrations versus just paid for ones.",
-      reportId: "00O4D000000SFK6",
+      reportId: "00O40000004Lolr",
       reportType: 'stackedbar',
       exportLabel: 'Exam Year',
       xaxisLabel: 'Exam Year',
@@ -332,6 +332,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
       $scope.rptData.currentEndExamYear = null;
       $scope.rptData.includeUnPaid = false;
       $scope.rptData.yearToDate = false;
+      $scope.rptData.currentExamCountry = null;
 
       if (fndRpt.name == 'Exam Registrations By Year All Time' && $scope.rptData.includeUnPaid) {
         $scope.rptData.aggregatesIndex = 0;
@@ -364,23 +365,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
     }
 
     reportsGARPServices.getExamSites(function(err, data) {
-      var countries = [];
-      _.each(data.result, function(item) {
-        if(util.defined(item,"Site__r.Name") && item.Site__r.Name != "") {
-          var country = graphService.findOtherCountry(item.Site__r.Name);
-          var fnd = _.findWhere(countries, {name: country});
-          if(!util.defined(fnd) && country != "") {
-            countries.push({
-              name: country
-            });
-          }          
-        }
-      });
-      $scope.countries = _.sortBy(countries, function(row) { 
-        return row.name;
-      })
-      $scope.countries.unshift({name: 'All'});
-      debugger;      
+      $scope.countries = graphService.processCountries(data);
     });
 
     $scope.refresh = function(reload, exportData) {
@@ -891,7 +876,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
           var sdata = gridService.processData(data, $scope.fndRpt.columnDefs, aggregatesIndex);
         }
 
-        var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);
+        var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData, $scope.countries);
 
         if (exportData) {
           var csv = util.JSON2CSV(sdata,true,true,gridService.columnDefs,reportName);
@@ -945,7 +930,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         }
         labels = displaylabels;
 
-        var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);
+        var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData, $scope.countries);
 
         if (exportData) {
 
@@ -1004,7 +989,7 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
         var labels = returnData.labels;
         var sdata = returnData.sdata;
 
-       var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData);
+       var reportName = graphService.computeReportName($scope.fndRpt, $scope.rptData, $scope.countries);
 
         if (exportData) {
           var expData = graphService.exportDataProcessing(sdata, labels, $scope.fndRpt.exportLabel);
