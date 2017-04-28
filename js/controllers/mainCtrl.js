@@ -1009,6 +1009,7 @@ $scope.getProductAmount = function(opp, prod) {
   }
 
 
+
   $scope.criteriaMatch = function(value) {
     return function( item ) {   
 
@@ -1029,9 +1030,39 @@ $scope.getProductAmount = function(opp, prod) {
       var fnd=_.findWhere($scope.prods, {Id: item.Id})
 
       if(defined(fnd,"Product2")) {
-        if(fnd.Product2.ProductCode==SHIP || fnd.Product2.ProductCode==TAX)
+        if(fnd.Product2.ProductCode==SHIP || fnd.Product2.ProductCode==TAX || fnd.Product2.ProductCode=='CNY13' || fnd.Product2.ProductCode=='CRT')
           return 0;
         else return 1;
+      } else {
+        return 0;
+      }
+
+    }
+  }
+
+  $scope.criteriaMatchPreTax = function(value) {
+    return function( item ) {   
+
+      var found = false;
+      var cnt=0;
+      for(var propertyName in $scope.formVars.prods) { 
+        var fProd = $scope.formVars.prods[propertyName];
+        if(item.Id == fProd.id && fProd.checked == false) {
+          found=true;
+        }
+        if(fProd.checked == true)
+          cnt++;
+      }
+      if(cnt > 0 && found)
+        return 0;
+
+
+      var fnd=_.findWhere($scope.prods, {Id: item.Id})
+
+      if(defined(fnd,"Product2")) {
+        if(fnd.Product2.ProductCode=='CNY13' || fnd.Product2.ProductCode=='CRT')
+          return 1;
+        else return 0;
       } else {
         return 0;
       }
