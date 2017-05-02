@@ -909,6 +909,13 @@ $scope.getProductAmount = function(opp, prod) {
     }
     for(var i=0; i<$scope.prods.length; i++) {  
       var prod = $scope.prods[i];
+      var func = $scope.criteriaMatchPreTax();
+      if(func(prod)) {
+        json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c;        
+      }
+    }
+    for(var i=0; i<$scope.prods.length; i++) {  
+      var prod = $scope.prods[i];
       var func = $scope.criteriaMatchTax();
       if(func(prod)) {
         json[0][prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = prod.Name + '-' + prod.Product2.ProductCode+':'+prod.Product2.GL_Code__c;        
@@ -953,6 +960,14 @@ $scope.getProductAmount = function(opp, prod) {
             obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c+"Shipping"] = formatAmountExport($scope.getProductAmountShipping(opp, prod));
           }
         }
+        for(var i=0; i<$scope.prods.length; i++) {  
+          var prod = $scope.prods[i];
+          var func = $scope.criteriaMatchPreTax();
+          if(func(prod)) {
+           obj[prod.Product2.ProductCode+'~'+prod.Product2.GL_Code__c] = formatAmountExport($scope.getProductAmount(opp, prod));
+          }
+        }
+        
         for(var i=0; i<$scope.prods.length; i++) {  
           var prod = $scope.prods[i];
           var func = $scope.criteriaMatchTax();
