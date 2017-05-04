@@ -408,11 +408,11 @@ reportsGARPControllers.controller('examsCtrl', ['$scope', '$rootScope', '$timeou
             var year = new Date().getFullYear();
             var month = new Date().getMonth()+1;
             if((parseInt($scope.rptData.currentStartExamYear) == year || parseInt($scope.rptData.currentEndExamYear) == year) && 
-              $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'Nov' &&  month < 11) {
+              $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'Nov' &&  month < 5) {
                 $scope.err['hasExamYearRange'] = 'No data for Nov yet.';
             }
             if((parseInt($scope.rptData.currentStartExamYear) > year || parseInt($scope.rptData.currentEndExamYear) > year) && 
-              $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'May' &&  month < 5) {
+              $scope.fndRpt.hasExamMonth == true && $scope.rptData.currentExamMonth == 'May' &&  month < 12) {
                 $scope.err['hasExamYearRange'] = 'No data for May yet.';
             }
           }
