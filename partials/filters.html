@@ -1,5 +1,5 @@
 <div ng-controller="filterCtrl" class="container page-container" style="margin-left: 0px">
-  <div>
+
     <div class="row">
       <div class="col-md-12">
           Date Range: <input type=text name="startDate" ng-model="userFormVars.startDate"> <input type=text name="endDate" ng-model="userFormVars.endDate"> <button ng-click="refresh()" class="btn garp-btn-portal">Refresh</button> <button ng-click="download()" id="fileExport" class="btn garp-btn-portal">Download</button>
@@ -7,7 +7,7 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        <button ng-click="show=!show" class="btn garp-btn-portal">Filters</button>
+        <button ng-click="show = !show" class="btn garp-btn-portal">Filters</button>
       </div>
     </div>  
     <div class="row" ng-if="show">
@@ -27,6 +27,7 @@
           <input type=checkbox name='pm_creditcardbyfax' ng-model="userFormVars.pm_creditcardbyfax"> Credit Card by Fax &nbsp;
           <input type=checkbox name='pm_wire' ng-model="userFormVars.pm_wire"> Wire &nbsp;
           <input type=checkbox name='pm_check' ng-model="userFormVars.pm_check"> Check &nbsp;
+          <input type=checkbox name='pm_ach' ng-model="userFormVars.pm_ach"> ACH &nbsp;
       </div>
 
       <div>
@@ -66,5 +67,5 @@
         &nbsp;
       </div>
     </div>
-  </div>
+
 </div>
