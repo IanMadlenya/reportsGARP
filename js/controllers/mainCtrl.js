@@ -29,6 +29,7 @@ reportsGARPControllers.controller('filterCtrl', ['$scope', '$rootScope', '$timeo
     pm_creditcardbyfax: true,
     pm_wire: false,
     pm_check: false,
+    pm_ach: false,
     prods: []
   }
 
@@ -272,6 +273,7 @@ var mergeProds = [
     pm_creditcardbyfax: true,
     pm_wire: false,
     pm_check: false,
+    pm_ach: false,
     prods: []
   }
   //$scope.spinner=null;
@@ -1155,19 +1157,26 @@ $scope.getProductAmount = function(opp, prod) {
       if(match == false)
         return match;
 
-
       match = false;
-      if($scope.formVars.pm_creditcard==false && $scope.formVars.pm_creditcardbyfax==false &&
-          $scope.formVars.pm_wire==false && $scope.formVars.pm_check==false)
+
+      if(
+        $scope.formVars.pm_creditcard == false && 
+        $scope.formVars.pm_creditcardbyfax == false &&
+        $scope.formVars.pm_wire == false && 
+        $scope.formVars.pm_check == false &&
+        $scope.formVars.pm_ach == false
+      )
         match=true;
-      else if($scope.formVars.pm_creditcard==true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Credit Card')
-         match=true;
-      else if($scope.formVars.pm_creditcardbyfax==true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Credit Card by Fax')
-         match=true;
-      else if($scope.formVars.pm_wire==true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Wire Transfer')
-         match=true;
-      else if($scope.formVars.pm_check==true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Check')
-         match=true;
+      else if($scope.formVars.pm_creditcard == true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Credit Card')
+        match=true;
+      else if($scope.formVars.pm_creditcardbyfax == true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Credit Card by Fax')
+        match=true;
+      else if($scope.formVars.pm_wire == true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Wire Transfer')
+        match=true;
+      else if($scope.formVars.pm_check == true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'Check')
+        match=true;
+      else if($scope.formVars.pm_ach == true && defined(item,"trans.ChargentSFA__Payment_Method__c") && item.trans.ChargentSFA__Payment_Method__c == 'ACH')
+        match=true;
 
       return match;
     }
